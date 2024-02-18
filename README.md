@@ -1,4 +1,31 @@
+# Server handler
+Move to backend folder
+```bash
+$ cd backend
+```
+### To start server
+
+```bash
+$ docker compose up -d --build
+```
+
+
+Access `localhost:8080/chess-backend` to view server status
+
+
+
+### To restart server
+
+
+```bash
+# Down container 
+$ docker compose down api
+$ docker compose up -d --build api
+```
+
+
 # Database Hanlder
+Ensure that db container is running !!!\
 Move to database folder
 ```bash
 $ cd database
@@ -38,27 +65,3 @@ For more information you can read at Knexjs docs
 
 https://knexjs.org/guide/migrations.html#migration-cli
 
-# Server handler
-Move to backend folder
-```bash
-$ cd backend
-```
-### To start server
-
-```bash
-$ docker compose up -d --build
-```
-
-
-Access `localhost:8080/chess-backend` to view server status
-
-
-
-### To restart server
-
-
-```bash
-# Down container 
-$ docker compose down api
-$ docker compose up -d --build api
-```
