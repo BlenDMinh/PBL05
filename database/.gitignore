@@ -1,0 +1,4 @@
+node_modules/
+
+# Bind mount database
+postgres-data/
