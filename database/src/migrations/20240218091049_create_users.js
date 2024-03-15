@@ -2,18 +2,38 @@
  * @param { import("knex").Knex } knex
  */
 const DEFAULT_PASSWORD =
-  '$2b$10$4WxWKojNnKfDAicVsveh7.ogkWOBMV1cvRUSPCXwxA05NRX18F0QW'
-const tableName = 'users'
+  "$2b$10$4WxWKojNnKfDAicVsveh7.ogkWOBMV1cvRUSPCXwxA05NRX18F0QW";
+
+const USER_STATUS = {
+  ACTIVE: 0,
+  INACTIVE: 1,
+  LOCKED: 2,
+};
+
+const USER_ROLE = {
+  ADMIN: 0,
+  PLAYER: 1,
+};
+
+exports.USER_ROLE = USER_ROLE;
+exports.USER_STATUS = USER_STATUS;
+
+const tableName = "users";
 exports.up = async (knex) => {
   await knex.schema.createTable(tableName, (table) => {
-    table.increments('id').unsigned().primary()
-    table.string('username')
-    table.string('password').defaultTo(DEFAULT_PASSWORD)
-  })
-}
+    table.increments("id").unsigned().primary();
+    table.string("display_name");
+    table.string("email").unique().index();
+    table.integer("status").unsigned().defaultTo(USER_STATUS.ACTIVE);
+    table.boolean("online").defaultTo(false);
+    table.string("password").defaultTo(DEFAULT_PASSWORD);
+    table.string("avatar_url");
+    table.integer("role").unsigned().defaultTo(USER_ROLE.PLAYER);
+  });
+};
 /**
  * @param { import("knex").Knex } knex
  */
 exports.down = async (knex) => {
-  await knex.schema.dropTable(tableName)
-}
+  await knex.schema.dropTable(tableName);
+};
