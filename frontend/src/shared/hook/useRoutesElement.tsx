@@ -8,6 +8,7 @@ import NotFoundPage from '../../pages/not-found'
 import PrivateRoutes from '../../routes/PrivateRoutes'
 import AuthRoutes from 'src/routes/AuthRoutes'
 import { path } from 'src/constants/path'
+import GameRoutes from 'src/routes/GameRoutes'
 
 interface RouteElement {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -54,6 +55,10 @@ export default function useRouteElements() {
       path: path.auth,
       element: <AuthRoutes />,
       children: AUTH_ROUTER
+    },
+    {
+      path: path.game,
+      element: <GameRoutes />
     }
   ]
   return useRoutes(routeElements)

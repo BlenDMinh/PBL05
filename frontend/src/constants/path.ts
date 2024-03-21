@@ -8,5 +8,6 @@ export const path = {
   patientDetailExamination: '/patients/:patientId/medical-records/:examinationId',
   schedules: '/schedules',
   surveys: '/surveys',
-  personals: '/personals'
+  personals: '/personals',
+  game: '/game'
 } as const
