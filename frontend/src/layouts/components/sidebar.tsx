@@ -6,6 +6,8 @@ import { AppContext, AppContextType } from 'src/contexts/app.context'
 import { sidebarOption } from 'src/data/layout'
 import { HiBars3, HiArrowRightOnRectangle } from 'react-icons/hi2'
 import { clearLS } from 'src/utils/auth'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChessQueen } from '@fortawesome/free-solid-svg-icons'
 
 export interface SidebarProps {}
 
@@ -41,13 +43,16 @@ export default function Sidebar(props: SidebarProps) {
         >
           <div className='flex w-full flex-col gap-8'>
             <li className='flex h-16 items-center justify-center border-b border-dashed border-black'>
-              <Link to={path.home} className='w-max px-0'>
+              <Link to={path.home} className='flex·w-max·items-center·px-0'>
                 {showSidebar ? (
-                  <h3 className='w-max pl-0 text-3xl font-semibold'>
-                    Care<span className='text-primary'>Helper</span>
-                  </h3>
+                  <div className='flex items-center'>
+                    <FontAwesomeIcon icon={faChessQueen} size='3x' style={{ color: '6D95CA' }} />
+                    <h3 className='w-max pt-4 text-3xl font-semibold'>
+                      <span className='text-primary'>CHESS</span>
+                    </h3>
+                  </div>
                 ) : (
-                  <h3>Logo</h3>
+                  <h3 className='text-primary'>CHESS</h3>
                 )}
               </Link>
             </li>

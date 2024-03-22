@@ -9,14 +9,14 @@ function PrivateRoutes() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate(path.login)
-    }
+    // if (!isAuthenticated) {
+    //   navigate(path.login)
+    // }
   }, [])
   // TODO useRoutes
-  if (!isAuthenticated) {
-    return null
-  }
+  // if (!isAuthenticated) {
+  //   return null
+  // }
 
   return (
     <DefaultLayout>
