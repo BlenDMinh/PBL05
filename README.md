@@ -1,8 +1,5 @@
 # Server handler
-Move to backend folder
-```bash
-$ cd backend
-```
+From root directory
 ### To start server
 
 ```bash

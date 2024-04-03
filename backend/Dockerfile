@@ -13,6 +13,9 @@ FROM tomcat:9.0-jre8-alpine
 WORKDIR /usr/local/tomcat/bin
 COPY run.sh run.sh
 RUN chmod +x run.sh
+#Copy tomcat server configure file
+WORKDIR /usr/local/tomcat/conf
+COPY server.xml server.xml
 #Copy war file
 WORKDIR /usr/local/tomcat/webapps
 COPY  --from=warfile /usr/src/chess/target/backend.war chess-backend.war
