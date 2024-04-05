@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 public class ResponseUtils {
     private Gson gson = new Gson();
@@ -15,6 +16,17 @@ public class ResponseUtils {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         String data = this.gson.toJson(object);
+        out.print(data);
+        out.flush();
+    }
+
+    public void responseMessage(HttpServletResponse response, String message) throws IOException {
+        PrintWriter out = response.getWriter();
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("message", message);
+        String data = this.gson.toJson(jsonObject);
         out.print(data);
         out.flush();
     }

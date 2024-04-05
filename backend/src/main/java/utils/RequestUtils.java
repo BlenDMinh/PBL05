@@ -7,6 +7,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import common.HttpStatusCode;
+import exceptions.CustomException;
+import stores.session.Session;
+import stores.session.SimpleSessionManager;
+
 public class RequestUtils {
     private final ObjectMapper objectMapper;
 
@@ -18,5 +23,17 @@ public class RequestUtils {
         try (BufferedReader reader = request.getReader()) {
             return objectMapper.readValue(reader, clazz);
         }
+    }
+
+    public Session getSession(HttpServletRequest request) {
+        String sessionId = request.getHeader("JSESSIONID");
+        if (sessionId == null) {
+            throw new CustomException(HttpStatusCode.NOT_ACCEPTABLE, "Session not valid");
+        }
+        Session session = SimpleSessionManager.getInstance().getSession(sessionId);
+        if (session == null || !session.isValid()) {
+            throw new CustomException(HttpStatusCode.NOT_ACCEPTABLE, "Session not valid");
+        }
+        return session;
     }
 }

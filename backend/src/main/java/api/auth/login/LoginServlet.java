@@ -1,8 +1,6 @@
-package servlets.auth;
+package api.auth.login;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,14 +8,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import common.HttpStatusCode;
 import common.Role;
-import common.service.session.AuthSessionManager;
 import exceptions.CustomException;
 import modules.admin.dto.AdminDto;
 import modules.auth.dto.LoginDto;
@@ -25,6 +19,9 @@ import modules.auth.dto.LoginResponseDto;
 import modules.auth.dto.UserPasswordDto;
 import modules.auth.service.AuthService;
 import modules.player.dto.PlayerDto;
+import stores.session.Session;
+import stores.session.SessionKey;
+import stores.session.SimpleSessionManager;
 import utils.RequestUtils;
 import utils.ResponseUtils;
 
@@ -50,13 +47,29 @@ public class LoginServlet extends HttpServlet {
     if (userPasswordDto == null) {
       throw new CustomException(HttpStatusCode.NOT_FOUND, "User not found");
     }
-    String sessionId = AuthSessionManager.getInstance().createSession(userPasswordDto);
+    Session session = SimpleSessionManager.getInstance().createSession();
+    session.setAttribute(SessionKey.USER_PASSWORD_DTO, userPasswordDto);
+
     if (userPasswordDto.getRole() == Role.ADMIN) {
       AdminDto adminDto = modelMapper.map(userPasswordDto, AdminDto.class);
-      responseUtils.responseJson(resp, new LoginResponseDto<AdminDto>(adminDto, sessionId));
+      responseUtils.responseJson(resp, new LoginResponseDto<AdminDto>(adminDto, session.getSessionId()));
     } else {
       PlayerDto playerDto = modelMapper.map(userPasswordDto, PlayerDto.class);
-      responseUtils.responseJson(resp, new LoginResponseDto<PlayerDto>(playerDto, sessionId));
+      responseUtils.responseJson(resp, new LoginResponseDto<PlayerDto>(playerDto, session.getSessionId()));
+    }
+  }
+
+  @Override
+  protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    Session session = requestUtils.getSession(req);
+
+    UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
+    if (userPasswordDto.getRole() == Role.ADMIN) {
+      AdminDto adminDto = modelMapper.map(userPasswordDto, AdminDto.class);
+      responseUtils.responseJson(resp, adminDto);
+    } else {
+      PlayerDto playerDto = modelMapper.map(userPasswordDto, PlayerDto.class);
+      responseUtils.responseJson(resp, playerDto);
     }
   }
 }

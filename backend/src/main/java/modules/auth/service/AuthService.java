@@ -1,7 +1,5 @@
 package modules.auth.service;
 
-import java.sql.SQLException;
-
 import modules.auth.AuthRepository;
 import modules.auth.dto.UserPasswordDto;
 
