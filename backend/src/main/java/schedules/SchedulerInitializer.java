@@ -23,6 +23,7 @@ public class SchedulerInitializer implements ServletContextListener {
         scheduler.scheduleAtFixedRate(() -> {
             System.out.println("Clearing expired sessions...");
             SimpleSessionManager.getInstance().removeExpiredSessions();
+            System.out.println("Cleared expired sessions");
         }, 0, 1, TimeUnit.DAYS);
     }
 
