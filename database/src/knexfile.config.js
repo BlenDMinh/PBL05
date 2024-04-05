@@ -1,7 +1,7 @@
 const dotenv = require('dotenv')
 const { join } = require('path')
 
-dotenv.config({ path: join(__dirname, '../../backend/.env') })
+dotenv.config({ path: join(__dirname, '../../.env') })
 
 module.exports = {
   development: {

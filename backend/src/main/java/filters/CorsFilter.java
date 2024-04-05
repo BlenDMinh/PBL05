@@ -1,6 +1,7 @@
 package filters;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.Filter;
@@ -11,9 +12,9 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import utils.Env;
+import common.Env;
 
-@WebFilter("/*")
+@WebFilter(filterName = "CorsFilter")
 public class CorsFilter implements Filter {
 
   private static final String[] allowedOrigins = Env.CORS_ALLOWS;
@@ -21,8 +22,8 @@ public class CorsFilter implements Filter {
   @Override
   public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
       throws IOException, ServletException {
-    HttpServletRequest request = (HttpServletRequest) servletRequest;
 
+    HttpServletRequest request = (HttpServletRequest) servletRequest;
     String requestOrigin = request.getHeader("Origin");
     if (requestOrigin != null) {
       if (isAllowedOrigin(requestOrigin)) {

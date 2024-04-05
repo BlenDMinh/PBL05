@@ -1,6 +1,7 @@
 /**
  * @param { import("knex").Knex } knex
  */
+// 123456
 const DEFAULT_PASSWORD =
   "$2b$10$4WxWKojNnKfDAicVsveh7.ogkWOBMV1cvRUSPCXwxA05NRX18F0QW";
 
@@ -28,6 +29,7 @@ exports.up = async (knex) => {
     table.boolean("online").defaultTo(false);
     table.string("password").defaultTo(DEFAULT_PASSWORD);
     table.string("avatar_url");
+    table.integer("elo").defaultTo(1000);
     table.integer("role").unsigned().defaultTo(USER_ROLE.PLAYER);
   });
 };
