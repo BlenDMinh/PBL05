@@ -25,7 +25,7 @@ import stores.session.SimpleSessionManager;
 import utils.RequestUtils;
 import utils.ResponseUtils;
 
-@WebServlet("/api/auth/login")
+@WebServlet("/auth/login")
 public class LoginServlet extends HttpServlet {
 
   private final AuthService authService;

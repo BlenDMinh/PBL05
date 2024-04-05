@@ -13,7 +13,7 @@ import stores.session.SimpleSessionManager;
 import utils.RequestUtils;
 import utils.ResponseUtils;
 
-@WebServlet("/api/auth/logout")
+@WebServlet("/auth/logout")
 public class LogoutServlet extends HttpServlet {
     private final RequestUtils requestUtils = new RequestUtils();
     private final ResponseUtils responseUtils = new ResponseUtils();
