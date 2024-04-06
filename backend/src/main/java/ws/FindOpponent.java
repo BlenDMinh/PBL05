@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 
@@ -40,13 +41,27 @@ public class FindOpponent {
         userSession.getUserProperties().put("player_id", userPasswordDto.getId());
         userSession.getUserProperties().put("rank", rank);
         Set<Session> set = group.get(rank.getValue());
+        if (set.contains(userSession)) {
+            userSession.getAsyncRemote().sendText("Finding");
+            return;
+        }
         if (set.isEmpty()) {
             set.add(userSession);
+            userSession.getAsyncRemote().sendText("Finding");
         } else {
             Iterator<Session> iterator = set.iterator();
-            Session opponentSession = iterator.next();
+            Session opponentSession = null;
+            try {
+                do {
+                    opponentSession = iterator.next();
+                } while ((int) opponentSession.getUserProperties().get("player_id") == userPasswordDto.getId());
+            } catch (NoSuchElementException ex) {
+                userSession.getAsyncRemote().sendText("Finding");
+                return;
+            }
             set.remove(opponentSession);
             matchingGame(userSession, opponentSession);
+
         }
     }
 
@@ -85,7 +100,7 @@ public class FindOpponent {
         }
     }
 
-    private void matchingGame(Session player1, Session player2) {
+    private void matchingGame(Session player1, Session player2) throws IOException {
         Random random = new Random();
         int randomNumber = random.nextInt(2);
 
@@ -104,6 +119,8 @@ public class FindOpponent {
             player1.getAsyncRemote().sendText("Error");
             player2.getAsyncRemote().sendText("Error");
         }
+        player1.close();
+        player2.close();
     }
 }
 
