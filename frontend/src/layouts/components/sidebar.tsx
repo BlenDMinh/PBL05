@@ -42,13 +42,13 @@ export default function Sidebar(props: SidebarProps) {
           )}
         >
           <div className='flex w-full flex-col gap-8'>
-            <li className='flex h-16 items-center justify-center border-b border-dashed border-black'>
+            <li className='flex h-16 items-center justify-center'>
               <Link to={path.home} className='flex·w-max·items-center·px-0'>
                 {showSidebar ? (
                   <div className='flex items-center'>
-                    <FontAwesomeIcon icon={faChessQueen} size='3x' style={{ color: '6D95CA' }} />
-                    <h3 className='w-max pt-4 text-3xl font-semibold'>
-                      <span className='text-primary'>CHESS</span>
+                    <FontAwesomeIcon icon={faChessQueen} size='4x' style={{ color: '#0066CC' }} />
+                    <h3 className='w-max pt-4 text-4xl font-semibold'>
+                      <span style={{ color: '#003399' }}>CHESS</span>
                     </h3>
                   </div>
                 ) : (

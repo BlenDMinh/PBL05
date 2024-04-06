@@ -1,4 +1,4 @@
-import { authImage1, authImage2, authImage3, authImage4, authImage5 } from 'src/assets/images'
+import { authImage1 } from 'src/assets/images'
 import { path } from 'src/constants/path'
 
 export type AuthSlide = {
@@ -15,22 +15,6 @@ export const authSlides: AuthSlide[] = [
   {
     id: 1,
     img: authImage1
-  },
-  {
-    id: 2,
-    img: authImage2
-  },
-  {
-    id: 3,
-    img: authImage3
-  },
-  {
-    id: 4,
-    img: authImage4
-  },
-  {
-    id: 5,
-    img: authImage5
   }
 ]
 
