@@ -56,7 +56,7 @@ export default function Login(props: LoginProps) {
   return (
     <article className='mx-auto flex w-full max-w-[450px] flex-col items-center gap-8'>
       <h1 className='text-4xl font-bold'>
-        Sign in to Care<span className='text-primary'>Helper</span>
+        Sign in to <span className='text-primary'>CHESS</span>
       </h1>
       <div className='w-full'>
         <form className='flex flex-col gap-1' onSubmit={handleSubmit(onSubmit)}>
@@ -83,7 +83,7 @@ export default function Login(props: LoginProps) {
       </div>
       <div className='divider mt-4'>or</div>
       <p>
-        Don&apos;t have an account?{' '}
+        Don&apos;t have an account?
         <Link to={path.register} className='font-semibold underline'>
           Sign up
         </Link>

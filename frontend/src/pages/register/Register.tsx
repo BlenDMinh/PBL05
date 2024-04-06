@@ -60,7 +60,7 @@ export default function Register(props: RegisterProps) {
   return (
     <article className='mx-auto flex w-full max-w-[450px] flex-col items-center gap-8'>
       <h1 className='text-4xl font-bold'>
-        Sign up to Care<span className='text-primary'>Helper</span>
+        Sign up to <span className='text-primary'>Chess</span>
       </h1>
       <div className='w-full'>
         <form className='flex flex-col gap-1' onSubmit={handleSubmit(onSubmit)}>
