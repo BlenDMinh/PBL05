@@ -22,6 +22,6 @@ public class LogoutServlet extends HttpServlet {
     protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         Session session = requestUtils.getSession(req);
         SimpleSessionManager.getInstance().invalidateSession(session.getSessionId());
-        responseUtils.responseJson(resp, "Logout successfully");
+        responseUtils.responseMessage(resp, "Logout successfully");
     }
 }

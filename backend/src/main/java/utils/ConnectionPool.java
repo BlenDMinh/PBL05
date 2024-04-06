@@ -9,7 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import common.Env;
 
 public class ConnectionPool {
-    private static final int POOL_SIZE = 100;
+    private static final int POOL_SIZE = 10;
     private static final BlockingQueue<Connection> CONNECTION_POOL = new ArrayBlockingQueue<>(POOL_SIZE);
 
     static {
