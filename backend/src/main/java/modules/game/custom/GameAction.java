@@ -15,7 +15,7 @@ import modules.game.custom.player.GamePlayer;
 public class GameAction {
     int id;
     GamePlayer player;
-    Positon from;
-    Positon to;
+    Position from;
+    Position to;
     Date time;
 }

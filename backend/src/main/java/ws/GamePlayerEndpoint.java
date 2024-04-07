@@ -13,6 +13,8 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
+
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import modules.auth.dto.UserPasswordDto;
@@ -22,6 +24,7 @@ import modules.game.common.MessageDecoder;
 import modules.game.common.MessageEncoder;
 import modules.game.custom.ChessGame;
 import modules.game.custom.GameRule;
+import modules.game.custom.Position;
 import modules.game.dto.GameDto;
 import modules.game.dto.GamePlayerDto;
 import modules.game.dto.RuleSetDto;
@@ -33,6 +36,7 @@ import stores.session.SimpleSessionManager;
 public class GamePlayerEndpoint {
     private final Logger logger = Logger.getLogger("GamePlayerEndpoint");
     private final GameService gameService = new GameService();
+    private final Gson gson = new Gson();
     static Session player1Session, player2Session;
     private ChessGame chessGame;
 
@@ -93,17 +97,19 @@ public class GamePlayerEndpoint {
                 break;
 
             case GameMessage.MOVE:
-                if (player1Session == null || player2Session == null) {
-                    playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.WAITING));
-                } else {
-                    handleGame(gameMessageDto, playerSession);
-                }
+                JsonObject jsonData =gson.fromJson(gameMessageDto.getData().toString(), JsonObject.class);
+                Position from = gson.fromJson(jsonData.get("from"), Position.class);
+                Position to = gson.fromJson(jsonData.get("to"), Position.class);
+                handleGame(from, to, playerSession);
+                break;
+            default:
+                playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.UNKNOWN));
                 break;
         }
 
     }
 
-    void handleGame(GameMessageDto message, Session playerSession) {
+    void handleGame(Position from, Position to, Session playerSession) {
         int playerMoved = chessGame.isPlayer1Turn() ? (int) player1Session.getUserProperties().get("player_id")
                 : (int) player2Session.getUserProperties().get("player_id");
         GameMessageDto resp = new GameMessageDto("Player" + playerMoved + " has moved");

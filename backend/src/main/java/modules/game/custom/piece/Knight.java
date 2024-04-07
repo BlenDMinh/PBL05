@@ -1,5 +1,15 @@
 package modules.game.custom.piece;
 
-public class Knight {
-    
+import modules.game.custom.Position;
+
+public class Knight extends ChessPiece{
+    public Knight(Position position, boolean white, ChessPiece[][] board){
+        super(position, white, board);
+    }
+
+    @Override
+    public boolean isValidMove(Position to) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'isValidMove'");
+    }
 }

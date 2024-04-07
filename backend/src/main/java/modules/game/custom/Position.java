@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Positon {
-    int x;
-    int y;
+public class Position {
+    int row;
+    int col;
 }
