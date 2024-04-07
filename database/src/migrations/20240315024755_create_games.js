@@ -6,8 +6,6 @@ const tableName = "games";
 exports.up = async (knex) => {
   await knex.schema.createTable(tableName, (table) => {
     table.increments("id").unsigned().primary();
-    table.string("name");
-    table.string("detail");
     table.integer("status").unsigned();
     table
       .integer("player1_id")

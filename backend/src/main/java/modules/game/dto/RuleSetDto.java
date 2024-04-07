@@ -1,4 +1,6 @@
-package modules.game.custom;
+package modules.game.dto;
+
+import com.google.gson.JsonObject;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,11 +11,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameRule {
+public class RuleSetDto {
     int id;
-    String ruleName;
-    int minutePerTurn;
-    int totalMinutePerPlayer;
-    int turnAroundStep;
-    int turnAroundPlusTime;
+    String name;
+    JsonObject detail;
+    JsonObject description; 
+    boolean isPublished;
 }

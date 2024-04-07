@@ -52,7 +52,9 @@ public class GameRepository {
     public GameDto getById(int id) throws SQLException, Exception {
         Connection conn = null;
         GameDto gameDto = null;
-        String sql = "select * from games where id = ?";
+        String sql = "select games.*, rulesets.name, rulesets.detail, rulesets.description, rulesets.published from games"
+                + " join rulesets on games.ruleset_id = rulesets.id"
+                + " where games.id = ?";
         try {
             conn = ConnectionPool.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
