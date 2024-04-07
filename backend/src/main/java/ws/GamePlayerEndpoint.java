@@ -12,19 +12,24 @@ import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
 import org.apache.log4j.Logger;
-
+import org.modelmapper.ModelMapper;
 import com.google.gson.JsonObject;
 
 import modules.auth.dto.UserPasswordDto;
+import modules.game.common.GameMessage;
+import modules.game.common.GameMessageDto;
+import modules.game.common.MessageDecoder;
+import modules.game.common.MessageEncoder;
 import modules.game.custom.ChessGame;
 import modules.game.custom.GameRule;
 import modules.game.dto.GameDto;
+import modules.game.dto.GamePlayerDto;
 import modules.game.dto.RuleSetDto;
 import modules.game.service.GameService;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
 
-@ServerEndpoint("/game-player/{id}")
+@ServerEndpoint(value = "/game-player/{id}", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
 public class GamePlayerEndpoint {
     private final Logger logger = Logger.getLogger("GamePlayerEndpoint");
     private final GameService gameService = new GameService();
@@ -35,8 +40,8 @@ public class GamePlayerEndpoint {
     public void onOpen(Session session, @PathParam("id") Integer id) throws SQLException, Exception {
         GameDto gameDto = gameService.getById(id);
         boolean isValidGame = gameService.isValidGame(gameDto);
-        if (!isValidGame) {
-            session.getAsyncRemote().sendText("Game not valid");
+        if (!isValidGame || (player1Session != null && player2Session != null)) {
+            session.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
             session.close();
         } else if (chessGame == null) {
             chessGame = new ChessGame(gameDto.getId(), gameDto.getPlayer1Id(), gameDto.getPlayer2Id());
@@ -53,39 +58,66 @@ public class GamePlayerEndpoint {
     }
 
     @OnMessage
-    public void onMessage(String message, Session playerSession) throws IOException {
-        Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
-        if (playerId == null) {
-            stores.session.Session session = SimpleSessionManager.getInstance().getSession(message);
-            if (session == null) {
-                playerSession.getAsyncRemote().sendText("Session not valid");
-                playerSession.close();
-            }
-            UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
-            int userId = userPasswordDto.getId();
-            if (chessGame.getPlayer1().getId() == userId) {
-                playerSession.getUserProperties().put("player_id", userId);
-                player1Session = playerSession;
-            } else if (chessGame.getPlayer2().getId() == userId) {
-                playerSession.getUserProperties().put("player_id", userId);
-                player2Session = playerSession;
-            } else {
-                playerSession.close();
-            }
-        } else if (player1Session == null || player2Session == null) {
-            playerSession.getAsyncRemote().sendText("Waiting for opponent");
-        } else {
-            handleGame(message, playerSession);
+    public void onMessage(GameMessageDto gameMessageDto, Session playerSession) throws IOException {
+        String message = gameMessageDto.getMessage();
+        switch (message) {
+            case GameMessage.JSESSIONID:
+                Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
+                if (playerId == null) {
+                    stores.session.Session session = SimpleSessionManager.getInstance()
+                            .getSession(gameMessageDto.getData().toString());
+                    if (session == null) {
+                        playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.SESSION_NOT_VALID));
+                        playerSession.close();
+                    }
+                    UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO,
+                            UserPasswordDto.class);
+                    int userId = userPasswordDto.getId();
+                    ModelMapper modelMapper = new ModelMapper();
+                    GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
+                            GamePlayerDto.class);
+                    GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                            gamePlayerDto);
+                    if (chessGame.getPlayer1().getId() == userId) {
+                        playerSession.getUserProperties().put("player_id", userId);
+                        player1Session = playerSession;
+                        sendToAllPlayer(resp);
+                    } else if (chessGame.getPlayer2().getId() == userId) {
+                        playerSession.getUserProperties().put("player_id", userId);
+                        player2Session = playerSession;
+                        sendToAllPlayer(resp);
+                    } else {
+                        playerSession.close();
+                    }
+                }
+                break;
+
+            case GameMessage.MOVE:
+                if (player1Session == null || player2Session == null) {
+                    playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.WAITING));
+                } else {
+                    handleGame(gameMessageDto, playerSession);
+                }
+                break;
         }
+
     }
 
-    void handleGame(String message, Session playerSession) {
+    void handleGame(GameMessageDto message, Session playerSession) {
         int playerMoved = chessGame.isPlayer1Turn() ? (int) player1Session.getUserProperties().get("player_id")
                 : (int) player2Session.getUserProperties().get("player_id");
-        String t = "Player" + playerMoved + " has moved";
+        GameMessageDto resp = new GameMessageDto("Player" + playerMoved + " has moved");
         chessGame.nextTurn();
-        player1Session.getAsyncRemote().sendText(t);
-        player2Session.getAsyncRemote().sendText(t);
+        sendToAllPlayer(resp);
+    }
+
+    void sendToAllPlayer(GameMessageDto message) {
+        if (player1Session != null) {
+            player1Session.getAsyncRemote().sendObject(message);
+        }
+        if (player2Session != null) {
+            player2Session.getAsyncRemote().sendObject(message);
+        }
     }
 
     @OnError
@@ -103,5 +135,4 @@ public class GamePlayerEndpoint {
             player2Session.close();
         }
     }
-
 }

@@ -16,11 +16,15 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 import modules.auth.dto.UserPasswordDto;
+import modules.game.common.GameMessage;
+import modules.game.common.GameMessageDto;
+import modules.game.common.MessageDecoder;
+import modules.game.common.MessageEncoder;
 import modules.game.service.GameService;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
 
-@ServerEndpoint("/find-opponent")
+@ServerEndpoint(value = "/find-opponent", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
 public class FindOpponentEndpoint {
     static ArrayList<Set<Session>> group = new ArrayList<>();
 
@@ -33,8 +37,10 @@ public class FindOpponentEndpoint {
     private final GameService gameService = new GameService();
 
     @OnMessage
-    public void handleMessage(String sessionId, Session userSession) throws IOException {
-        stores.session.Session session = SimpleSessionManager.getInstance().getSession(sessionId);
+    public void handleMessage(GameMessageDto gameMessageDto, Session userSession) throws IOException {
+        String sessionId = gameMessageDto.getData().toString();
+        stores.session.Session session = SimpleSessionManager.getInstance()
+                .getSession(sessionId);
         UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
         int elo = userPasswordDto.getElo();
         Rank rank = getRank(elo);
@@ -42,12 +48,12 @@ public class FindOpponentEndpoint {
         userSession.getUserProperties().put("rank", rank);
         Set<Session> set = group.get(rank.getValue());
         if (set.contains(userSession)) {
-            userSession.getAsyncRemote().sendText("Finding");
+            userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
             return;
         }
         if (set.isEmpty()) {
             set.add(userSession);
-            userSession.getAsyncRemote().sendText("Finding");
+            userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
         } else {
             Iterator<Session> iterator = set.iterator();
             Session opponentSession = null;
@@ -56,7 +62,7 @@ public class FindOpponentEndpoint {
                     opponentSession = iterator.next();
                 } while ((int) opponentSession.getUserProperties().get("player_id") == userPasswordDto.getId());
             } catch (NoSuchElementException ex) {
-                userSession.getAsyncRemote().sendText("Finding");
+                userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
                 return;
             }
             set.remove(opponentSession);
@@ -116,11 +122,11 @@ public class FindOpponentEndpoint {
                 gameId = gameService.createGame((int) player1.getUserProperties().get("player_id"),
                         (int) player2.getUserProperties().get("player_id"));
             }
-            player1.getAsyncRemote().sendText(gameId + "");
-            player2.getAsyncRemote().sendText(gameId + "");
+            player1.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_CREATED, gameId));
+            player2.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_CREATED, gameId));
         } catch (Exception e) {
-            player1.getAsyncRemote().sendText("Error");
-            player2.getAsyncRemote().sendText("Error");
+            player1.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.ERROR));
+            player2.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.ERROR));
         }
         player1.close();
         player2.close();

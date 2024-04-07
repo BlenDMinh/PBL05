@@ -18,7 +18,7 @@ public class ChessGame {
     GamePlayer player2;
     boolean player1Turn;
     GameRule gameRule;
-    ChessPiece[][] gameState = new ChessPiece[8][8];
+    ChessPiece[][] board = new ChessPiece[8][8]; // row 1-8, column A-H -> index 0-7
 
     public ChessGame(int id, int player1Id, int player2Id) {
         this.id = id;
