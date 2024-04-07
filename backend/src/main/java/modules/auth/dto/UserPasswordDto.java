@@ -3,12 +3,12 @@ package modules.auth.dto;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import common.AccountStatus;
-import common.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import modules.auth.common.AccountStatus;
+import modules.auth.common.Role;
 
 @Getter
 @Setter
@@ -30,7 +30,7 @@ public class UserPasswordDto {
         displayName = rs.getString("display_name");
         email = rs.getString("email");
         password = rs.getString("password");
-        status = AccountStatus.values()[rs.getInt("status")];
+        status = AccountStatus.fromInt(rs.getInt("status"));
         online = rs.getBoolean("online");
         avatarUrl = rs.getString("avatar_url");
         elo = rs.getInt("elo");

@@ -11,14 +11,14 @@ import javax.servlet.http.HttpServletResponse;
 import org.modelmapper.ModelMapper;
 
 import common.HttpStatusCode;
-import common.Role;
 import exceptions.CustomException;
-import modules.admin.dto.AdminDto;
+import modules.auth.common.Role;
+import modules.auth.dto.AdminDto;
 import modules.auth.dto.LoginDto;
 import modules.auth.dto.LoginResponseDto;
+import modules.auth.dto.PlayerDto;
 import modules.auth.dto.UserPasswordDto;
 import modules.auth.service.AuthService;
-import modules.player.dto.PlayerDto;
 import stores.session.Session;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;

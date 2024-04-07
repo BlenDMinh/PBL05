@@ -2,13 +2,13 @@ package ws;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -21,12 +21,12 @@ import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
 
 @ServerEndpoint("/find-opponent")
-public class FindOpponent {
+public class FindOpponentEndpoint {
     static ArrayList<Set<Session>> group = new ArrayList<>();
 
     static {
         for (Rank _ : Rank.values()) {
-            group.add(Collections.synchronizedSet(new HashSet<>()));
+            group.add(ConcurrentHashMap.newKeySet());
         }
     }
 
@@ -66,13 +66,13 @@ public class FindOpponent {
     }
 
     @OnClose
-    public void handleClose(Session session) {
+    public void handleClose(Session session, CloseReason closeReason) {
         removeSession(session);
     }
 
     @OnError
     public void handleError(Throwable t) {
-        t.printStackTrace();
+
     }
 
     static Rank getRank(int elo) {
@@ -91,6 +91,9 @@ public class FindOpponent {
 
     static void removeSession(Session targetSession) {
         Rank rank = (Rank) targetSession.getUserProperties().get("rank");
+        if (rank == null) {
+            return;
+        }
         java.util.Iterator<Session> iterator = group.get(rank.getValue()).iterator();
         while (iterator.hasNext()) {
             Session session = iterator.next();

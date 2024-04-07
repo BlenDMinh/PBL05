@@ -8,6 +8,7 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
+import modules.game.dto.GameDto;
 import utils.ConnectionPool;
 
 public class GameRepository {
@@ -46,5 +47,32 @@ public class GameRepository {
             }
         }
         return gameId;
+    }
+
+    public GameDto getById(int id) throws SQLException, Exception {
+        Connection conn = null;
+        GameDto gameDto = null;
+        String sql = "select * from games where id = ?";
+        try {
+            conn = ConnectionPool.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                gameDto = new GameDto(rs);
+            }
+        } catch (SQLException e) {
+            logger.error("SQLException occurred: " + e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            logger.error("Exception occurred: " + e.getMessage(), e);
+            throw e;
+        } finally {
+            if (conn != null) {
+                ConnectionPool.releaseConnection(conn);
+            }
+        }
+        return gameDto;
     }
 }

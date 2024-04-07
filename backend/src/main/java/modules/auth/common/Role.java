@@ -1,13 +1,12 @@
-package common;
+package modules.auth.common;
 
-public enum AccountStatus {
-    ACTIVE(0),
-    INACTIVE(1),
-    BANNED(2);
+public enum Role {
+    ADMIN(0),
+    PLAYER(1);
 
     private final int value;
 
-    AccountStatus(int value) {
+    Role(int value) {
         this.value = value;
     }
 
