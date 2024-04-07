@@ -8,7 +8,7 @@ import { AppContext, AppContextType } from 'src/contexts/app.context'
 export default function DefaultLayout({ children }: ReactWithChild) {
   const { showSidebar } = useContext<AppContextType>(AppContext)
   return (
-    <div className='bg-bg_primary'>
+    <div className='bg-base'>
       <Navbar />
       <Sidebar />
       <div

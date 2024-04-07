@@ -23,7 +23,7 @@ export default function Sidebar(props: SidebarProps) {
     navigate(path.login)
   }
   return (
-    <div className='drawer fixed z-10 w-max bg-white lg:drawer-open'>
+    <div className='drawer fixed z-10 w-max bg-base-200 lg:drawer-open'>
       <input id='my-drawer-2' type='checkbox' className='drawer-toggle' />
       <div className='drawer-content flex h-16 flex-col items-center justify-center pl-2  lg:hidden'>
         <label htmlFor='my-drawer-2' aria-label='open sidebar' className='btn drawer-button h-3/5'>
@@ -34,7 +34,7 @@ export default function Sidebar(props: SidebarProps) {
         <label htmlFor='my-drawer-2' aria-label='close sidebar' className='drawer-overlay'></label>
         <ul
           className={classNames(
-            'menu min-h-full justify-between bg-white p-4 pt-0 text-base font-semibold text-black !transition-all',
+            'menu min-h-full justify-between shadow-inner bg-base-200 p-4 pt-0 text-base font-semibold text-black !transition-all',
             {
               'lg:w-72': showSidebar,
               'lg:w-[5.5rem]': !showSidebar
@@ -62,7 +62,7 @@ export default function Sidebar(props: SidebarProps) {
                 <li key={id}>
                   <Link
                     className={classNames(
-                      'text-nowrap hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary',
+                      'text-base-content text-nowrap hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary active:!text-white',
                       {
                         'tooltip tooltip-right': !showSidebar,
                         'bg-primary text-white':
@@ -83,7 +83,7 @@ export default function Sidebar(props: SidebarProps) {
 
           <li>
             <button
-              className={`hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary ${
+              className={`text-base-content hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary active:!text-white ${
                 !showSidebar && 'tooltip tooltip-right'
               }`}
               data-tip={'Sign out'}

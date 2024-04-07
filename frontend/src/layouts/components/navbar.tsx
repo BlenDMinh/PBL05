@@ -1,10 +1,12 @@
 import classNames from 'classnames'
 import { useContext } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { AppContext, AppContextType } from 'src/contexts/app.context'
 import { quickOptionsNavbar } from 'src/data/layout'
 import { HiChevronDoubleLeft, HiMagnifyingGlass, HiOutlineBell } from 'react-icons/hi2'
 import Button from 'src/components/button/Button'
+import { path } from 'src/constants/path'
+import { clearLS } from 'src/utils/auth'
 export interface NavbarProps {}
 
 export default function Navbar(props: NavbarProps) {
@@ -12,9 +14,19 @@ export default function Navbar(props: NavbarProps) {
   const handleShowSidebar = () => {
     setShowSidebar(!showSidebar)
   }
+  const { user, setIsAuthenticated, setUser  } = useContext<AppContextType>(AppContext)
+  const navigate = useNavigate()
+  
+  const handleSignOut = () => {
+    clearLS()
+    setIsAuthenticated(false)
+    setUser(null)
+    navigate(path.login)
+  }
+
   return (
     <div
-      className={classNames('navbar fixed z-10 h-16 justify-between bg-white py-2', {
+      className={classNames('navbar fixed z-10 h-16 justify-between bg-base-200 py-2 px-16', {
         'lg:pl-[19rem]': showSidebar,
         'lg:pl-24': !showSidebar
       })}
@@ -64,8 +76,8 @@ export default function Navbar(props: NavbarProps) {
             className='dropdown-content top-[120%] z-[1] flex w-56 flex-col rounded-md bg-base-100 shadow'
           >
             <div className='w-full border-b border-dashed border-black p-4 py-3'>
-              <h3 className='line-clamp-1 text-base font-semibold'>Pham Tuyen &nbsp;</h3>
-              <p className='line-clamp-1 text-sm'>tuyenpham1104.dev@gmail.com &nbsp;</p>
+              <h3 className='line-clamp-1 text-base font-semibold'>{ user?.displayName } &nbsp;</h3>
+              <p className='line-clamp-1 text-sm'>{ user?.email } &nbsp;</p>
             </div>
             <ul className='menu menu-sm gap-[1px]'>
               {quickOptionsNavbar.map((option) => (
@@ -78,6 +90,14 @@ export default function Navbar(props: NavbarProps) {
                   </Link>
                 </li>
               ))}
+              <li className='rounded'>
+                <button
+                  className='hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary'
+                  onClick={handleSignOut}
+                >
+                  Sign out
+                </button>
+              </li>
             </ul>
           </div>
         </div>

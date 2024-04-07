@@ -8,11 +8,16 @@ export const setRefreshTokenToLS = (refreshToken: string) => {
   localStorage.setItem('refreshToken', refreshToken)
 }
 
+export const setSessionIdToLS = (sessionId: string) => {
+  localStorage.setItem('jsessionid', sessionId)
+}
+
 export const setProfileToLS = (user: User) => {
   localStorage.setItem('profile', JSON.stringify(user))
 }
 
 export const clearLS = () => {
+  localStorage.removeItem('jsessionid')
   localStorage.removeItem('accessToken')
   localStorage.removeItem('refreshToken')
   localStorage.removeItem('profile')
@@ -21,6 +26,8 @@ export const clearLS = () => {
 export const getAccessTokenFromLS = () => localStorage.getItem('accessToken') || ''
 
 export const getRefreshTokenFromLS = () => localStorage.getItem('refreshToken') || ''
+
+export const getSessionIdFromLS = () => localStorage.getItem('jsessionid') || ''
 
 export const getProfileFromLS = () => {
   const result = localStorage.getItem('profile')

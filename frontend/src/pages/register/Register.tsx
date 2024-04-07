@@ -58,7 +58,7 @@ export default function Register(props: RegisterProps) {
     registerMutation.mutate(body)
   }
   return (
-    <article className='mx-auto flex w-full max-w-[450px] flex-col items-center gap-8'>
+    <article className='mt-20 mx-auto flex h-full w-full max-w-[450px] flex-col items-center gap-8'>
       <h1 className='text-4xl font-bold'>
         Sign up to <span className='text-primary'>Chess</span>
       </h1>
@@ -86,7 +86,7 @@ export default function Register(props: RegisterProps) {
           />
           <div className='flex items-center justify-center'>
             <label className='label cursor-pointer gap-2'>
-              <input ref={checkboxRef} type='checkbox' className='checkbox-primary checkbox checkbox-sm border-black' />
+              <input ref={checkboxRef} type='checkbox' className='checkbox-primary checkbox checkbox-sm border-base-content' />
               <span className='label-text'>
                 I agree with <span className='font-semibold text-primary underline'>Terms</span> and{' '}
                 <span className='font-semibold text-primary underline'>Privacy</span>

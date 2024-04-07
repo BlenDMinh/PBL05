@@ -9,7 +9,8 @@ import {
 } from 'react-icons/hi2'
 import { IconType } from 'react-icons'
 
-interface QuickOptionNavbar extends PoliciesOption {}
+interface QuickOptionNavbar extends PoliciesOption {
+}
 interface SidebarOption extends QuickOptionNavbar {
   icon: IconType
 }
@@ -25,11 +26,6 @@ export const quickOptionsNavbar: QuickOptionNavbar[] = [
     title: 'Settings',
     to: '/'
   },
-  {
-    id: 3,
-    title: 'Sign out',
-    to: '/'
-  }
 ]
 
 export const sidebarOption: SidebarOption[] = [

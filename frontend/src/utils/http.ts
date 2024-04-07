@@ -4,9 +4,11 @@ import {
   getAccessTokenFromLS,
   getProfileFromLS,
   getRefreshTokenFromLS,
+  getSessionIdFromLS,
   setAccessTokenToLS,
   setProfileToLS,
-  setRefreshTokenToLS
+  setRefreshTokenToLS,
+  setSessionIdToLS
 } from 'src/utils/auth'
 import { LoginResponse, RefreshTokenResponse } from 'src/types/auth.type'
 import { URL_LOGIN, URL_LOGOUT, URL_REFRESH_TOKEN } from 'src/apis/auth.api'
@@ -18,13 +20,15 @@ import { User } from 'src/types/users.type'
 
 export class Http {
   instance: AxiosInstance
-  private accessToken: string
-  private refreshToken: string
+  // private accessToken: string
+  // private refreshToken: string
+  private jsessionid: string
   private user: User
   private refreshTokenRequest: Promise<string> | null
   constructor() {
-    this.accessToken = getAccessTokenFromLS()
-    this.refreshToken = getRefreshTokenFromLS()
+    // this.accessToken = getAccessTokenFromLS()
+    // this.refreshToken = getRefreshTokenFromLS()
+    this.jsessionid = getSessionIdFromLS()
     this.user = getProfileFromLS()
     this.refreshTokenRequest = null
     this.instance = axios.create({
@@ -38,8 +42,8 @@ export class Http {
     })
     this.instance.interceptors.request.use(
       (config) => {
-        if (this.accessToken && config.headers) {
-          config.headers.authorization = this.accessToken
+        if (this.jsessionid && config.headers) {
+          config.headers["JSESSIONID"] = this.jsessionid
           return config
         }
         return config
@@ -54,15 +58,12 @@ export class Http {
         const { url } = response.config
         if (url === URL_LOGIN) {
           const data = response.data as LoginResponse
-          this.accessToken = data.accessToken
-          this.refreshToken = data.refreshToken
+          this.jsessionid = data.sessionId
           this.user = data.user
-          setAccessTokenToLS(this.accessToken)
-          setRefreshTokenToLS(this.refreshToken)
+          setSessionIdToLS(data.sessionId)
           setProfileToLS(this.user)
         } else if (url === URL_LOGOUT) {
-          this.accessToken = ''
-          this.refreshToken = ''
+          this.jsessionid = ''
           clearLS()
         }
         return response
@@ -90,18 +91,18 @@ export class Http {
           // thì chúng ta mới tiến hành gọi refresh token
           if (isAxiosExpiredTokenError(error) && config?.url !== URL_REFRESH_TOKEN) {
             // Hạn chế gọi 2 lần handleRefreshToken
-            this.refreshTokenRequest = this.refreshTokenRequest
-              ? this.refreshTokenRequest
-              : this.handleRefreshToken().finally(() => {
-                  // Giữ refreshTokenRequest trong 10s cho những request tiếp theo nếu có 401 thì dùng
-                  setTimeout(() => {
-                    this.refreshTokenRequest = null
-                  }, 10000)
-                })
-            return this.refreshTokenRequest.then((accessToken) => {
+            // this.refreshTokenRequest = this.refreshTokenRequest
+            //   ? this.refreshTokenRequest
+            //   : this.handleRefreshToken().finally(() => {
+            //       // Giữ refreshTokenRequest trong 10s cho những request tiếp theo nếu có 401 thì dùng
+            //       setTimeout(() => {
+            //         this.refreshTokenRequest = null
+            //       }, 10000)
+            //     })
+            // return this.refreshTokenRequest.then((accessToken) => {
               // Nghĩa là chúng ta tiếp tục gọi lại request cũ vừa bị lỗi
-              return this.instance({ ...config, headers: { ...config?.headers, authorization: accessToken } })
-            })
+            //   return this.instance({ ...config, headers: { ...config?.headers, authorization: accessToken } })
+            // })
           }
 
           // Còn những trường hợp như token không đúng
@@ -110,8 +111,7 @@ export class Http {
           // thì tiến hành xóa local storage và toast message
 
           clearLS()
-          this.accessToken = ''
-          this.refreshToken = ''
+          this.jsessionid = ''
           console.log(`Error ${error.response?.data.data?.message || error.response?.data.message}`)
           // window.location.reload()
         }
@@ -119,24 +119,24 @@ export class Http {
       }
     )
   }
-  private handleRefreshToken() {
-    return this.instance
-      .post<RefreshTokenResponse>(URL_REFRESH_TOKEN, {
-        refreshToken: this.refreshToken
-      })
-      .then((res) => {
-        const { accessToken } = res.data.data
-        setAccessTokenToLS(accessToken)
-        this.accessToken = accessToken
-        return accessToken
-      })
-      .catch((error) => {
-        clearLS()
-        this.accessToken = ''
-        this.refreshToken = ''
-        throw error
-      })
-  }
+  // private handleRefreshToken() {
+  //   return this.instance
+  //     .post<RefreshTokenResponse>(URL_REFRESH_TOKEN, {
+  //       refreshToken: this.refreshToken
+  //     })
+  //     .then((res) => {
+  //       const { accessToken } = res.data.data
+  //       setAccessTokenToLS(accessToken)
+  //       this.accessToken = accessToken
+  //       return accessToken
+  //     })
+  //     .catch((error) => {
+  //       clearLS()
+  //       this.accessToken = ''
+  //       this.refreshToken = ''
+  //       throw error
+  //     })
+  // }
 }
 const http = new Http().instance
 export default http

@@ -16,8 +16,7 @@ export type RefreshTokenResponse = SuccessResponse<{ accessToken: string }>
 
 export type LoginResponse = {
   user: User
-  accessToken: string
-  refreshToken: string
+  sessionId: string
 }
 export type RegisterResponse = {
   message: string

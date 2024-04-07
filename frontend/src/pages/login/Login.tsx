@@ -54,7 +54,7 @@ export default function Login(props: LoginProps) {
     loginMutation.mutate(data)
   }
   return (
-    <article className='mx-auto flex w-full max-w-[450px] flex-col items-center gap-8'>
+    <article className='mt-20 mx-auto flex h-full w-full max-w-[450px] flex-col items-center gap-8'>
       <h1 className='text-4xl font-bold'>
         Sign in to <span className='text-primary'>CHESS</span>
       </h1>
@@ -83,7 +83,7 @@ export default function Login(props: LoginProps) {
       </div>
       <div className='divider mt-4'>or</div>
       <p>
-        Don&apos;t have an account?
+        Don&apos;t have an account?{' '}
         <Link to={path.register} className='font-semibold underline'>
           Sign up
         </Link>
