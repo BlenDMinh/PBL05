@@ -47,7 +47,7 @@ public class GamePlayerEndpoint {
     private final GameService gameService = new GameService();
     private final Gson gson = new Gson();
     static Session player1Session, player2Session;
-    private ChessGame chessGame;
+    static ChessGame chessGame;
 
     @OnOpen
     public void onOpen(Session session, @PathParam("id") Integer id) throws SQLException, Exception {
@@ -95,22 +95,25 @@ public class GamePlayerEndpoint {
                             UserPasswordDto.class);
                     int userId = userPasswordDto.getId();
                     ModelMapper modelMapper = new ModelMapper();
-                    GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
-                            GamePlayerDto.class);
 
                     if (chessGame.getPlayer1().getId() == userId) {
                         playerSession.getUserProperties().put("player_id", userId);
                         player1Session = playerSession;
+                        GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
+                                GamePlayerDto.class);
+                        gamePlayerDto.setWhite(chessGame.getPlayer1().isWhite());
                         GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
                                 new PlayerJoinedResponse(chessGame.getRawBoard(), true, gamePlayerDto));
                         sendToAllPlayer(resp);
                     } else if (chessGame.getPlayer2().getId() == userId) {
                         playerSession.getUserProperties().put("player_id", userId);
                         player2Session = playerSession;
+                        GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
+                                GamePlayerDto.class);
+                        gamePlayerDto.setWhite(chessGame.getPlayer2().isWhite());
                         GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                                new PlayerJoinedResponse(chessGame.getRawBoard(), false, gamePlayerDto));
+                                new PlayerJoinedResponse(chessGame.getRawBoard(), true, gamePlayerDto));
                         sendToAllPlayer(resp);
-                        chessGame.nextTurn();
                     } else {
                         playerSession.close();
                     }
@@ -258,9 +261,11 @@ public class GamePlayerEndpoint {
     @OnClose
     public void handleClose(Session session) throws IOException {
         if (player1Session != null && player1Session.isOpen()) {
+            player1Session = null;
             player1Session.close();
         }
         if (player2Session != null && player2Session.isOpen()) {
+            player2Session = null;
             player2Session.close();
         }
     }

@@ -77,16 +77,16 @@ public class Pawn extends ChessPiece {
         int row = this.getFrom().getRow();
         int col = this.getFrom().getCol();
         switch (pieceType.toLowerCase()) {
-            case "rook":
+            case "Rook":
                 promotedPiece = new Rook(new Position(row, col), isWhite(), getChessGame());
                 break;
-            case "queen":
+            case "Queen":
                 promotedPiece = new Queen(new Position(row, col), isWhite(), getChessGame());
                 break;
-            case "bishop":
+            case "Bishop":
                 promotedPiece = new Bishop(new Position(row, col), isWhite(), getChessGame());
                 break;
-            case "knight":
+            case "Knight":
                 promotedPiece = new Knight(new Position(row, col), isWhite(), getChessGame());
                 break;
             default:

@@ -75,7 +75,7 @@ public class ChessGame {
     }
 
     public void nextTurn() {
-        player1Turn = !player1Turn;
+        setPlayer1Turn(!player1Turn);
     }
 
     public String getRawBoard() {

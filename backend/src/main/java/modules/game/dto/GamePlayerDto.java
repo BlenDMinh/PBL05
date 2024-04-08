@@ -13,4 +13,5 @@ public class GamePlayerDto {
     int id;
     String displayName;
     String avatarUrl;
+    boolean white;
 }
