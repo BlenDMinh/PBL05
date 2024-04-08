@@ -15,6 +15,7 @@ import lombok.Setter;
 public abstract class GamePlayer {
     protected int id;
     protected ChessGame game;
+    protected boolean white;
 
     abstract void makeAction(Position from, Position to);
 }

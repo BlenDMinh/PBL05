@@ -12,7 +12,7 @@ public class UserPlayer extends GamePlayer {
         throw new UnsupportedOperationException("Unimplemented method 'makeAction'");
     }
 
-    public UserPlayer(int id, ChessGame game) {
-        super(id, game);
+    public UserPlayer(int id, ChessGame game, boolean white) {
+        super(id, game, white);
     }
 }

@@ -1,10 +1,12 @@
 package modules.game.custom.piece;
 
+import modules.game.custom.ChessGame;
 import modules.game.custom.Position;
 
 public class Pawn extends ChessPiece {
-    public Pawn(Position from, boolean white, ChessPiece[][] board) {
-        super(from, white, board);
+
+    public Pawn(Position from, boolean white, ChessGame chessGame) {
+        super(from, white, chessGame);
     }
 
     @Override
@@ -34,6 +36,18 @@ public class Pawn extends ChessPiece {
             return true;
         }
 
+        // White pawn first double step
+        if (isWhite() && !isMoved() && toCol == fromCol && toRow == fromRow + 2 && getBoard()[toRow][toCol] == null &&
+                getBoard()[fromRow + 1][fromCol] == null) {
+            return true;
+        }
+
+        // Black pawn first double step
+        if (!isWhite() && !isMoved() && toCol == fromCol && toRow == fromRow - 2 && getBoard()[toRow][toCol] == null &&
+                getBoard()[fromRow - 1][fromCol] == null) {
+            return true;
+        }
+
         // White pawn captures diagonally
         if (isWhite() && Math.abs(toCol - fromCol) == 1 && toRow == fromRow + 1 &&
                 getBoard()[toRow][toCol] != null && !getBoard()[toRow][toCol].isWhite()) {
@@ -47,5 +61,47 @@ public class Pawn extends ChessPiece {
         }
 
         return false;
+    }
+
+    public boolean isReachedEndOfRow() {
+        int row = this.getFrom().getRow();
+        if ((isWhite() && row == 7) || (!isWhite() && row == 0)) {
+            return true;
+        }
+        return false;
+    }
+
+    public void promotePawn(String pieceType) {
+        // Instantiate the promoted piece based on the provided pieceType
+        ChessPiece promotedPiece = null;
+        int row = this.getFrom().getRow();
+        int col = this.getFrom().getCol();
+        switch (pieceType.toLowerCase()) {
+            case "rook":
+                promotedPiece = new Rook(new Position(row, col), isWhite(), getChessGame());
+                break;
+            case "queen":
+                promotedPiece = new Queen(new Position(row, col), isWhite(), getChessGame());
+                break;
+            case "bishop":
+                promotedPiece = new Bishop(new Position(row, col), isWhite(), getChessGame());
+                break;
+            case "knight":
+                promotedPiece = new Knight(new Position(row, col), isWhite(), getChessGame());
+                break;
+            default:
+                // Handle invalid piece type
+                break;
+        }
+
+        // Replace the pawn with the promoted piece on the board
+        if (promotedPiece != null) {
+            getChessGame().getBoard()[row][col] = promotedPiece;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return isWhite() ? ChessPieceType.WhitePawn : ChessPieceType.BlackPawn;
     }
 }

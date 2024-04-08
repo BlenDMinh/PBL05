@@ -41,6 +41,10 @@ public class FindOpponentEndpoint {
         String sessionId = gameMessageDto.getData().toString();
         stores.session.Session session = SimpleSessionManager.getInstance()
                 .getSession(sessionId);
+        if (session == null) {
+            userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.SESSION_NOT_VALID));
+            return;
+        }
         UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
         int elo = userPasswordDto.getElo();
         Rank rank = getRank(elo);
