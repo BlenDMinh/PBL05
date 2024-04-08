@@ -3,6 +3,7 @@ import { ws } from "src/game/constants/ws"
 import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { getSessionIdFromLS } from "src/utils/auth";
 import { GameSocketMessage } from "src/game/types/ws.type";
+import { useNavigate } from "react-router-dom";
 
 enum State {
     START_FINDING,
@@ -16,6 +17,8 @@ export default function QuickMatch() {
     const [isError, setIsError] = useState(false)
     const [wsUrl, setWsUrl] = useState(ws.findOpponent)
     const { sendMessage, lastMessage, readyState } = useWebSocket(wsUrl)
+
+    const navigate = useNavigate()
 
     useEffect(() => {
         console.log(ReadyState[readyState])
@@ -44,7 +47,7 @@ export default function QuickMatch() {
             setState(State.GAME_FOUND)
             const gameId = json.data
             // Navigate to game
-
+            navigate(`/game/${gameId}`)
         }
         console.log(lastMessage)
     }, [lastMessage])

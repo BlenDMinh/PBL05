@@ -10,5 +10,6 @@ export const path = {
   surveys: '/surveys',
   personals: '/personals',
   game: '/game',
+  pvp: '/game/:gameId',
   quickMatch: '/game/quickmatch'
 } as const

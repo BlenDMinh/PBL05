@@ -1,6 +1,7 @@
 import { useContext } from "react"
 import { AppContext, AppContextType } from "src/contexts/app.context"
 import chessBoard from "src/assets/images/chessboard.png"
+import { Link } from "react-router-dom"
 
 export default function Home() {
   const { user } = useContext<AppContextType>(AppContext)
@@ -23,9 +24,9 @@ export default function Home() {
       </div>
       <div className="flex w-full gap-10 h-96">
         <div className="flex flex-col h-full justify-evenly">
-          <div className="btn bg-base-200 h-24 w-64 border-b-8 border-base-300">
+          <Link className="btn bg-base-200 h-24 w-64 border-b-8 border-base-300" to="/game/quickmatch">
             <span className="text-base-content font-bold text-xl">Quick Match</span>
-          </div>
+          </Link>
           <div className="btn bg-base-200 h-24 w-64 border-b-8 border-base-300">
 
           </div>

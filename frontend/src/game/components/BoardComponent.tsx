@@ -20,7 +20,8 @@ export default function BoardComponent(props: BoardComponentProps) {
     // Determine possible moves and mark corresponding squares
     const possibleMoves = currentSelectedPiece ? currentSelectedPiece.getAvailableMoves() : [];
 
-    console.log(game.gameState)
+    if(!game.gameState)
+        return <></>
 
     return (
         <Container
@@ -42,7 +43,7 @@ export default function BoardComponent(props: BoardComponentProps) {
                 />
             )}
             {[...Array(8 * 8).keys()].map(i =>
-                game.rawGameState[i] !== 'c' ?
+                game.rawGameState![i] !== 'c' ?
                     <ChessPieceComponent
                         game={game}
                         key={'c' + i}
@@ -52,7 +53,7 @@ export default function BoardComponent(props: BoardComponentProps) {
                         height={gridHeight}
                         index={i}
                         isSelected={i === game.selectedGridIndex}
-                        type={game.rawGameState[i] as ChessPieceType}
+                        type={game.rawGameState![i] as ChessPieceType}
                     />
                     :
                     <></>

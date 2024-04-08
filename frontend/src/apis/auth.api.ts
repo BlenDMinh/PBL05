@@ -13,6 +13,9 @@ const authApi = {
   login(body: LoginReqBody) {
     return http.post<LoginResponse>(URL_LOGIN, body)
   },
+  loginFromSessionId() {
+    return http.get<LoginResponse>(URL_LOGIN)
+  },
   logout() {
     return http.post(URL_LOGOUT)
   }

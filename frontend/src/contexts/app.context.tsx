@@ -1,7 +1,9 @@
-import { createContext, useState } from 'react'
+import { createContext, useEffect, useState } from 'react'
+import authApi from 'src/apis/auth.api'
+import HttpStatusCode from 'src/constants/httpStatusCode.enum'
 import { ReactWithChild } from 'src/interface/app'
 import { User } from 'src/types/users.type'
-import { getAccessTokenFromLS, getProfileFromLS } from 'src/utils/auth'
+import { clearLS, getAccessTokenFromLS, getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
 
 export interface AppContextType {
   isAuthenticated: boolean
@@ -13,7 +15,7 @@ export interface AppContextType {
 }
 
 const initAppContext: AppContextType = {
-  isAuthenticated: Boolean(getAccessTokenFromLS()),
+  isAuthenticated: Boolean(getSessionIdFromLS()),
   setIsAuthenticated: () => null,
   showSidebar: true,
   setShowSidebar: () => null,
@@ -27,6 +29,17 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(initAppContext.isAuthenticated)
   const [showSidebar, setShowSidebar] = useState<boolean>(initAppContext.showSidebar)
   const [user, setUser] = useState<User | null>(initAppContext.user)
+
+  useEffect(() => {
+    authApi.loginFromSessionId().then(res => {
+      if(res.status != HttpStatusCode.Ok) {
+        // setIsAuthenticated(false)
+        // setUser(null)
+        // clearLS()
+      }
+    })
+  }, [])
+
   return (
     <AppContext.Provider value={{ isAuthenticated, setIsAuthenticated, showSidebar, setShowSidebar, user, setUser }}>
       {children}

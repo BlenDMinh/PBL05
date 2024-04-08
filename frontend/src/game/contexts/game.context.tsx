@@ -1,66 +1,40 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { ReactWithChild } from "src/interface/app";
 import { config } from "../configs/game";
-import { ChessPieceType, GameAction, GameState, Position } from "../types/game.type";
+import { GameAction, GameState } from "../types/game.type";
 import { ChessPiece } from "../core/ChessPiece";
+import { convertRawToGameState } from "./util";
+import { ws } from "../constants/ws";
+import useWebSocket, { ReadyState } from "react-use-websocket";
+import { getSessionIdFromLS } from "src/utils/auth";
+import { GameSocketMessage } from "../types/ws.type";
 
 export interface GameContextType {
+    gameId: number,
+    startGame: (gameId: number) => void
     gameWidth: number;
     gameHeight: number;
-    rawGameState: string;
-    setRawGameState: React.Dispatch<React.SetStateAction<string>>;
+    rawGameState: string | null;
+    setRawGameState: React.Dispatch<React.SetStateAction<string | null>>;
     boardSize: number;
     selectedGridIndex: number;
     setSelectedGridIndex: React.Dispatch<React.SetStateAction<number>>;
-    gameState: GameState;
+    gameState: GameState | null;
     getCurrentSelectedChessPiece: () => ChessPiece | null;
     doMove: (move: GameAction) => void
 }
 
-const convertRawToGameState = (rawGameState: string): GameState => {
-    const states: Array<Array<ChessPiece | null>> = [];
-    for (let i = 0; i < 8; i++) {
-        const row: Array<ChessPiece | null> = [];
-        for (let j = 0; j < 8; j++) {
-            const pieceType: ChessPieceType = rawGameState.charAt(i * 8 + j) as ChessPieceType;
-            if (pieceType !== 'c' as ChessPieceType) {
-                // Pushing null for now, we'll assign the actual ChessPiece instance later
-                row.push(null);
-            } else {
-                row.push(null); // Empty square
-            }
-        }
-        states.push(row);
-    }
-
-    // Construct GameState object after iterating through the rawGameState
-    const gameState: GameState = {
-        states: states
-    };
-
-    // Assign the actual ChessPiece instances based on the constructed GameState
-    for (let i = 0; i < 8; i++) {
-        for (let j = 0; j < 8; j++) {
-            const pieceType: ChessPieceType = rawGameState.charAt(i * 8 + j) as ChessPieceType;
-            if (pieceType !== 'c' as ChessPieceType) {
-                const piece = ChessPiece.createPiece(pieceType, { x: j, y: i }, gameState);
-                gameState.states[i][j] = piece;
-            }
-        }
-    }
-
-    return gameState;
-};
-
 const initGameContext: GameContextType = {
+    gameId: -1,
+    startGame: (gameId: number) => null,
     gameWidth: window.innerWidth * config.widthScale,
     gameHeight: window.innerHeight * config.heightScale,
-    rawGameState: '789ab98766666666cccccccccccccccccccccccccccccccc0000000012345321',
+    rawGameState: null,
     setRawGameState: () => null,
     boardSize: Math.min(window.innerWidth * config.widthScale, window.innerHeight * config.heightScale),
     selectedGridIndex: -1,
     setSelectedGridIndex: () => null,
-    gameState: convertRawToGameState('789ab98766666666cccccccccccccccccccccccccccccccc0000000012345321'),
+    gameState: null,
     getCurrentSelectedChessPiece: () => null, // Placeholder implementation
     doMove: () => null
 };
@@ -79,10 +53,10 @@ export default function GameContextProvider({children}: ReactWithChild) {
         setGameWidth(window.innerWidth * config.widthScale);
         setGameHeight(window.innerHeight * config.heightScale);
     });
-
-    const gameState = useMemo(() => convertRawToGameState(rawGameState), [rawGameState]);
-
+    
     const getCurrentSelectedChessPiece = () => {
+        if(!gameState)
+            return null;
         if (selectedGridIndex !== -1) {
             const rowIndex = Math.floor(selectedGridIndex / 8);
             const colIndex = selectedGridIndex % 8;
@@ -91,22 +65,56 @@ export default function GameContextProvider({children}: ReactWithChild) {
         return null;
     };
 
+    const [gameId, startGame] = useState(initGameContext.gameId)
+    const gameWsUrl = useMemo(() => ws.game(gameId), [gameId])
+    const { sendMessage, lastMessage, readyState } = useWebSocket(gameWsUrl)
+
+    useEffect(() => {
+        
+        if(readyState == ReadyState.OPEN) {
+            const message = JSON.stringify({
+                "message": "JSESSIONID",
+                "data": getSessionIdFromLS()
+            })
+            console.log(message)
+            sendMessage(message)
+        }
+    }, [readyState])
+
+    useEffect(() => {
+        console.log(lastMessage)
+        if(!lastMessage)
+            return;
+        const json = JSON.parse(lastMessage?.data) as GameSocketMessage
+        const data = json.data
+        if(data) {
+            if(data.rawGameState)
+                setRawGameState(data.rawGameState)
+        }
+    }, [lastMessage])
+    
+    const gameState = useMemo(() => convertRawToGameState(rawGameState), [rawGameState]);
+
     const doMove = (move: GameAction) => {
-        console.log(move)
-
-        const fromIndex = move.from.y * 8 + move.from.x
-        const toIndex = move.to.y * 8 + move.to.x
-
-        const newGameState = [...rawGameState]
-
-        newGameState[toIndex] = rawGameState[fromIndex]
-        newGameState[fromIndex] = 'c'
-
-        setRawGameState(newGameState.join(''))
+        sendMessage(JSON.stringify({
+            "message": "Move",
+            "data": {
+                "from": {
+                    "row": move.from.y,
+                    "col": move.from.x
+                },
+                "to": {
+                    "row": move.to.y,
+                    "col": move.to.x
+                }
+            }
+        }))
     }
-
+    
     return (
         <GameContext.Provider value={{
+            gameId,
+            startGame,
             gameWidth,
             gameHeight,
             rawGameState,

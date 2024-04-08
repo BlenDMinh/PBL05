@@ -8,6 +8,7 @@ import { RouteObject } from 'react-router-dom'
 import { path } from 'src/constants/path'
 import QuickMatch from 'src/pages/quick-match/QuickMatch'
 import ChessGame from 'src/game/ChessGame'
+import Game from 'src/pages/game/Game'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -60,8 +61,8 @@ export const PRIVATE_ROUTER: RouteObject[] = [
 
 export const GAME_ROUTES: RouteObject[] = [
   {
-    path: path.game,
-    element: <ChessGame />
+    path: path.pvp,
+    element: <Game />
   },
   {
     path: path.quickMatch,

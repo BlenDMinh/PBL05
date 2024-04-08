@@ -1,3 +1,5 @@
+import authApi from 'src/apis/auth.api'
+import HttpStatusCode from 'src/constants/httpStatusCode.enum'
 import { User } from 'src/types/users.type'
 
 export const setAccessTokenToLS = (accessToken: string) => {
@@ -31,5 +33,7 @@ export const getSessionIdFromLS = () => localStorage.getItem('jsessionid') || ''
 
 export const getProfileFromLS = () => {
   const result = localStorage.getItem('profile')
-  return result ? JSON.parse(result) : null
+  if(!result)
+    return null
+  return JSON.parse(result)
 }
