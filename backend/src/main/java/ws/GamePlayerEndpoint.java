@@ -80,7 +80,6 @@ public class GamePlayerEndpoint {
                 return;
             }
         }
-        boolean isPlayer1Turn = chessGame.isPlayer1Turn();
         switch (message) {
             case GameMessage.JSESSIONID:
                 Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
@@ -103,7 +102,8 @@ public class GamePlayerEndpoint {
                                 GamePlayerDto.class);
                         gamePlayerDto.setWhite(chessGame.getPlayer1().isWhite());
                         GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                                new PlayerJoinedResponse(chessGame.getRawBoard(), true, gamePlayerDto));
+                                new PlayerJoinedResponse(chessGame.getRawBoard(), chessGame.isPlayer1Turn(),
+                                        gamePlayerDto));
                         sendToAllPlayer(resp);
                     } else if (chessGame.getPlayer2().getId() == userId) {
                         playerSession.getUserProperties().put("player_id", userId);
@@ -112,7 +112,8 @@ public class GamePlayerEndpoint {
                                 GamePlayerDto.class);
                         gamePlayerDto.setWhite(chessGame.getPlayer2().isWhite());
                         GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                                new PlayerJoinedResponse(chessGame.getRawBoard(), true, gamePlayerDto));
+                                new PlayerJoinedResponse(chessGame.getRawBoard(), chessGame.isPlayer1Turn(),
+                                        gamePlayerDto));
                         sendToAllPlayer(resp);
                     } else {
                         playerSession.close();
@@ -130,7 +131,7 @@ public class GamePlayerEndpoint {
                         chessPiece.doMove(to);
                         sendToAllPlayer(
                                 new GameMessageDto(GameMessage.MOVE,
-                                        new MoveResponse(chessGame.getRawBoard(), !isPlayer1Turn, from, to)));
+                                        new MoveResponse(chessGame.getRawBoard(), !chessGame.isPlayer1Turn(), from, to)));
                         chessGame.nextTurn();
                     } else {
                         playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
@@ -146,7 +147,7 @@ public class GamePlayerEndpoint {
                         king.doCastle();
                         sendToAllPlayer(
                                 new GameMessageDto(GameMessage.CASTLE,
-                                        new CastleResponse(chessGame.getRawBoard(), !isPlayer1Turn)));
+                                        new CastleResponse(chessGame.getRawBoard(), !chessGame.isPlayer1Turn())));
                         chessGame.nextTurn();
                     } else {
                         playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
@@ -177,7 +178,7 @@ public class GamePlayerEndpoint {
                 pawn.doMove(pawnTo);
                 pawn.promotePawn(piece);
                 sendToAllPlayer(new GameMessageDto(GameMessage.PROMOTION,
-                        new PromotionResponse(chessGame.getRawBoard(), !isPlayer1Turn, pawnFrom, pawnTo, piece)));
+                        new PromotionResponse(chessGame.getRawBoard(), !chessGame.isPlayer1Turn(), pawnFrom, pawnTo, piece)));
                 chessGame.nextTurn();
                 break;
             default:
@@ -260,13 +261,10 @@ public class GamePlayerEndpoint {
 
     @OnClose
     public void handleClose(Session session) throws IOException {
-        if (player1Session != null && player1Session.isOpen()) {
+        if (session.equals(player1Session)) {
             player1Session = null;
-            player1Session.close();
-        }
-        if (player2Session != null && player2Session.isOpen()) {
+        } else if (session.equals(player2Session)) {
             player2Session = null;
-            player2Session.close();
         }
     }
 }
