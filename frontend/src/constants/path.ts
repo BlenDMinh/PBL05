@@ -9,5 +9,6 @@ export const path = {
   schedules: '/schedules',
   surveys: '/surveys',
   personals: '/personals',
-  game: '/game'
+  game: '/game',
+  quickMatch: '/game/quickmatch'
 } as const

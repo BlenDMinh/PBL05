@@ -1,8 +1,8 @@
 import { RouteObject, useRoutes } from 'react-router-dom'
-import { AUTH_ROUTER, PRIVATE_ROUTER } from '../path'
+import { AUTH_ROUTER, GAME_ROUTES, PRIVATE_ROUTER } from '../path'
 
 // component
-import { Suspense, lazy } from 'react'
+import { Children, Suspense, lazy } from 'react'
 import { RouteLazy } from '../../interface/app'
 import NotFoundPage from '../../pages/not-found'
 import PrivateRoutes from '../../routes/PrivateRoutes'
@@ -58,7 +58,8 @@ export default function useRouteElements() {
     },
     {
       path: path.game,
-      element: <GameRoutes />
+      element: <GameRoutes />,
+      children: GAME_ROUTES
     }
   ]
   return useRoutes(routeElements)

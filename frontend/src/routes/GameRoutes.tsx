@@ -6,7 +6,7 @@ import GameLayout from "src/layouts/GameLayout";
 export default function GameRoutes() {
     return <GameLayout>
             <GameContextProvider>
-                <ChessGame />
+             <Outlet />
             </GameContextProvider>
         </GameLayout>
 }
