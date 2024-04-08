@@ -6,6 +6,8 @@ import AppointmentSchedule from 'src/pages/schedule/Schedule'
 import MedicalSurvey from 'src/pages/survey/Survey'
 import { RouteObject } from 'react-router-dom'
 import { path } from 'src/constants/path'
+import QuickMatch from 'src/pages/quick-match/QuickMatch'
+import ChessGame from 'src/game/ChessGame'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -53,5 +55,16 @@ export const PRIVATE_ROUTER: RouteObject[] = [
   {
     path: path.personals,
     element: <Personal />
+  }
+]
+
+export const GAME_ROUTES: RouteObject[] = [
+  {
+    path: path.game,
+    element: <ChessGame />
+  },
+  {
+    path: path.quickMatch,
+    element: <QuickMatch />
   }
 ]
