@@ -16,7 +16,7 @@ import modules.game.custom.player.UserPlayer;
 @Getter
 @Setter
 public class ChessGame {
-    int id;
+    String id;
     GamePlayer player1;
     GamePlayer player2;
     boolean player1Turn;
@@ -25,7 +25,7 @@ public class ChessGame {
     King whiteKing;
     King blackKing;
 
-    public ChessGame(int id, int player1Id, int player2Id) {
+    public ChessGame(String id, int player1Id, int player2Id) {
         this.id = id;
         this.player1Turn = true;
         this.player1 = new UserPlayer(player1Id, this, true);

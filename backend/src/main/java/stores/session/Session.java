@@ -47,7 +47,7 @@ public class Session {
     }
 
     private long getSessionTimeout() {
-        return 1 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+        return 1 * 24 * 60 * 60 * 1000; // 1 days in milliseconds
     }
 
     public boolean isValid() {

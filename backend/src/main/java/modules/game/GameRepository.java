@@ -12,11 +12,11 @@ import modules.game.dto.GameDto;
 import utils.ConnectionPool;
 
 public class GameRepository {
-    static Logger logger = Logger.getLogger("AuthRepository");
+    static Logger logger = Logger.getLogger("GameRepository");
 
-    public Integer createOne(int firstId, int secondId, int rulesetId) throws Exception {
+    public String createOne(int firstId, int secondId, int rulesetId) throws Exception {
         Connection conn = null;
-        Integer gameId = null;
+        String gameId = null;
         String sql = "insert into games (player1_id, player2_id, ruleset_id) VALUES (?, ?, ?)";
         try {
             conn = ConnectionPool.getConnection();
@@ -28,9 +28,9 @@ public class GameRepository {
             stmt.executeUpdate();
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
-                gameId = rs.getInt(1);
+                gameId = rs.getString(1);
                 if (logger.isDebugEnabled()) {
-                    logger.info("Game created with id " + gameId.intValue());
+                    logger.info("Game created with id " + gameId);
                 }
             } else {
                 throw new SQLException("Cannot create game");
@@ -49,7 +49,7 @@ public class GameRepository {
         return gameId;
     }
 
-    public GameDto getById(int id) throws SQLException, Exception {
+    public GameDto getById(String id) throws SQLException, Exception {
         Connection conn = null;
         GameDto gameDto = null;
         String sql = "select games.*, rulesets.name, rulesets.detail, rulesets.description, rulesets.published from games"
@@ -58,8 +58,7 @@ public class GameRepository {
         try {
             conn = ConnectionPool.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            stmt.setInt(1, id);
+            stmt.setString(1, id);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 gameDto = new GameDto(rs);

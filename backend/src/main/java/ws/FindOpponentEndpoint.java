@@ -118,7 +118,7 @@ public class FindOpponentEndpoint {
         int randomNumber = random.nextInt(2);
 
         try {
-            int gameId = 0;
+            String gameId;
             if (randomNumber == 0) {
                 gameId = gameService.createGame((int) player2.getUserProperties().get("player_id"),
                         (int) player1.getUserProperties().get("player_id"));

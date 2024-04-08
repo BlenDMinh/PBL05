@@ -38,6 +38,7 @@ import modules.game.dto.GameDto;
 import modules.game.dto.GamePlayerDto;
 import modules.game.dto.RuleSetDto;
 import modules.game.service.GameService;
+import modules.game.store.GamePlayerStore;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
 
@@ -47,26 +48,30 @@ public class GamePlayerEndpoint {
     private final GameService gameService = new GameService();
     private final Gson gson = new Gson();
     static Session player1Session, player2Session;
-    static ChessGame chessGame;
+    private ChessGame chessGame;
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("id") Integer id) throws SQLException, Exception {
+    public void onOpen(Session session, @PathParam("id") String id) throws SQLException, Exception {
+        if (GamePlayerStore.getInstance().isGameExist(id)){
+            chessGame = GamePlayerStore.getInstance().getGameById(id);
+        }
         GameDto gameDto = gameService.getById(id);
         boolean isValidGame = gameService.isValidGame(gameDto);
         if (!isValidGame || (player1Session != null && player2Session != null)) {
             session.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
             session.close();
         } else if (chessGame == null) {
-            chessGame = new ChessGame(gameDto.getId(), gameDto.getPlayer1Id(), gameDto.getPlayer2Id());
+            ChessGame newChessGame = new ChessGame(gameDto.getId(), gameDto.getPlayer1Id(), gameDto.getPlayer2Id());
             RuleSetDto ruleSetDto = gameDto.getRuleSetDto();
             JsonObject rulesetDetail = ruleSetDto.getDetail();
-            logger.info(rulesetDetail.toString());
             GameRule gameRule = new GameRule(ruleSetDto.getId(), ruleSetDto.getName(),
                     rulesetDetail.get("minute_per_turn").getAsInt(),
                     rulesetDetail.get("total_minute_per_player").getAsInt(),
                     rulesetDetail.get("turn_around_steps").getAsInt(),
                     rulesetDetail.get("turn_around_time_plus").getAsInt());
-            chessGame.setGameRule(gameRule);
+            newChessGame.setGameRule(gameRule);
+            GamePlayerStore.getInstance().addGame(newChessGame);
+            chessGame = newChessGame;
         }
     }
 

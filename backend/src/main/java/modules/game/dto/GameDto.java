@@ -20,7 +20,7 @@ import modules.game.common.GameStatus;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GameDto {
-    int id;
+    String id;
     GameStatus status;
     int player1Id;
     int player2Id;
@@ -28,7 +28,7 @@ public class GameDto {
     RuleSetDto ruleSetDto;
 
     public GameDto(ResultSet rs) throws JsonMappingException, JsonProcessingException, SQLException {
-        id = rs.getInt("id");
+        id = rs.getString("id");
         status = GameStatus.fromInt(rs.getInt("status"));
         player1Id = rs.getInt("player1_id");
         player2Id = rs.getInt("player2_id");

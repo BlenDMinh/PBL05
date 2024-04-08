@@ -15,8 +15,7 @@ exports.up = async (knex) => {
       .references("id")
       .inTable("users");
     table
-      .integer("game_id")
-      .unsigned()
+      .string("game_id")
       .notNullable()
       .references("id")
       .inTable("games");
