@@ -1,12 +1,7 @@
 import { path } from 'src/constants/path'
 import { PoliciesOption } from 'src/data/auth'
-import {
-  HiOutlineHome,
-  HiOutlineCalendarDays,
-  HiOutlineClipboardDocumentCheck,
-  HiOutlineUser,
-  HiOutlineUserGroup
-} from 'react-icons/hi2'
+import { FaChessBishop } from 'react-icons/fa';
+
 import { IconType } from 'react-icons'
 
 interface QuickOptionNavbar extends PoliciesOption {
@@ -31,32 +26,14 @@ export const quickOptionsNavbar: QuickOptionNavbar[] = [
 export const sidebarOption: SidebarOption[] = [
   {
     id: 1,
-    title: 'Home',
-    to: path.home,
-    icon: HiOutlineHome
+    title: 'Game',
+    to: path.game,
+    icon: FaChessBishop
   },
   {
     id: 2,
-    title: 'Patient',
+    title: 'Game',
     to: path.patients,
-    icon: HiOutlineUserGroup
-  },
-  {
-    id: 3,
-    title: 'Appointment Schedule',
-    to: path.schedules,
-    icon: HiOutlineCalendarDays
-  },
-  {
-    id: 4,
-    title: 'Medical Survey',
-    to: path.surveys,
-    icon: HiOutlineClipboardDocumentCheck
-  },
-  {
-    id: 5,
-    title: 'Personal',
-    to: path.personals,
-    icon: HiOutlineUser
+    icon: FaChessBishop
   }
 ]
