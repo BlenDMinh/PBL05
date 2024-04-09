@@ -7,7 +7,7 @@ import { sidebarOption } from 'src/data/layout'
 import { HiBars3, HiArrowRightOnRectangle } from 'react-icons/hi2'
 import { clearLS } from 'src/utils/auth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faChessQueen } from '@fortawesome/free-solid-svg-icons'
+import { faChessKing } from '@fortawesome/free-solid-svg-icons'
 
 export interface SidebarProps {}
 
@@ -42,11 +42,11 @@ export default function Sidebar(props: SidebarProps) {
           )}
         >
           <div className='flex w-full flex-col gap-8'>
-            <li className='flex h-16 items-center justify-center'>
-              <Link to={path.home} className='flex·w-max·items-center·px-0'>
+            <div className='flex h-16 items-center justify-center'>
+              <div className='flex·w-max·items-center·px-0'>
                 {showSidebar ? (
                   <div className='flex items-center'>
-                    <FontAwesomeIcon icon={faChessQueen} size='4x' style={{ color: '#0066CC' }} />
+                    <FontAwesomeIcon icon={faChessKing} size='4x' style={{ color: '#0066CC' }} />
                     <h3 className='w-max pt-4 text-4xl font-semibold'>
                       <span style={{ color: '#003399' }}>CHESS</span>
                     </h3>
@@ -54,8 +54,8 @@ export default function Sidebar(props: SidebarProps) {
                 ) : (
                   <h3 className='text-primary'>CHESS</h3>
                 )}
-              </Link>
-            </li>
+              </div>
+            </div>
 
             <div className='flex flex-col gap-1'>
               {sidebarOption.map(({ icon: Icon, id, title, to }) => (
@@ -66,8 +66,8 @@ export default function Sidebar(props: SidebarProps) {
                       {
                         'tooltip tooltip-right': !showSidebar,
                         'bg-primary text-white':
-                          (pathname !== path.home && to !== path.home && pathname.startsWith(to)) ||
-                          (to === path.home && pathname === path.home)
+                          (pathname !== path.game && to !== path.game && pathname.startsWith(to)) ||
+                          (to === path.game && pathname === path.game)
                       }
                     )}
                     to={to}

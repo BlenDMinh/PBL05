@@ -3,7 +3,7 @@ import { useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AppContext, AppContextType } from 'src/contexts/app.context'
 import { quickOptionsNavbar } from 'src/data/layout'
-import { HiChevronDoubleLeft, HiMagnifyingGlass, HiOutlineBell } from 'react-icons/hi2'
+import { HiChevronDoubleLeft, HiOutlineBell } from 'react-icons/hi2'
 import Button from 'src/components/button/Button'
 import { path } from 'src/constants/path'
 import { clearLS } from 'src/utils/auth'
@@ -14,9 +14,9 @@ export default function Navbar(props: NavbarProps) {
   const handleShowSidebar = () => {
     setShowSidebar(!showSidebar)
   }
-  const { user, setIsAuthenticated, setUser  } = useContext<AppContextType>(AppContext)
+  const { user, setIsAuthenticated, setUser } = useContext<AppContextType>(AppContext)
   const navigate = useNavigate()
-  
+
   const handleSignOut = () => {
     clearLS()
     setIsAuthenticated(false)
@@ -40,7 +40,7 @@ export default function Navbar(props: NavbarProps) {
           Icon={HiChevronDoubleLeft}
         />
       </div>
-      <div className='navbar-center flex-[30%]'>
+      {/* <div className='navbar-center flex-[30%]'>
         <form className='w-full'>
           <div className='relative'>
             <div className='pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3'>
@@ -53,7 +53,7 @@ export default function Navbar(props: NavbarProps) {
             />
           </div>
         </form>
-      </div>
+      </div> */}
       <div className='navbar-end flex flex-[30%] items-center'>
         <button className='btn btn-circle btn-ghost mt-1'>
           <div className='indicator'>
@@ -76,8 +76,8 @@ export default function Navbar(props: NavbarProps) {
             className='dropdown-content top-[120%] z-[1] flex w-56 flex-col rounded-md bg-base-100 shadow'
           >
             <div className='w-full border-b border-dashed border-black p-4 py-3'>
-              <h3 className='line-clamp-1 text-base font-semibold'>{ user?.displayName } &nbsp;</h3>
-              <p className='line-clamp-1 text-sm'>{ user?.email } &nbsp;</p>
+              <h3 className='line-clamp-1 text-base font-semibold'>{user?.displayName} &nbsp;</h3>
+              <p className='line-clamp-1 text-sm'>{user?.email} &nbsp;</p>
             </div>
             <ul className='menu menu-sm gap-[1px]'>
               {quickOptionsNavbar.map((option) => (
