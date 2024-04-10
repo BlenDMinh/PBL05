@@ -12,4 +12,13 @@ public enum GameDifficulty {
     public int getValue() {
         return value;
     }
+
+    public static GameDifficulty fromValue(int value) {
+        for (GameDifficulty difficulty : GameDifficulty.values()) {
+            if (difficulty.value == value) {
+                return difficulty;
+            }
+        }
+        throw new IllegalArgumentException("Invalid value for GameDifficulty: " + value);
+    }
 }

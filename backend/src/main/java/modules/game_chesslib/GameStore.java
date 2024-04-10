@@ -6,18 +6,18 @@ import java.util.WeakHashMap;
 
 import modules.game_chesslib.custom.ChessGame;
 
-public class GamePlayerStore {
-    static GamePlayerStore instance;
+public class GameStore {
+    static GameStore instance;
 
-    public static GamePlayerStore getInstance() {
+    public static GameStore getInstance() {
         return instance;
     }
 
-    private GamePlayerStore() {
+    private GameStore() {
     }
 
     static {
-        instance = new GamePlayerStore();
+        instance = new GameStore();
     }
     private Map<String, ChessGame> gameMap = Collections.synchronizedMap(new WeakHashMap<>());
 

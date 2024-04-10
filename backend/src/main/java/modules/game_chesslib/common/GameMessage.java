@@ -13,6 +13,7 @@ public final class GameMessage {
     public static final String NOT_AUTHENTICATED = "Player not authenticated";
     public static final String UNKNOWN = "Unknown message";
     public static final String INVALID_MOVE = "Invalid move";
+    public static final String HUMAN_JOIN = "Human join";
     
     public static final String CASTLE = "Castle";
     public static final String PROMOTION = "Promotion";

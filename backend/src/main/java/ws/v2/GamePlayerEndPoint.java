@@ -35,7 +35,7 @@ import modules.game_chesslib.service.GameService;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
 import modules.auth.dto.UserPasswordDto;
-import modules.game_chesslib.GamePlayerStore;
+import modules.game_chesslib.GameStore;
 import modules.game_chesslib.custom.ChessGame;
 
 @ServerEndpoint(value = "/v2/game-player/{id}", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
@@ -48,8 +48,8 @@ public class GamePlayerEndPoint {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("id") String id) throws SQLException, Exception {
-        if (GamePlayerStore.getInstance().isGameExist(id)) {
-            chessGame = GamePlayerStore.getInstance().getGameById(id);
+        if (GameStore.getInstance().isGameExist(id)) {
+            chessGame = GameStore.getInstance().getGameById(id);
         }
         GameDto gameDto = gameService.getById(id);
         boolean isValidGame = gameService.isValidGame(gameDto);
@@ -66,7 +66,7 @@ public class GamePlayerEndPoint {
                     rulesetDetail.get("turn_around_steps").getAsInt(),
                     rulesetDetail.get("turn_around_time_plus").getAsInt());
             newChessGame.setGameRule(gameRule);
-            GamePlayerStore.getInstance().addGame(newChessGame);
+            GameStore.getInstance().addGame(newChessGame);
             chessGame = newChessGame;
         }
     }
@@ -181,6 +181,7 @@ public class GamePlayerEndPoint {
 
     @OnError
     public void onError(Session session, Throwable throwable) {
+        chessGame.getBoard().legalMoves();
         if (chessGame != null)
             logger.error("GameId: " + chessGame.getId() + " " + throwable.getMessage());
     }
