@@ -9,6 +9,7 @@ import { path } from 'src/constants/path'
 import QuickMatch from 'src/pages/quick-match/QuickMatch'
 import ChessGame from 'src/game/ChessGame'
 import Game from 'src/pages/game/Game'
+import GameV2 from 'src/pages/gamev2/GameV2'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -67,5 +68,12 @@ export const GAME_ROUTES: RouteObject[] = [
   {
     path: path.quickMatch,
     element: <QuickMatch />
+  }
+]
+
+export const GAME_V2_ROUTES: RouteObject[] = [
+  {
+    path: path.gamev2,
+    element: <GameV2/>
   }
 ]

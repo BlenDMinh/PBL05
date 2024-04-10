@@ -8,7 +8,7 @@ export default function Game() {
     const game = useGame()
 
     useEffect(() => {
-        game.startGame(Number.parseInt(gameId ?? "-1"))
+        game.startGame(gameId ?? "")
     }, [gameId])
 
     useEffect(() => {}, [game.gameState])

@@ -10,8 +10,8 @@ import { getSessionIdFromLS } from "src/utils/auth";
 import { GameSocketMessage } from "../types/ws.type";
 
 export interface GameContextType {
-    gameId: number,
-    startGame: (gameId: number) => void
+    gameId: string,
+    startGame: (gameId: string) => void
     gameWidth: number;
     gameHeight: number;
     rawGameState: string | null;
@@ -25,8 +25,8 @@ export interface GameContextType {
 }
 
 const initGameContext: GameContextType = {
-    gameId: -1,
-    startGame: (gameId: number) => null,
+    gameId: "",
+    startGame: (gameId: string) => null,
     gameWidth: window.innerWidth * config.widthScale,
     gameHeight: window.innerHeight * config.heightScale,
     rawGameState: null,
