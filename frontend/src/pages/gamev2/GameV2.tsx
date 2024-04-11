@@ -11,14 +11,10 @@ export default function GameV2() {
   const { gameId } = useParams()
   const game = useGameV2()
   useEffect(() => {
-    game.startGame(gameId ?? '')
+    if (gameId) game.startGame(gameId)
   }, [gameId])
 
-  useEffect(() => {
-    console.log('Turn: ' + game.turn)
-  }, [game.turn])
-
-  if (!game.core) return <>Loading...</>
+  if (!game || !game.core || !game.turn || !game.side || !game.fen) return <>Loading...</>
 
   return (
     <>
@@ -27,19 +23,22 @@ export default function GameV2() {
         height={Math.min(window.innerWidth, window.innerHeight)}
         config={{
           turnColor: game.turn,
+          orientation: game.side,
           fen: game.fen,
-          draggable: {
-            enabled: false
-          },
           movable: {
-            free: false,
+            free: true,
             dests: game.getMoveableDests(),
             color: game.side
           },
           events: {
             move: game.move
           },
-          lastMove: game.lastMove
+          autoCastle: false,
+          lastMove: game.lastMove,
+          animation: {
+            enabled: true,
+            duration: 2
+          }
         }}
       />
     </>
