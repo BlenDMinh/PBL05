@@ -1,4 +1,4 @@
-export const wsHost = "ws://localhost:8080/chess-backend"
+export const wsHost = "ws://192.168.100.171:8080/chess-backend"
 
 export const ws = {
     findOpponent: wsHost + "/find-opponent",
