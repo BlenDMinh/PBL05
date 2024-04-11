@@ -31,7 +31,7 @@ export const getRefreshTokenFromLS = () => localStorage.getItem('refreshToken') 
 
 export const getSessionIdFromLS = () => localStorage.getItem('jsessionid') || ''
 
-export const getProfileFromLS = () => {
+export const getProfileFromLS: () => User = () => {
   const result = localStorage.getItem('profile')
   if(!result)
     return null

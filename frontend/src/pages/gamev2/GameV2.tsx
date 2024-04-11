@@ -3,9 +3,9 @@ import { useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGameV2 } from "src/contexts/gamev2.context";
 
-import "src/pages/gamev2/chessground.base.css"
-import "src/pages/gamev2/chessground.brown.css"
-import "src/pages/gamev2/chessground.cburnett.css"
+import "src/pages/gamev2/css/chessground.base.css"
+import "src/pages/gamev2/css/chessground.brown.css"
+import "src/pages/gamev2/css/chessground.cburnett.css"
 
 export default function GameV2() {
     const { gameId } = useParams()
@@ -14,12 +14,16 @@ export default function GameV2() {
         game.startGame(gameId ?? "")
     }, [gameId])
 
+    useEffect(() => {
+        console.log("Turn: " + game.turn)
+    }, [game.turn])
+
     if(!game.core)
         return <>Loading...</>
     
     return <>
         <Chessground config={{
-            turnColor: "black",
+            turnColor: game.turn,
             fen: game.fen,
             draggable: {
                 enabled: false

@@ -4,6 +4,7 @@ import useWebSocket, { ReadyState } from 'react-use-websocket';
 import { getSessionIdFromLS } from "src/utils/auth";
 import { GameSocketMessage } from "src/game/types/ws.type";
 import { useNavigate } from "react-router-dom";
+import { path } from "src/constants/path";
 
 enum State {
     START_FINDING,
@@ -47,7 +48,7 @@ export default function QuickMatch() {
             setState(State.GAME_FOUND)
             const gameId = json.data
             // Navigate to game
-            navigate(`/game/${gameId}`)
+            navigate(`/game/v2/${gameId}`)
         }
         console.log(lastMessage)
     }, [lastMessage])

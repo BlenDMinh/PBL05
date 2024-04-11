@@ -73,7 +73,7 @@ export const GAME_ROUTES: RouteObject[] = [
 
 export const GAME_V2_ROUTES: RouteObject[] = [
   {
-    path: path.gamev2,
+    path: path.pvpv2,
     element: <GameV2/>
   }
 ]
