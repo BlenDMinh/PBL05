@@ -83,7 +83,21 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         sendMessage(message)
       }
     }
-  })
+  }, [readyState])
+
+  useEffect(() => {
+    if(!lastMessage)
+        return;
+    const json = JSON.parse(lastMessage?.data)
+    console.log(json)
+    const data = json.data as GameV2SocketData
+    setFen(data.fen)
+    // console.log(data.gamePlayer.displayName + " " + getProfileFromLS().displayName)
+    if(data.gamePlayer && data.gamePlayer.displayName === getProfileFromLS().displayName) {
+        // console.log(data.gamePlayer.white ? "white" : "black")
+        setSide(data.gamePlayer.white ? "white" : "black")
+    }
+}, [lastMessage])
 
   const turn = useMemo(() => (core ? (core.turn() == 'b' ? 'black' : 'white') : 'white'), [fen])
 

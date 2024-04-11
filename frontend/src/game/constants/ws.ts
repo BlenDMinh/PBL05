@@ -1,4 +1,4 @@
-export const wsHost = "ws://192.168.100.171:8080/chess-backend"
+export const wsHost = import.meta.env.VITE_WS_URL
 
 export const ws = {
     findOpponent: wsHost + "/find-opponent",
