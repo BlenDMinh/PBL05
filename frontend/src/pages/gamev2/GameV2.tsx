@@ -1,89 +1,38 @@
 import Chessground from "@react-chess/chessground";
-import { useEffect, useState } from "react";
-import { Chess, SQUARES }  from "chess.js"
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useGameV2 } from "src/contexts/gamev2.context";
 
 import "src/pages/gamev2/chessground.base.css"
 import "src/pages/gamev2/chessground.brown.css"
 import "src/pages/gamev2/chessground.cburnett.css"
-import { Key } from "chessground/types";
 
 export default function GameV2() {
-    const [chess, setChess] = useState(new Chess())
-    const [pendingMove, setPendingMove] = useState<Key[]>()
-    const [selectVisible, setSelectVisible] = useState(false)
-    const [fen, setFen] = useState("")
-    const [lastMove, setLastMove] = useState<Key[]>()
-
+    const { gameId } = useParams()
+    const game = useGameV2()
     useEffect(() => {
-        console.log(chess)
-    }, [])
+        game.startGame(gameId ?? "")
+    }, [gameId])
 
-    const onMove = (from: Key, to: Key) => {
-        const moves = chess.moves({ verbose: true })
-        console.log(moves)
-        for (let i = 0, len = moves.length; i < len; i++) { /* eslint-disable-line */
-            if (moves[i].flags.indexOf("p") !== -1 && moves[i].from === from) {
-                setPendingMove([from, to])
-                setSelectVisible(true)
-                return
-            }
-        }
-        if (chess.move({ from, to, promotion: "x" })) {
-            setFen(chess.fen())
-            setLastMove([from, to])
-            // setTimeout(randomMove, 500)
-        }
-    }
-
-    const randomMove = () => {
-        const moves = chess.moves({ verbose: true })
-        const move = moves[Math.floor(Math.random() * moves.length)]
-        if (moves.length > 0) {
-            chess.move(move.san)
-            setFen(chess.fen())
-            setLastMove([move.from, move.to])
-        }
-    }
-
-    const promotion = e => {
-        const from = pendingMove[0]
-        const to = pendingMove[1]
-        chess.move({ from, to, promotion: e })
-        setFen(chess.fen())
-        setLastMove([from, to])
-        setSelectVisible(false)
-        setTimeout(randomMove, 500)
-    }
-
-    const turnColor = () => {
-        return chess.turn() === "w" ? "white" : "black"
-    }
-
-    const calcMovable = () => {
-        const dests = new Map()
-        SQUARES.forEach(s => {
-          const ms = chess.moves({ square: s, verbose: true })
-          if (ms.length) dests.set(s, ms.map(m => m.to))
-        })
-        return dests
-      }
+    if(!game.core)
+        return <>Loading...</>
     
     return <>
         <Chessground config={{
             turnColor: "black",
-            fen: fen,
+            fen: game.fen,
             draggable: {
                 enabled: false
             },
             movable: {
                 free: false,
-                dests: calcMovable(),
+                dests: game.getMoveableDests(),
                 color: "both"
             },
             events: {
-                move: onMove
+                move: game.move
             },
-            lastMove: lastMove,
+            lastMove: game.lastMove,
         }} />
     </>
 }

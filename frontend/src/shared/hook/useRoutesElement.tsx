@@ -10,6 +10,7 @@ import AuthRoutes from 'src/routes/AuthRoutes'
 import { path } from 'src/constants/path'
 import GameRoutes from 'src/routes/GameRoutes'
 import GameV2 from 'src/pages/gamev2/GameV2'
+import GameV2Routes from 'src/routes/GameV2Routes'
 
 interface RouteElement {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -64,7 +65,7 @@ export default function useRouteElements() {
     },
     {
       path: path.gamev2,
-      element: <GameRoutes />,
+      element: <GameV2Routes />,
       children: GAME_V2_ROUTES
     }
   ]
