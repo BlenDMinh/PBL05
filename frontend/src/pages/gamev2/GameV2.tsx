@@ -32,7 +32,7 @@ export default function GameV2() {
           movable: {
             free: false,
             dests: game.getMoveableDests(),
-            color: 'both'
+            color: game.side
           },
           events: {
             move: game.move
