@@ -31,8 +31,8 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
   const [user, setUser] = useState<User | null>(initAppContext.user)
 
   useEffect(() => {
-    authApi.loginFromSessionId().then(res => {
-      if(res.status != HttpStatusCode.Ok) {
+    authApi.loginFromSessionId().then((res) => {
+      if (res.status != HttpStatusCode.Ok) {
         // setIsAuthenticated(false)
         // setUser(null)
         // clearLS()

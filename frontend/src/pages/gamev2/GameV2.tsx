@@ -23,6 +23,8 @@ export default function GameV2() {
   return (
     <>
       <Chessground
+        width={Math.min(window.innerWidth, window.innerHeight)}
+        height={Math.min(window.innerWidth, window.innerHeight)}
         config={{
           turnColor: game.turn,
           fen: game.fen,

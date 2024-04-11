@@ -4,8 +4,7 @@ import useWebSocket, { ReadyState } from 'react-use-websocket'
 import { getSessionIdFromLS } from 'src/utils/auth'
 import { GameSocketMessage } from 'src/game/types/ws.type'
 import { useNavigate } from 'react-router-dom'
-import { path } from 'src/constants/path'
-
+import board from '../../assets/images/board.png'
 enum State {
   START_FINDING,
   FINDING,
@@ -54,14 +53,25 @@ export default function QuickMatch() {
   }
   if (state == State.FINDING) {
     return (
-      <div className='h-full w-full flex flex-col items-center justify-center'>
+      <div className='h-full w-full flex flex-col items-center justify-center relative'>
         <div style={{ position: 'relative' }}>
           <img
+            src={board}
             alt='Chess Board'
+            width={Math.min(window.innerWidth, window.innerHeight)}
+            height={Math.min(window.innerWidth, window.innerHeight)}
             style={{ position: 'relative', zIndex: '1', boxShadow: '0 0 10px rgba(0, 0, 0, 0.2)' }}
           />
+          <div className='absolute top-0 left-0 w-full h-full bg-black opacity-50' style={{ zIndex: '2' }}></div>
           <div
-            style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: '2' }}
+            className='text-3xl text-base-content'
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              zIndex: '3'
+            }}
           >
             Finding opponent...
           </div>

@@ -1,15 +1,15 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react"
-import { ReactWithChild } from "src/interface/app"
-import { Chess, SQUARES, Square }  from "chess.js"
-import { Dests, Key } from "chessground/types";
-import { ws } from "src/game/constants/ws";
-import useWebSocket, { ReadyState } from "react-use-websocket";
-import { getProfileFromLS, getSessionIdFromLS } from "src/utils/auth";
-import { GameV2SocketData } from "src/pages/gamev2/types/game.v2.type";
+import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { ReactWithChild } from 'src/interface/app'
+import { Chess, SQUARES, Square } from 'chess.js'
+import { Dests, Key } from 'chessground/types'
+import { ws } from 'src/game/constants/ws'
+import useWebSocket, { ReadyState } from 'react-use-websocket'
+import { getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
+import { GameV2SocketData } from 'src/pages/gamev2/types/game.v2.type'
 
 export enum GameType {
-    PVP,
-    BOT
+  PVP,
+  BOT
 }
 
 export interface GameV2ContextInterface {
@@ -27,17 +27,17 @@ export interface GameV2ContextInterface {
 }
 
 const initContext: GameV2ContextInterface = {
-    core: null,
-    gameId: "",
-    side: "white",
-    startGame: () => null,
-    fen: "",
-    setFen: () => null,
-    lastMove: [],
-    setLastMove: () => null,
-    getMoveableDests: () => new Map(),
-    turn: "white",
-    move: () => null
+  core: null,
+  gameId: '',
+  side: 'white',
+  startGame: () => null,
+  fen: '',
+  setFen: () => null,
+  lastMove: [],
+  setLastMove: () => null,
+  getMoveableDests: () => new Map(),
+  turn: 'white',
+  move: () => null
 }
 
 export const GameV2Context = createContext<GameV2ContextInterface>(initContext)
@@ -81,33 +81,10 @@ export default function GameV2ContextProvider({children}: ReactWithChild) {
                 sendMessage(message)
             }
         }
-    }, [readyState])
-
-    useEffect(() => {
-        if(!lastMessage)
-            return;
-        const json = JSON.parse(lastMessage?.data)
-        console.log(json)
-        const data = json.data as GameV2SocketData
-        setFen(data.fen)
-        // console.log(data.gamePlayer.displayName + " " + getProfileFromLS().displayName)
-        if(data.gamePlayer && data.gamePlayer.displayName === getProfileFromLS().displayName) {
-            // console.log(data.gamePlayer.white ? "white" : "black")
-            setSide(data.gamePlayer.white ? "white" : "black")
-        }
-    }, [lastMessage])
-
-    const getMoveableDests = () => {
-        const dests = new Map()
-        if(!core)
-            return dests
-        SQUARES.forEach(s => {
-          const ms = core.moves({ square: s, verbose: true })
-          if (ms.length) dests.set(s, ms.map(m => m.to))
-        })
-        // console.log(dests)
-        return dests
+      }
+      sendMessage(JSON.stringify(message))
     }
+  }
 
     const turn = useMemo(() => core ? (core.turn() == 'b' ? "black" : "white") : "white", [fen])
 
@@ -162,11 +139,11 @@ export default function GameV2ContextProvider({children}: ReactWithChild) {
 }
 
 export const useGameV2 = () => {
-    const context = useContext(GameV2Context);
+  const context = useContext(GameV2Context)
 
-    if (context === undefined) {
-        throw new Error('useGame must be used within GameProvider');
-    }
+  if (context === undefined) {
+    throw new Error('useGame must be used within GameProvider')
+  }
 
-    return context;
+  return context
 }
