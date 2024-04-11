@@ -11,6 +11,7 @@ import { path } from 'src/constants/path'
 import GameRoutes from 'src/routes/GameRoutes'
 import GameV2 from 'src/pages/gamev2/GameV2'
 import GameV2Routes from 'src/routes/GameV2Routes'
+import Chat from 'src/pages/chat/Chat'
 
 interface RouteElement {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -47,7 +48,6 @@ export default function useRouteElements() {
       path: '*',
       element: <NotFoundPage />
     },
-
     {
       path: path.home,
       element: <PrivateRoutes />,

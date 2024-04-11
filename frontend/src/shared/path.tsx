@@ -10,6 +10,7 @@ import QuickMatch from 'src/pages/quick-match/QuickMatch'
 import ChessGame from 'src/game/ChessGame'
 import Game from 'src/pages/game/Game'
 import GameV2 from 'src/pages/gamev2/GameV2'
+import Chat from 'src/pages/chat/Chat'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -27,6 +28,10 @@ export const PRIVATE_ROUTER: RouteObject[] = [
   {
     path: path.home,
     element: <Home />
+  },
+  {
+    path: path.chat,
+    element: <Chat />
   },
   // {
   //   path: path.patients,

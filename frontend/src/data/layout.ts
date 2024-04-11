@@ -1,6 +1,6 @@
 import { path } from 'src/constants/path'
 import { PoliciesOption } from 'src/data/auth'
-import { FaChessBishop } from 'react-icons/fa';
+import { FaChessBishop, FaComments, FaHome } from 'react-icons/fa';
 
 import { IconType } from 'react-icons'
 
@@ -26,14 +26,14 @@ export const quickOptionsNavbar: QuickOptionNavbar[] = [
 export const sidebarOption: SidebarOption[] = [
   {
     id: 1,
-    title: 'Game',
-    to: path.game,
-    icon: FaChessBishop
+    title: 'Home',
+    to: path.home,
+    icon: FaHome
   },
   {
     id: 2,
-    title: 'Game',
-    to: path.patients,
-    icon: FaChessBishop
+    title: 'Messages',
+    to: path.chat,
+    icon: FaComments
   }
 ]

@@ -43,7 +43,7 @@ export default function Sidebar(props: SidebarProps) {
         >
           <div className='flex w-full flex-col gap-8'>
             <div className='flex h-16 items-center justify-center'>
-              <div className='flex·w-max·items-center·px-0'>
+              <a href='/' className='flex·w-max·items-center·px-0'>
                 {showSidebar ? (
                   <div className='flex items-center'>
                     <FontAwesomeIcon icon={faChessKing} size='4x' style={{ color: '#0066CC' }} />
@@ -54,7 +54,7 @@ export default function Sidebar(props: SidebarProps) {
                 ) : (
                   <h3 className='text-primary'>CHESS</h3>
                 )}
-              </div>
+              </a>
             </div>
 
             <div className='flex flex-col gap-1'>
@@ -65,9 +65,7 @@ export default function Sidebar(props: SidebarProps) {
                       'text-base-content text-nowrap hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary active:!text-white',
                       {
                         'tooltip tooltip-right': !showSidebar,
-                        'bg-primary text-white':
-                          (pathname !== path.game && to !== path.game && pathname.startsWith(to)) ||
-                          (to === path.game && pathname === path.game)
+                        'bg-primary text-white': pathname == to
                       }
                     )}
                     to={to}
