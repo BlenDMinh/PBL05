@@ -82,9 +82,7 @@ export default function GameV2ContextProvider({children}: ReactWithChild) {
             }
         }
       }
-      sendMessage(JSON.stringify(message))
-    }
-  }
+    )
 
     const turn = useMemo(() => core ? (core.turn() == 'b' ? "black" : "white") : "white", [fen])
 
@@ -117,6 +115,18 @@ export default function GameV2ContextProvider({children}: ReactWithChild) {
             sendMessage(JSON.stringify(message))
         }
         setFen(core.fen())
+    }
+
+    const getMoveableDests = () => {
+        const dests = new Map()
+        if(!core)
+            return dests
+        SQUARES.forEach(s => {
+            const ms = core.moves({ square: s, verbose: true })
+            if (ms.length) dests.set(s, ms.map(m => m.to))
+        })
+        // console.log(dests)
+        return dests
     }
 
     return (
