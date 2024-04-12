@@ -1,5 +1,6 @@
 package modules.chat.dto;
 
+import java.sql.ResultSet;
 import java.util.Date;
 
 import lombok.Getter;
@@ -25,6 +26,10 @@ public class MessageResponseDto {
     }
 
     public MessageResponseDto(String content) {
+        this.content = content;
+    }
+
+    public MessageResponseDto(ResultSet rs) {
         this.content = content;
     }
 }
