@@ -13,6 +13,7 @@ export const path = {
   gamev2: '/game/v2',
   pvp: '/game/:gameId',
   pvpv2: '/game/v2/:gameId',
+  botv2: '/game/v2/bot',
   quickMatch: '/game/quickmatch',
   chat: '/chat'
 } as const

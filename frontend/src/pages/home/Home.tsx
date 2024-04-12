@@ -26,7 +26,9 @@ export default function Home() {
           <Link className='btn bg-base-200  w-full h-1/4 border-b-8 border-base-300' to='/game/quickmatch'>
             <span className='text-base-content font-bold text-xl'>Quick Match</span>
           </Link>
-          <div className='btn bg-base-200 w-full h-1/4 border-b-8 border-base-300'></div>
+          <Link to='/game/v2/bot' className='btn bg-base-200 w-full h-1/4 border-b-8 border-base-300'>
+            <span className='text-base-content font-bold text-xl'>Play with bot</span>
+          </Link>
           <div className='btn bg-base-200 w-full h-1/4 border-b-8 border-base-300'></div>
         </div>
         <div className='btn bg-base-200 h-full w-1/3 border-b-8 border-base-300'></div>

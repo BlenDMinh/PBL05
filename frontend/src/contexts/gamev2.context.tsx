@@ -12,9 +12,17 @@ export enum GameType {
   BOT
 }
 
+export interface GameConfig {
+  botDifficulty: number
+}
+
+export const DEFAULT_CONFIG: GameConfig = {
+  botDifficulty: 5
+}
+
 export interface GameV2ContextInterface {
   gameId: string
-  startGame: (gameId: string) => void
+  startGame: (gameId: string, gameType?: GameType, gameConfig?: GameConfig) => void
   core: Chess | null
   fen: string
   side: 'white' | 'black'
@@ -50,8 +58,11 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [side, setSide] = useState<'black' | 'white'>('white')
   const [lastMove, setLastMove] = useState<Key[]>([])
 
-  const startGame = (gameId: string, gameType: GameType = GameType.PVP) => {
+  const [config, setConfig] = useState(DEFAULT_CONFIG)
+
+  const startGame = (gameId: string, gameType: GameType = GameType.PVP, gameConfig: GameConfig = DEFAULT_CONFIG) => {
     setGameType(gameType)
+    setConfig(config)
     setGameId(gameId)
   }
 
@@ -80,7 +91,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
           message: 'Human join',
           data: {
             sessionId: getSessionIdFromLS(),
-            difficulty: 2
+            difficulty: config.botDifficulty
           }
         })
         console.log(message)
