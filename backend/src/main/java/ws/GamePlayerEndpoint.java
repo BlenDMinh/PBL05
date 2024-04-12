@@ -56,220 +56,201 @@ public class GamePlayerEndpoint {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("id") String id) throws SQLException, Exception {
-        boolean done = false;
-        while (!done) {
-            // Getting Outer Lock
-            boolean ans = re.tryLock();
-
-            // Returns True if lock is free
-            if (ans) {
-                try {
-                    re.lock();
-                    if (GamePlayerStore.getInstance().isGameExist(id)) {
-                        chessGame = GamePlayerStore.getInstance().getGameById(id);
-                    }
-                    GameDto gameDto = gameService.getById(id);
-                    boolean isValidGame = gameService.isValidGame(gameDto);
-                    if (!isValidGame || (player1Session != null && player2Session != null)) {
-                        session.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
-                        session.close();
-                    } else if (chessGame == null) {
-                        ChessGame newChessGame = new ChessGame(gameDto.getId(), gameDto.getPlayer1Id(),
-                                gameDto.getPlayer2Id());
-                        RuleSetDto ruleSetDto = gameDto.getRuleSetDto();
-                        JsonObject rulesetDetail = ruleSetDto.getDetail();
-                        GameRule gameRule = new GameRule(ruleSetDto.getId(), ruleSetDto.getName(),
-                                rulesetDetail.get("minute_per_turn").getAsInt(),
-                                rulesetDetail.get("total_minute_per_player").getAsInt(),
-                                rulesetDetail.get("turn_around_steps").getAsInt(),
-                                rulesetDetail.get("turn_around_time_plus").getAsInt());
-                        newChessGame.setGameRule(gameRule);
-                        GamePlayerStore.getInstance().addGame(newChessGame);
-                        chessGame = newChessGame;
-                    }
-                    done = true;
-                } catch (Exception ex) {
-
-                } finally {
-                    re.unlock();
-                }
+        re.lock();
+        try {
+            if (GamePlayerStore.getInstance().isGameExist(id)) {
+                chessGame = GamePlayerStore.getInstance().getGameById(id);
             }
+            GameDto gameDto = gameService.getById(id);
+            boolean isValidGame = gameService.isValidGame(gameDto);
+            if (!isValidGame || (player1Session != null && player2Session != null)) {
+                session.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
+                session.close();
+            } else if (chessGame == null) {
+                ChessGame newChessGame = new ChessGame(gameDto.getId(), gameDto.getPlayer1Id(),
+                        gameDto.getPlayer2Id());
+                RuleSetDto ruleSetDto = gameDto.getRuleSetDto();
+                JsonObject rulesetDetail = ruleSetDto.getDetail();
+                GameRule gameRule = new GameRule(ruleSetDto.getId(), ruleSetDto.getName(),
+                        rulesetDetail.get("minute_per_turn").getAsInt(),
+                        rulesetDetail.get("total_minute_per_player").getAsInt(),
+                        rulesetDetail.get("turn_around_steps").getAsInt(),
+                        rulesetDetail.get("turn_around_time_plus").getAsInt());
+                newChessGame.setGameRule(gameRule);
+                GamePlayerStore.getInstance().addGame(newChessGame);
+                chessGame = newChessGame;
+            }
+        } catch (Exception ex) {
+
+        } finally {
+            re.unlock();
         }
+
     }
 
     @OnMessage
     public void onMessage(GameMessageDto gameMessageDto, Session playerSession) throws IOException {
-        boolean done = false;
-        while (!done) {
-            // Getting Outer Lock
-            boolean ans = re.tryLock();
-
-            // Returns True if lock is free
-            if (ans) {
-                try {
-                    re.lock();
-                    String message = gameMessageDto.getMessage();
-                    if (!message.equals(GameMessage.JSESSIONID)) {
-                        Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
-                        if (playerId == null) {
-                            playerSession.getAsyncRemote()
-                                    .sendObject(new GameMessageDto(GameMessage.NOT_AUTHENTICATED));
-                            return;
-                        }
-                    }
-                    switch (message) {
-                        case GameMessage.JSESSIONID:
-                            Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
-                            if (playerId == null) {
-                                stores.session.Session session = SimpleSessionManager.getInstance()
-                                        .getSession(gameMessageDto.getData().toString());
-                                if (session == null) {
-                                    playerSession.getAsyncRemote()
-                                            .sendObject(new GameMessageDto(GameMessage.SESSION_NOT_VALID));
-                                    playerSession.close();
-                                }
-                                UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO,
-                                        UserPasswordDto.class);
-                                int userId = userPasswordDto.getId();
-                                ModelMapper modelMapper = new ModelMapper();
-
-                                if (chessGame.getPlayer1().getId() == userId) {
-                                    player1SessionId = gameMessageDto.getData().toString();
-                                    playerSession.getUserProperties().put("player_id", userId);
-                                    player1Session = playerSession;
-                                    GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
-                                            GamePlayerDto.class);
-                                    gamePlayerDto.setWhite(chessGame.getPlayer1().isWhite());
-                                    GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                                            new PlayerJoinedResponse(chessGame.getRawBoard(), chessGame.isPlayer1Turn(),
-                                                    gamePlayerDto));
-                                    sendToAllPlayer(resp);
-                                    if (!player2SessionId.isBlank()) {
-                                        stores.session.Session session2 = SimpleSessionManager.getInstance()
-                                                .getSession(player2SessionId);
-                                        UserPasswordDto userPasswordDto2 = session2.getAttribute(
-                                                SessionKey.USER_PASSWORD_DTO,
-                                                UserPasswordDto.class);
-                                        GamePlayerDto gamePlayerDto2 = modelMapper.map(userPasswordDto2,
-                                                GamePlayerDto.class);
-                                        gamePlayerDto2.setWhite(chessGame.getPlayer2().isWhite());
-                                        GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                                                new PlayerJoinedResponse(chessGame.getRawBoard(),
-                                                        chessGame.isPlayer1Turn(),
-                                                        gamePlayerDto2));
-                                        player1Session.getBasicRemote().sendObject(resp2);
-                                    }
-                                } else if (chessGame.getPlayer2().getId() == userId) {
-                                    player2SessionId = gameMessageDto.getData().toString();
-                                    playerSession.getUserProperties().put("player_id", userId);
-                                    player2Session = playerSession;
-                                    GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
-                                            GamePlayerDto.class);
-                                    gamePlayerDto.setWhite(chessGame.getPlayer2().isWhite());
-                                    GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                                            new PlayerJoinedResponse(chessGame.getRawBoard(), chessGame.isPlayer1Turn(),
-                                                    gamePlayerDto));
-                                    sendToAllPlayer(resp);
-                                    if (!player1SessionId.isBlank()) {
-                                        stores.session.Session session1 = SimpleSessionManager.getInstance()
-                                                .getSession(player1SessionId);
-                                        UserPasswordDto userPasswordDto1 = session1.getAttribute(
-                                                SessionKey.USER_PASSWORD_DTO,
-                                                UserPasswordDto.class);
-                                        GamePlayerDto gamePlayerDto1 = modelMapper.map(userPasswordDto1,
-                                                GamePlayerDto.class);
-                                        gamePlayerDto1.setWhite(chessGame.getPlayer1().isWhite());
-                                        GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                                                new PlayerJoinedResponse(chessGame.getRawBoard(),
-                                                        chessGame.isPlayer1Turn(),
-                                                        gamePlayerDto1));
-                                        player1Session.getBasicRemote().sendObject(resp2);
-                                    }
-                                } else {
-                                    playerSession.close();
-                                }
-                            }
-                            break;
-
-                        case GameMessage.MOVE:
-                            MoveRequest moveRequest = gson.fromJson(gameMessageDto.getData().toString(),
-                                    MoveRequest.class);
-                            Position from = moveRequest.getFrom();
-                            Position to = moveRequest.getTo();
-                            if (isRightTurnAndOwner(from, to, playerSession)) {
-                                ChessPiece chessPiece = chessGame.getBoard()[from.getRow()][from.getCol()];
-                                if (chessPiece.isValidMove(to)) {
-                                    chessPiece.doMove(to);
-                                    sendToAllPlayer(
-                                            new GameMessageDto(GameMessage.MOVE,
-                                                    new MoveResponse(chessGame.getRawBoard(),
-                                                            !chessGame.isPlayer1Turn(), from,
-                                                            to)));
-                                    chessGame.nextTurn();
-                                } else {
-                                    playerSession.getAsyncRemote()
-                                            .sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
-                                }
-                            }
-                            break;
-
-                        case GameMessage.CASTLE:
-                            if (isRightTurn(playerSession)) {
-                                boolean white = getTurn(playerSession);
-                                King king = white ? chessGame.getWhiteKing() : chessGame.getBlackKing();
-                                if (king.isCastlingAllowed()) {
-                                    king.doCastle();
-                                    sendToAllPlayer(
-                                            new GameMessageDto(GameMessage.CASTLE,
-                                                    new CastleResponse(chessGame.getRawBoard(),
-                                                            !chessGame.isPlayer1Turn())));
-                                    chessGame.nextTurn();
-                                } else {
-                                    playerSession.getAsyncRemote()
-                                            .sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
-                                }
-                            }
-                            break;
-
-                        case GameMessage.PROMOTION:
-                            PromotionRequest promotionRequest = gson.fromJson(gameMessageDto.getData().toString(),
-                                    PromotionRequest.class);
-                            Position pawnFrom = promotionRequest.getFrom();
-                            Position pawnTo = promotionRequest.getTo();
-                            String piece = promotionRequest.getPiece();
-                            if (isRightTurnAndOwner(pawnFrom, pawnTo, playerSession)) {
-                                playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
-                                return;
-                            }
-                            // check if board at from position is a pawn
-                            if (!(chessGame.getBoard()[pawnFrom.getRow()][pawnFrom.getCol()] instanceof Pawn)) {
-                                playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
-                                return;
-                            }
-                            Pawn pawn = (Pawn) chessGame.getBoard()[pawnFrom.getRow()][pawnFrom.getCol()];
-                            if (!pawn.isValidMove(pawnTo) || !pawn.isReachedEndOfRow()) {
-                                playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
-                                return;
-                            }
-                            pawn.doMove(pawnTo);
-                            pawn.promotePawn(piece);
-                            sendToAllPlayer(new GameMessageDto(GameMessage.PROMOTION,
-                                    new PromotionResponse(chessGame.getRawBoard(), !chessGame.isPlayer1Turn(), pawnFrom,
-                                            pawnTo,
-                                            piece)));
-                            chessGame.nextTurn();
-                            break;
-                        default:
-                            playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.UNKNOWN));
-                            return;
-                    }
-                    done = true;
-                } catch (Exception ex) {
-
-                } finally {
-                    re.unlock();
+        re.lock();
+        try {
+            String message = gameMessageDto.getMessage();
+            if (!message.equals(GameMessage.JSESSIONID)) {
+                Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
+                if (playerId == null) {
+                    playerSession.getAsyncRemote()
+                            .sendObject(new GameMessageDto(GameMessage.NOT_AUTHENTICATED));
+                    return;
                 }
             }
+            switch (message) {
+                case GameMessage.JSESSIONID:
+                    Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
+                    if (playerId == null) {
+                        stores.session.Session session = SimpleSessionManager.getInstance()
+                                .getSession(gameMessageDto.getData().toString());
+                        if (session == null) {
+                            playerSession.getAsyncRemote()
+                                    .sendObject(new GameMessageDto(GameMessage.SESSION_NOT_VALID));
+                            playerSession.close();
+                        }
+                        UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO,
+                                UserPasswordDto.class);
+                        int userId = userPasswordDto.getId();
+                        ModelMapper modelMapper = new ModelMapper();
+
+                        if (chessGame.getPlayer1().getId() == userId) {
+                            player1SessionId = gameMessageDto.getData().toString();
+                            playerSession.getUserProperties().put("player_id", userId);
+                            player1Session = playerSession;
+                            GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
+                                    GamePlayerDto.class);
+                            gamePlayerDto.setWhite(chessGame.getPlayer1().isWhite());
+                            GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                                    new PlayerJoinedResponse(chessGame.getRawBoard(), chessGame.isPlayer1Turn(),
+                                            gamePlayerDto));
+                            sendToAllPlayer(resp);
+                            if (!player2SessionId.isBlank()) {
+                                stores.session.Session session2 = SimpleSessionManager.getInstance()
+                                        .getSession(player2SessionId);
+                                UserPasswordDto userPasswordDto2 = session2.getAttribute(
+                                        SessionKey.USER_PASSWORD_DTO,
+                                        UserPasswordDto.class);
+                                GamePlayerDto gamePlayerDto2 = modelMapper.map(userPasswordDto2,
+                                        GamePlayerDto.class);
+                                gamePlayerDto2.setWhite(chessGame.getPlayer2().isWhite());
+                                GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                                        new PlayerJoinedResponse(chessGame.getRawBoard(),
+                                                chessGame.isPlayer1Turn(),
+                                                gamePlayerDto2));
+                                player1Session.getBasicRemote().sendObject(resp2);
+                            }
+                        } else if (chessGame.getPlayer2().getId() == userId) {
+                            player2SessionId = gameMessageDto.getData().toString();
+                            playerSession.getUserProperties().put("player_id", userId);
+                            player2Session = playerSession;
+                            GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
+                                    GamePlayerDto.class);
+                            gamePlayerDto.setWhite(chessGame.getPlayer2().isWhite());
+                            GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                                    new PlayerJoinedResponse(chessGame.getRawBoard(), chessGame.isPlayer1Turn(),
+                                            gamePlayerDto));
+                            sendToAllPlayer(resp);
+                            if (!player1SessionId.isBlank()) {
+                                stores.session.Session session1 = SimpleSessionManager.getInstance()
+                                        .getSession(player1SessionId);
+                                UserPasswordDto userPasswordDto1 = session1.getAttribute(
+                                        SessionKey.USER_PASSWORD_DTO,
+                                        UserPasswordDto.class);
+                                GamePlayerDto gamePlayerDto1 = modelMapper.map(userPasswordDto1,
+                                        GamePlayerDto.class);
+                                gamePlayerDto1.setWhite(chessGame.getPlayer1().isWhite());
+                                GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                                        new PlayerJoinedResponse(chessGame.getRawBoard(),
+                                                chessGame.isPlayer1Turn(),
+                                                gamePlayerDto1));
+                                player1Session.getBasicRemote().sendObject(resp2);
+                            }
+                        } else {
+                            playerSession.close();
+                        }
+                    }
+                    break;
+
+                case GameMessage.MOVE:
+                    MoveRequest moveRequest = gson.fromJson(gameMessageDto.getData().toString(),
+                            MoveRequest.class);
+                    Position from = moveRequest.getFrom();
+                    Position to = moveRequest.getTo();
+                    if (isRightTurnAndOwner(from, to, playerSession)) {
+                        ChessPiece chessPiece = chessGame.getBoard()[from.getRow()][from.getCol()];
+                        if (chessPiece.isValidMove(to)) {
+                            chessPiece.doMove(to);
+                            sendToAllPlayer(
+                                    new GameMessageDto(GameMessage.MOVE,
+                                            new MoveResponse(chessGame.getRawBoard(),
+                                                    !chessGame.isPlayer1Turn(), from,
+                                                    to)));
+                            chessGame.nextTurn();
+                        } else {
+                            playerSession.getAsyncRemote()
+                                    .sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                        }
+                    }
+                    break;
+
+                case GameMessage.CASTLE:
+                    if (isRightTurn(playerSession)) {
+                        boolean white = getTurn(playerSession);
+                        King king = white ? chessGame.getWhiteKing() : chessGame.getBlackKing();
+                        if (king.isCastlingAllowed()) {
+                            king.doCastle();
+                            sendToAllPlayer(
+                                    new GameMessageDto(GameMessage.CASTLE,
+                                            new CastleResponse(chessGame.getRawBoard(),
+                                                    !chessGame.isPlayer1Turn())));
+                            chessGame.nextTurn();
+                        } else {
+                            playerSession.getAsyncRemote()
+                                    .sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                        }
+                    }
+                    break;
+
+                case GameMessage.PROMOTION:
+                    PromotionRequest promotionRequest = gson.fromJson(gameMessageDto.getData().toString(),
+                            PromotionRequest.class);
+                    Position pawnFrom = promotionRequest.getFrom();
+                    Position pawnTo = promotionRequest.getTo();
+                    String piece = promotionRequest.getPiece();
+                    if (isRightTurnAndOwner(pawnFrom, pawnTo, playerSession)) {
+                        playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                        return;
+                    }
+                    // check if board at from position is a pawn
+                    if (!(chessGame.getBoard()[pawnFrom.getRow()][pawnFrom.getCol()] instanceof Pawn)) {
+                        playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                        return;
+                    }
+                    Pawn pawn = (Pawn) chessGame.getBoard()[pawnFrom.getRow()][pawnFrom.getCol()];
+                    if (!pawn.isValidMove(pawnTo) || !pawn.isReachedEndOfRow()) {
+                        playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                        return;
+                    }
+                    pawn.doMove(pawnTo);
+                    pawn.promotePawn(piece);
+                    sendToAllPlayer(new GameMessageDto(GameMessage.PROMOTION,
+                            new PromotionResponse(chessGame.getRawBoard(), !chessGame.isPlayer1Turn(), pawnFrom,
+                                    pawnTo,
+                                    piece)));
+                    chessGame.nextTurn();
+                    break;
+                default:
+                    playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.UNKNOWN));
+                    return;
+            }
+        } catch (Exception ex) {
+
+        } finally {
+            re.unlock();
         }
     }
 
