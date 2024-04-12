@@ -1,6 +1,7 @@
 package modules.chat.dto;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 
 import lombok.Getter;
@@ -29,7 +30,11 @@ public class MessageResponseDto {
         this.content = content;
     }
 
-    public MessageResponseDto(ResultSet rs) {
-        this.content = content;
+    public MessageResponseDto(ResultSet rs) throws SQLException {
+        id = rs.getInt("id");
+        content = rs.getString("content");
+        senderId = rs.getInt("sender_id");
+        receiverId = rs.getInt("receiver_id");
+        sendedAt = rs.getTimestamp("sended_at").toString();
     }
 }

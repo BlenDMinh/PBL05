@@ -1,11 +1,10 @@
 package modules.chat.service;
 
-import java.sql.SQLException;
 import java.util.List;
 
 import modules.chat.ChatRepository;
 import modules.chat.dto.MessageResponseDto;
-import modules.chat.dto.UserInChatDto;
+import modules.chat.dto.UserWithLastMessageDto;
 
 public class ChatService {
     final ChatRepository chatRepository = new ChatRepository();
@@ -14,7 +13,7 @@ public class ChatService {
         return chatRepository.createOne(content, senderId, receiverId);
     }
 
-    public List<UserInChatDto> getUserInChatOfSender(int senderId) throws RuntimeException{
-        return chatRepository.getUserInChatOfSender(senderId);
+    public List<UserWithLastMessageDto> getUserWithLastMessageOfUser(int userId) throws RuntimeException{
+        return chatRepository.getUserWithLastMessageDtoOfUser(userId);
     }
 }

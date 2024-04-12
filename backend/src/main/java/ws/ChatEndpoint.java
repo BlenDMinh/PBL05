@@ -62,7 +62,9 @@ public class ChatEndpoint {
         HashSet<Session> receiverSessions = users.containsKey(receiverId) ? users.get(receiverId) : null;
         HashSet<Session> senderSessions = users.get(senderId);
         ReentrantLock re = lockers.get(receiverId);
-        re.lock();
+        if (re != null) {
+            re.lock();
+        }
         try {
             MessageResponseDto messageResponseDto = chatService.addMessage(messageRequestDto.getContent(),
                     messageRequestDto.getSenderId(), messageRequestDto.getReceiverId());
@@ -70,7 +72,9 @@ public class ChatEndpoint {
         } catch (Exception ex) {
 
         } finally {
-            re.unlock();
+            if (re != null) {
+                re.unlock();
+            }
         }
 
     }
@@ -94,12 +98,7 @@ public class ChatEndpoint {
         Integer userId = (Integer) session.getUserProperties().get("user_id");
         if (userId != null) {
             HashSet<Session> userSessions = users.get(userId);
-            for (Session userSession : userSessions) {
-                userSessions.remove(userSession);
-                if (userSessions.isEmpty()) {
-                    lockers.remove(userId);
-                }
-            }
+            userSessions.remove(session);
         }
     }
 }

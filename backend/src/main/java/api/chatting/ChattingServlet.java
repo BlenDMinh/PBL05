@@ -1,18 +1,15 @@
 package api.chatting;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import exceptions.CustomException;
 import modules.auth.dto.UserPasswordDto;
-import modules.chat.dto.UserInChatDto;
+import modules.chat.dto.UserWithLastMessageDto;
 import modules.chat.service.ChatService;
 import stores.session.Session;
 import stores.session.SessionKey;
@@ -29,7 +26,7 @@ public class ChattingServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         Session session = requestUtils.getSession(req);
         UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
-        List<UserInChatDto> userInChatDtos = chatService.getUserInChatOfSender(userPasswordDto.getId());
+        List<UserWithLastMessageDto> userInChatDtos = chatService.getUserWithLastMessageOfUser(userPasswordDto.getId());
         responseUtils.responseJson(resp, userInChatDtos);
     }
 }
