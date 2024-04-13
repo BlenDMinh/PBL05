@@ -4,6 +4,7 @@ import java.util.List;
 
 import modules.chat.ChatRepository;
 import modules.chat.dto.MessageResponseDto;
+import modules.chat.dto.PaginationMessageResponseDto;
 import modules.chat.dto.UserWithLastMessageDto;
 
 public class ChatService {
@@ -17,7 +18,9 @@ public class ChatService {
         return chatRepository.getUserWithLastMessageDtoOfUser(userId);
     }
 
-    public List<MessageResponseDto> getMessageOfPair(int user1, int user2) {
-        return chatRepository.getListMessageOfPair(user1, user2);
+    public PaginationMessageResponseDto getPaginationMessageOfPair(int user1, int user2, int page, int size,
+            String keyword) {
+        return chatRepository.getPaginationMessageOfPair(user1, user2, page, size,
+                keyword);
     }
 }

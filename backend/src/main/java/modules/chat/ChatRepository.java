@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import modules.chat.dto.MessageResponseDto;
+import modules.chat.dto.PaginationMessageResponseDto;
 import modules.chat.dto.UserWithLastMessageDto;
 import utils.ConnectionPool;
 
@@ -84,12 +85,12 @@ public class ChatRepository {
         return userInChatDtos;
     }
 
-    public List<MessageResponseDto> getListMessageOfPair(int user1, int user2) {
-        List<MessageResponseDto> messageResponseDtos = new ArrayList<>();
-        String query = "select * from messages"
-                + " where (sender_id = ? and receiver_id = ?)"
-                + " or (sender_id = ? and receiver_id = ?)"
-                + " order by sended_at";
+    public int countMessageOfPair(int user1, int user2, String keyword) {
+        int result = 0;
+        String query = "select count(*) from messages"
+                + " where ((sender_id = ? and receiver_id = ?)"
+                + " or (sender_id = ? and receiver_id = ?))"
+                + " and content ilike ?";
         Connection conn = null;
         try {
             conn = ConnectionPool.getConnection();
@@ -98,6 +99,50 @@ public class ChatRepository {
             stmt.setInt(2, user2);
             stmt.setInt(3, user2);
             stmt.setInt(4, user1);
+            stmt.setString(5, "%" + keyword + "%");
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                result = rs.getInt(1);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            if (conn != null) {
+                ConnectionPool.releaseConnection(conn);
+            }
+        }
+        return result;
+    }
+
+    public PaginationMessageResponseDto getPaginationMessageOfPair(int user1, int user2, int page, int size,
+            String keyword) {
+        List<MessageResponseDto> messageResponseDtos = new ArrayList<>();
+        int totalElements = 0, totalPages = 0;
+        String query = "select * from messages"
+                + " where ((sender_id = ? and receiver_id = ?)"
+                + " or (sender_id = ? and receiver_id = ?))"
+                + " and content ilike ?"
+                + " order by sended_at"
+                + " offset ?"
+                + " limit ?";
+        Connection conn = null;
+        try {
+            conn = ConnectionPool.getConnection();
+            totalElements = this.countMessageOfPair(user1, user2, keyword);
+            totalPages = (int) Math.ceil((double) totalElements / size);
+            int upToFull = totalPages * size - totalElements;
+            int offset = 0;
+            if (totalElements >= size) {
+                offset = (totalPages - page) * size - upToFull;
+            }
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, user1);
+            stmt.setInt(2, user2);
+            stmt.setInt(3, user2);
+            stmt.setInt(4, user1);
+            stmt.setString(5, "%" + keyword + "%");
+            stmt.setInt(6, offset);
+            stmt.setInt(7, size);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 messageResponseDtos.add(new MessageResponseDto(rs));
@@ -109,6 +154,6 @@ public class ChatRepository {
                 ConnectionPool.releaseConnection(conn);
             }
         }
-        return messageResponseDtos;
+        return new PaginationMessageResponseDto(messageResponseDtos, totalPages, totalElements);
     }
 }
