@@ -28,16 +28,10 @@ public class ChessGame {
         this.board = new Board();
     }
 
-    public ChessGame(String id, int player1Id){
+    public ChessGame(String id, int humanId, GameDifficulty difficulty, boolean botWhite){
         this.id = id;
-        this.player1 = new UserPlayer(player1Id, this, true);
-        this.player2 = new BotPlayer(this, false);
-        this.board = new Board();
-    }
-
-    public ChessGame(String id){
-        this.id = id;
-        this.player2 = new BotPlayer(this, false);
+        this.player1 = new UserPlayer(humanId, this, !botWhite);
+        this.player2 = new BotPlayer(this, botWhite);
         this.board = new Board();
     }
 }

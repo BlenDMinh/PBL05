@@ -1,4 +1,4 @@
-package modules.game_chesslib.common.nested;
+package modules.game_chesslib.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class HumanJoinRequest {
-    String sessionId;
+public class GameBotDto implements GamePlayerDto{
+    boolean white;
     int difficulty;
 }

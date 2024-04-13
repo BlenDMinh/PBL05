@@ -20,12 +20,11 @@ import com.github.bhlangonijr.chesslib.move.Move;
 import com.google.gson.Gson;
 
 import modules.auth.dto.UserPasswordDto;
-import modules.game_chesslib.custom.GameDifficulty;
-import modules.game_chesslib.common.nested.HumanJoinRequest;
 import modules.game_chesslib.common.nested.MoveResponse;
 import modules.game_chesslib.common.nested.PlayerJoinedResponse;
 import modules.game_chesslib.custom.player.BotPlayer;
-import modules.game_chesslib.dto.GamePlayerDto;
+import modules.game_chesslib.dto.GameBotDto;
+import modules.game_chesslib.dto.GameHumanDto;
 import modules.game_chesslib.GameStore;
 import modules.game_chesslib.algo.Minimax;
 import modules.game_chesslib.common.GameMessage;
@@ -33,101 +32,90 @@ import modules.game_chesslib.common.GameMessageDto;
 import modules.game_chesslib.common.MessageDecoder;
 import modules.game_chesslib.common.MessageEncoder;
 import modules.game_chesslib.custom.ChessGame;
-import modules.game_chesslib.custom.player.UserPlayer;
-import modules.game_chesslib.service.GameService;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
 
 @ServerEndpoint(value = "/v2/game-bot/{id}", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
 public class GameBotEndPoint {
-    private final Logger logger = Logger.getLogger("GamePlayerEndpoint");
-    private final GameService gameService = new GameService();
+    private final Logger logger = Logger.getLogger("GameBotEndpoint");
     private final Gson gson = new Gson();
     private final Minimax bot = new Minimax();
     static Session humanSession;
     private ChessGame chessGame;
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("id") String id) throws SQLException, Exception {
-        if (GameStore.getInstance().isGameExist(id)) {
-            chessGame = GameStore.getInstance().getGameById(id);
+    public void onOpen(Session playerSession, @PathParam("id") String id) throws SQLException, Exception {
+        if (!GameStore.getInstance().isGameExist(id)) {
+            playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
+            return;
         }
-        // GameDto gameDto = gameService.getById(id);
-        // boolean isValidGame = gameService.isValidGame(gameDto);
-        // if (!isValidGame || humanSession != null) {
-        // session.getAsyncRemote().sendObject(new
-        // GameMessageDto(GameMessage.GAME_NOT_VALID));
-        // session.close();
-        // } else
-        if (chessGame == null) {
-            ChessGame newChessGame = new ChessGame(id);
-            // RuleSetDto ruleSetDto = gameDto.getRuleSetDto();
-            // JsonObject rulesetDetail = ruleSetDto.getDetail();
-            // GameRule gameRule = new GameRule(ruleSetDto.getId(), ruleSetDto.getName(),
-            // rulesetDetail.get("minute_per_turn").getAsInt(),
-            // rulesetDetail.get("total_minute_per_player").getAsInt(),
-            // rulesetDetail.get("turn_around_steps").getAsInt(),
-            // rulesetDetail.get("turn_around_time_plus").getAsInt());
-            // newChessGame.setGameRule(gameRule);
-            GameStore.getInstance().addGame(newChessGame);
-            chessGame = newChessGame;
+        chessGame = GameStore.getInstance().getGameById(id);
+        String queryString = playerSession.getQueryString();
+        if (!queryString.startsWith("sid=")) {
+            playerSession.close();
         }
-
+        String sessionId = queryString.substring("sid=".length());
+        stores.session.Session session = SimpleSessionManager.getInstance()
+                .getSession(sessionId);
+        if (session == null) {
+            playerSession.getBasicRemote().sendText(GameMessage.SESSION_NOT_VALID);
+            playerSession.close();
+            return;
+        }
+        UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
+        if (userPasswordDto.getId() != chessGame.getPlayer1().getId()) {
+            playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.NOT_AUTHENTICATED));
+            return;
+        }
+        humanSession = playerSession;
+        ModelMapper modelMapper = new ModelMapper();
+        GameHumanDto gameHumanDto = modelMapper.map(userPasswordDto,
+                GameHumanDto.class);
+        gameHumanDto.setWhite(chessGame.getPlayer1().isWhite());
+        BotPlayer botPlayer = (BotPlayer) chessGame.getPlayer2();
+        GameBotDto gameBotDto = new GameBotDto(botPlayer.isWhite(), botPlayer.getDifficulty().getValue());
+        playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.PLAYER_JOINED,
+                new PlayerJoinedResponse(chessGame.getBoard().getFen(),
+                        chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                        gameHumanDto)));
+        playerSession.getBasicRemote()
+                .sendObject(new GameMessageDto(GameMessage.BOT_JOINED,
+                        new PlayerJoinedResponse(chessGame.getBoard().getFen(),
+                                chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                                gameBotDto)));
+        if (botPlayer.isWhite()) {
+            Move bestMove = bot.getBestMove(botPlayer.getDifficulty().getValue(),
+                    chessGame.getBoard());
+            chessGame.getBoard().doMove(bestMove);
+            sendToAllPlayer(
+                    new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
+                            chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+        }
     }
 
     @OnMessage
     public void onMessage(GameMessageDto gameMessageDto, Session playerSession)
             throws IOException, InterruptedException {
         String message = gameMessageDto.getMessage();
-        if (!message.equals(GameMessage.HUMAN_JOIN)) {
-            Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
-            if (playerId == null) {
-                playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.NOT_AUTHENTICATED));
-                return;
-            }
-        }
         switch (message) {
-            case GameMessage.HUMAN_JOIN:
-                Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
-                if (playerId == null) {
-                    HumanJoinRequest humanJoinRequest = gson.fromJson(gameMessageDto.getData().toString(),
-                            HumanJoinRequest.class);
-                    stores.session.Session session = SimpleSessionManager.getInstance()
-                            .getSession(humanJoinRequest.getSessionId());
-                    if (session == null) {
-                        playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.SESSION_NOT_VALID));
-                        playerSession.close();
-                    }
-                    UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO,
-                            UserPasswordDto.class);
-                    int userId = userPasswordDto.getId();
-                    ModelMapper modelMapper = new ModelMapper();
-                    playerSession.getUserProperties().put("player_id", userId);
-                    humanSession = playerSession;
-                    chessGame.setPlayer1(new UserPlayer(userId, chessGame, true));
-                    GameDifficulty gameDifficulty = GameDifficulty.fromValue(humanJoinRequest.getDifficulty());
-                    ((BotPlayer) chessGame.getPlayer2()).setDifficulty(gameDifficulty);
-                    GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
-                            GamePlayerDto.class);
-                    gamePlayerDto.setWhite(chessGame.getPlayer1().isWhite());
-                    String fen = chessGame.getBoard().getFen();
-                    boolean white = chessGame.getBoard().getSideToMove().equals(Side.WHITE);
-                    GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                            new PlayerJoinedResponse(fen, white, gamePlayerDto));
-                    sendToAllPlayer(resp);
-                }
-                break;
-
             case GameMessage.MOVE:
+                if (!isRightTurn(playerSession)) {
+                    return;
+                }
                 modules.game_chesslib.custom.Move move = gson.fromJson(gameMessageDto.getData().toString(),
                         modules.game_chesslib.custom.Move.class);
                 Square from = Square.valueOf(move.getFrom().toUpperCase());
                 Square to = Square.valueOf(move.getTo().toUpperCase());
                 Move chessMove = new Move(from, to);
-                boolean validMove = chessGame.getBoard()
-                        .isMoveLegal(
-                                chessMove,
-                                true);
+                boolean validMove = false;
+                try {
+                    validMove = chessGame.getBoard()
+                            .isMoveLegal(
+                                    chessMove,
+                                    true);
+                } catch (Exception e) {
+                    validMove = false;
+                }
                 if (validMove) {
                     chessGame.getBoard().doMove(chessMove);
                     sendToAllPlayer(
@@ -154,6 +142,20 @@ public class GameBotEndPoint {
         if (humanSession != null) {
             humanSession.getAsyncRemote().sendObject(message);
         }
+    }
+
+    boolean isRightTurn(Session playerSession) {
+        boolean white = chessGame.getPlayer1().isWhite();
+        Side side = chessGame.getBoard().getSideToMove();
+        // check right turn
+        if (side.equals(Side.WHITE) && white) {
+            return true;
+        }
+        if (!side.equals(Side.WHITE) && !white) {
+            return true;
+        }
+        playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+        return false;
     }
 
     @OnError

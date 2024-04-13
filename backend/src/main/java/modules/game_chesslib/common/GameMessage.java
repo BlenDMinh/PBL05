@@ -5,6 +5,7 @@ public final class GameMessage {
     public static final String SESSION_NOT_VALID = "Session not valid";
     public static final String GAME_NOT_VALID = "Game not valid";
     public static final String PLAYER_JOINED = "Player joined";
+    public static final String BOT_JOINED = "Bot joined";
     public static final String FINDING = "Finding";
     public static final String ERROR = "Error";
     public static final String GAME_CREATED = "Game created";

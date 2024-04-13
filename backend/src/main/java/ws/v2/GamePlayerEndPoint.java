@@ -29,7 +29,7 @@ import modules.game_chesslib.common.nested.PlayerJoinedResponse;
 import modules.game_chesslib.custom.GameRule;
 import modules.game_chesslib.custom.player.GamePlayer;
 import modules.game_chesslib.dto.GameDto;
-import modules.game_chesslib.dto.GamePlayerDto;
+import modules.game_chesslib.dto.GameHumanDto;
 import modules.game_chesslib.dto.RuleSetDto;
 import modules.game_chesslib.service.GameService;
 import stores.session.SessionKey;
@@ -89,13 +89,13 @@ public class GamePlayerEndPoint {
         if (chessGame.getPlayer1().getId() == userId) {
             playerSession.getUserProperties().put("sid", sessionId);
             player1Session = playerSession;
-            GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
-                    GamePlayerDto.class);
-            gamePlayerDto.setWhite(chessGame.getPlayer1().isWhite());
+            GameHumanDto gameHumanDto = modelMapper.map(userPasswordDto,
+                    GameHumanDto.class);
+            gameHumanDto.setWhite(chessGame.getPlayer1().isWhite());
             GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
                     new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                             chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                            gamePlayerDto));
+                            gameHumanDto));
             sendToAllPlayer(resp);
             if (player2Session != null) {
                 String player2SessionId = (String) player2Session.getUserProperties().get("sid");
@@ -104,25 +104,25 @@ public class GamePlayerEndPoint {
                 UserPasswordDto userPasswordDto2 = session2.getAttribute(
                         SessionKey.USER_PASSWORD_DTO,
                         UserPasswordDto.class);
-                GamePlayerDto gamePlayerDto2 = modelMapper.map(userPasswordDto2,
-                        GamePlayerDto.class);
-                gamePlayerDto2.setWhite(chessGame.getPlayer2().isWhite());
+                GameHumanDto gameHumanDto2 = modelMapper.map(userPasswordDto2,
+                        GameHumanDto.class);
+                gameHumanDto2.setWhite(chessGame.getPlayer2().isWhite());
                 GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                gamePlayerDto2));
+                                gameHumanDto2));
                 playerSession.getAsyncRemote().sendObject(resp2);
             }
         } else if (chessGame.getPlayer2().getId() == userId) {
             playerSession.getUserProperties().put("sid", sessionId);
             player2Session = playerSession;
-            GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
-                    GamePlayerDto.class);
-            gamePlayerDto.setWhite(chessGame.getPlayer2().isWhite());
+            GameHumanDto gameHumanDto = modelMapper.map(userPasswordDto,
+                    GameHumanDto.class);
+            gameHumanDto.setWhite(chessGame.getPlayer2().isWhite());
             GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
                     new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                             chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                            gamePlayerDto));
+                            gameHumanDto));
             sendToAllPlayer(resp);
             if (player1Session != null) {
                 String player1SessionId = (String) player1Session.getUserProperties().get("sid");
@@ -131,13 +131,13 @@ public class GamePlayerEndPoint {
                 UserPasswordDto userPasswordDto1 = session1.getAttribute(
                         SessionKey.USER_PASSWORD_DTO,
                         UserPasswordDto.class);
-                GamePlayerDto gamePlayerDto1 = modelMapper.map(userPasswordDto1,
-                        GamePlayerDto.class);
-                gamePlayerDto1.setWhite(chessGame.getPlayer1().isWhite());
+                GameHumanDto gameHumanDto1 = modelMapper.map(userPasswordDto1,
+                        GameHumanDto.class);
+                gameHumanDto1.setWhite(chessGame.getPlayer1().isWhite());
                 GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                gamePlayerDto1));
+                                gameHumanDto1));
                 playerSession.getAsyncRemote().sendObject(resp2);
             }
         }
@@ -154,10 +154,15 @@ public class GamePlayerEndPoint {
                     Square from = Square.valueOf(move.getFrom().toUpperCase());
                     Square to = Square.valueOf(move.getTo().toUpperCase());
                     Move chessMove = new Move(from, to);
-                    boolean validMove = chessGame.getBoard()
-                            .isMoveLegal(
-                                    chessMove,
-                                    true);
+                    boolean validMove = false;
+                    try {
+                        validMove = chessGame.getBoard()
+                                .isMoveLegal(
+                                        chessMove,
+                                        true);
+                    } catch (Exception e) {
+                        validMove = false;
+                    }
                     if (validMove) {
                         chessGame.getBoard().doMove(chessMove);
                         sendToAllPlayer(
