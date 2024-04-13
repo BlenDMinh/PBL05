@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
-import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
@@ -36,13 +36,18 @@ public class FindOpponentEndpoint {
 
     private final GameService gameService = new GameService();
 
-    @OnMessage
-    public void handleMessage(GameMessageDto gameMessageDto, Session userSession) throws IOException {
-        String sessionId = gameMessageDto.getData().toString();
+    @OnOpen
+    public void onOpen(Session userSession) throws IOException {
+        String queryString = userSession.getQueryString();
+        if (!queryString.startsWith("sid=")) {
+            userSession.close();
+        }
+        String sessionId = queryString.substring("sid=".length());
         stores.session.Session session = SimpleSessionManager.getInstance()
                 .getSession(sessionId);
         if (session == null) {
-            userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.SESSION_NOT_VALID));
+            userSession.getBasicRemote().sendText(GameMessage.SESSION_NOT_VALID);
+            userSession.close();
             return;
         }
         UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
@@ -71,7 +76,6 @@ public class FindOpponentEndpoint {
             }
             set.remove(opponentSession);
             matchingGame(userSession, opponentSession);
-
         }
     }
 
