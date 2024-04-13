@@ -34,6 +34,10 @@ export const PRIVATE_ROUTER: RouteObject[] = [
     path: path.chat,
     element: <Chat />
   },
+  {
+    path: path.chatbox,
+    element: <Chat />
+  },
   // {
   //   path: path.patients,
   //   element: <Patient />

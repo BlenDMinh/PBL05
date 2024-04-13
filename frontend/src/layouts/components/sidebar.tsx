@@ -8,6 +8,7 @@ import { HiBars3, HiArrowRightOnRectangle } from 'react-icons/hi2'
 import { clearLS } from 'src/utils/auth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChessKing } from '@fortawesome/free-solid-svg-icons'
+import { matchPath } from "react-router-dom";
 
 export interface SidebarProps {}
 
@@ -43,7 +44,7 @@ export default function Sidebar(props: SidebarProps) {
         >
           <div className='flex w-full flex-col gap-8'>
             <div className='flex h-16 items-center justify-center'>
-              <a href='/' className='flex·w-max·items-center·px-0'>
+              <Link to='/' className='flex·w-max·items-center·px-0'>
                 {showSidebar ? (
                   <div className='flex items-center'>
                     <FontAwesomeIcon icon={faChessKing} size='4x' style={{ color: '#0066CC' }} />
@@ -54,7 +55,7 @@ export default function Sidebar(props: SidebarProps) {
                 ) : (
                   <h3 className='text-primary'>CHESS</h3>
                 )}
-              </a>
+              </Link>
             </div>
 
             <div className='flex flex-col gap-1'>
@@ -65,7 +66,7 @@ export default function Sidebar(props: SidebarProps) {
                       'text-base-content text-nowrap hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary active:!text-white',
                       {
                         'tooltip tooltip-right': !showSidebar,
-                        'bg-primary text-white': pathname == to
+                        'bg-primary text-white': matchPath(pathname, to)
                       }
                     )}
                     to={to}

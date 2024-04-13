@@ -15,5 +15,6 @@ export const path = {
   pvpv2: '/game/v2/:gameId',
   botv2: '/game/v2/bot',
   quickMatch: '/game/quickmatch',
-  chat: '/chat'
+  chat: '/chat',
+  chatbox: '/chat/:id'
 } as const
