@@ -135,7 +135,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         return
       }
     }
-    console.log(core.fen())
     try {
       if (core.move({ from, to, promotion: 'x' })) {
         setLastMove([from, to])

@@ -6,6 +6,15 @@ export type Conversation = {
     message: Message
 }
 
+export interface PaginitionResponse {
+    totalElements: number,
+    totalPages: number
+}
+
+export interface PairChatResponse extends PaginitionResponse {
+    messages: Message[],
+}
+
 export type Message = {
     id: number,
     content: string,

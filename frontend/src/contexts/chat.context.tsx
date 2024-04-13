@@ -65,6 +65,17 @@ export const ChatContextProvider = ({children}: ReactWithChild) => {
 
         const callback2 = callbackMap.get(json.receiverId.toString())
         callback2?.call(this, json)
+
+        const conveId = conversations.findIndex((m) => m.id == json.senderId || m.id == json.receiverId)
+        if(conveId != -1) {
+            const conversation = conversations[conveId]
+            const newConversations = [...conversations]
+            newConversations.splice(conveId, 1)
+            conversation.message = json
+            newConversations.unshift(conversation)
+            setConversations(newConversations)
+        }
+
     }, [chatSocket.lastJsonMessage])
 
     // useEffect(() => {

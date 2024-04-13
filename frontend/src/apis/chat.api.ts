@@ -1,4 +1,4 @@
-import { Conversation, Message } from 'src/types/chat.type'
+import { Conversation, PairChatResponse } from 'src/types/chat.type'
 import http from 'src/utils/http'
 
 export const URL_CHATTING = '/chatting'
@@ -8,10 +8,10 @@ const chatApi = {
     getConversations() {
         return http.get<Conversation[]>(URL_CHATTING)
     },
-    async getConversationChat(userId: string) {
+    async getConversationChat(userId: string, page: number, size: number) {
         if(!userId)
             return []
-        return http.get<Message[]>(URL_CHATTING_PAIR + userId)
+        return http.get<PairChatResponse>(URL_CHATTING_PAIR + userId + `?page=${page}&size=${size}`)
     },
 }
 
