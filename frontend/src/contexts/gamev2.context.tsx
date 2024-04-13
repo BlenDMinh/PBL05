@@ -17,7 +17,7 @@ export interface GameConfig {
 }
 
 export const DEFAULT_CONFIG: GameConfig = {
-  botDifficulty: 5
+  botDifficulty: 1
 }
 
 export interface GameV2ContextInterface {

@@ -3,7 +3,7 @@ import useWebSocket, { ReadyState } from "react-use-websocket"
 import chatApi from "src/apis/chat.api"
 import { ws } from "src/constants/ws"
 import { ReactWithChild } from "src/interface/app"
-import { Conversation, ReceiveMessage } from "src/types/chat.type"
+import { Conversation, Message } from "src/types/chat.type"
 import { getProfileFromLS } from "src/utils/auth"
 
 
@@ -12,7 +12,7 @@ export interface ChatContextType {
     conversations: Conversation[],
     state: ReadyState,
     sendMessage: (content: string, receiverId: string) => void,
-    onReceiveMessage: (senderId: string, callback: (message: ReceiveMessage) => void) => void
+    onMessage: (senderId: string, callback: (message: Message) => void) => void
 }
 
 const initContext: ChatContextType = {
@@ -20,7 +20,7 @@ const initContext: ChatContextType = {
     conversations: [],
     state: ReadyState.CONNECTING,
     sendMessage: () => null,
-    onReceiveMessage: () => null
+    onMessage: () => null
 }
 
 export const ChatContext = createContext<ChatContextType>(initContext)
@@ -31,7 +31,7 @@ export const ChatContextProvider = ({children}: ReactWithChild) => {
     const wsUrl = useMemo(() => ws.chat(sessionId), [sessionId])
     const chatSocket = useWebSocket(wsUrl)
     const state = chatSocket.readyState
-    const [callbackMap, setCallbackMap] = useState(new Map<string, (message: ReceiveMessage) => void>())
+    const [callbackMap, setCallbackMap] = useState(new Map<string, (message: Message) => void>())
     
     const startChat = (sessionId: string) => {
         setSessionId(sessionId)
@@ -50,17 +50,21 @@ export const ChatContextProvider = ({children}: ReactWithChild) => {
         )
     }
 
-    const onReceiveMessage = (senderId: string, callback: (message: ReceiveMessage) => void) => {
+    const onMessage = (senderId: string, callback: (message: Message) => void) => {
         callbackMap.set(senderId, callback)
     }
 
     useEffect(() => {
         console.log(chatSocket.lastJsonMessage)
-        const json = chatSocket.lastJsonMessage as ReceiveMessage
+        const json = chatSocket.lastJsonMessage as Message
         if(!json)
             return
-        const callback = callbackMap.get(json.senderId.toString())
-        callback?.call(this, json)
+        json.isFromUser = json.senderId == getProfileFromLS().id
+        const callback1 = callbackMap.get(json.senderId.toString())
+        callback1?.call(this, json)
+
+        const callback2 = callbackMap.get(json.receiverId.toString())
+        callback2?.call(this, json)
     }, [chatSocket.lastJsonMessage])
 
     // useEffect(() => {
@@ -74,7 +78,7 @@ export const ChatContextProvider = ({children}: ReactWithChild) => {
         conversations,
         state,
         sendMessage,
-        onReceiveMessage
+        onMessage
     }}>
         {children}
     </ChatContext.Provider>

@@ -12,8 +12,7 @@ export default function Conversation(props: ConversationProps) {
     const calcTimeDif = (from: any, to: any) => {
         const fromDate = new Date(from)
         const toDate = new Date(to)
-        console.log(fromDate, toDate)
-        const dif = toDate - fromDate
+        const dif = toDate.getTime() - fromDate.getTime()
         const seconds = dif / 1000;
         const minutes = seconds / 60;
         if(minutes < 60)
@@ -30,10 +29,10 @@ export default function Conversation(props: ConversationProps) {
         const years = months / 12;
         return `${Math.floor(years)} Y`
     }
-    const [lastTime, setLastTime] = useState(calcTimeDif(props.conversation.lastChatTime, Date.now()))
+    const [lastTime, setLastTime] = useState(calcTimeDif(props.conversation.message.sendedAt, Date.now()))
     useEffect(() => {
         setInterval(() => {
-            setLastTime(calcTimeDif(props.conversation.lastChatTime, Date.now()))
+            setLastTime(calcTimeDif(props.conversation.message.sendedAt, Date.now()))
         }, 1000 * 60)
     }, [])
 
@@ -54,7 +53,7 @@ export default function Conversation(props: ConversationProps) {
         </div>
         <div className="flex-1 flex flex-col items-start justify-evenly gap-2">
             <span className="text-base-content font-bold">{props.conversation.displayName}</span>
-            <p className="text-base-content font-thin">Last message .{lastTime}</p>
+            <p className="text-base-content font-thin">{props.conversation.message.content} .{lastTime}</p>
         </div>
     </Link>
 }
