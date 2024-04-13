@@ -47,17 +47,31 @@ public class GamePlayerEndPoint {
     private ChessGame chessGame;
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("id") String id) throws SQLException, Exception {
+    public void onOpen(Session playerSession, @PathParam("id") String id) throws SQLException, Exception {
+        String queryString = playerSession.getQueryString();
+        if (!queryString.startsWith("sid=")) {
+            playerSession.close();
+        }
+        String sessionId = queryString.substring("sid=".length());
+        stores.session.Session session = SimpleSessionManager.getInstance()
+                .getSession(sessionId);
+        if (session == null) {
+            playerSession.getBasicRemote().sendText(GameMessage.SESSION_NOT_VALID);
+            playerSession.close();
+            return;
+        }
+        UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
         if (GameStore.getInstance().isGameExist(id)) {
             chessGame = GameStore.getInstance().getGameById(id);
         }
         GameDto gameDto = gameService.getById(id);
         boolean isValidGame = gameService.isValidGame(gameDto);
         if (!isValidGame || (player1Session != null && player2Session != null)) {
-            session.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
-            session.close();
+            playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
+            playerSession.close();
         } else if (chessGame == null) {
-            ChessGame newChessGame = new ChessGame(id, gameDto.getPlayer1Id(), gameDto.getPlayer2Id());
+            ChessGame newChessGame = new ChessGame(gameDto.getId(), gameDto.getPlayer1Id(),
+                    gameDto.getPlayer2Id());
             RuleSetDto ruleSetDto = gameDto.getRuleSetDto();
             JsonObject rulesetDetail = ruleSetDto.getDetail();
             GameRule gameRule = new GameRule(ruleSetDto.getId(), ruleSetDto.getName(),
@@ -69,63 +83,73 @@ public class GamePlayerEndPoint {
             GameStore.getInstance().addGame(newChessGame);
             chessGame = newChessGame;
         }
+        int userId = userPasswordDto.getId();
+        ModelMapper modelMapper = new ModelMapper();
+
+        if (chessGame.getPlayer1().getId() == userId) {
+            playerSession.getUserProperties().put("sid", sessionId);
+            player1Session = playerSession;
+            GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
+                    GamePlayerDto.class);
+            gamePlayerDto.setWhite(chessGame.getPlayer1().isWhite());
+            GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                    new PlayerJoinedResponse(chessGame.getBoard().getFen(),
+                            chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                            gamePlayerDto));
+            sendToAllPlayer(resp);
+            if (player2Session != null) {
+                String player2SessionId = (String) player2Session.getUserProperties().get("sid");
+                stores.session.Session session2 = SimpleSessionManager.getInstance()
+                        .getSession(player2SessionId);
+                UserPasswordDto userPasswordDto2 = session2.getAttribute(
+                        SessionKey.USER_PASSWORD_DTO,
+                        UserPasswordDto.class);
+                GamePlayerDto gamePlayerDto2 = modelMapper.map(userPasswordDto2,
+                        GamePlayerDto.class);
+                gamePlayerDto2.setWhite(chessGame.getPlayer2().isWhite());
+                GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                        new PlayerJoinedResponse(chessGame.getBoard().getFen(),
+                                chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                                gamePlayerDto2));
+                playerSession.getAsyncRemote().sendObject(resp2);
+            }
+        } else if (chessGame.getPlayer2().getId() == userId) {
+            playerSession.getUserProperties().put("sid", sessionId);
+            player2Session = playerSession;
+            GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
+                    GamePlayerDto.class);
+            gamePlayerDto.setWhite(chessGame.getPlayer2().isWhite());
+            GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                    new PlayerJoinedResponse(chessGame.getBoard().getFen(),
+                            chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                            gamePlayerDto));
+            sendToAllPlayer(resp);
+            if (player1Session != null) {
+                String player1SessionId = (String) player1Session.getUserProperties().get("sid");
+                stores.session.Session session1 = SimpleSessionManager.getInstance()
+                        .getSession(player1SessionId);
+                UserPasswordDto userPasswordDto1 = session1.getAttribute(
+                        SessionKey.USER_PASSWORD_DTO,
+                        UserPasswordDto.class);
+                GamePlayerDto gamePlayerDto1 = modelMapper.map(userPasswordDto1,
+                        GamePlayerDto.class);
+                gamePlayerDto1.setWhite(chessGame.getPlayer1().isWhite());
+                GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                        new PlayerJoinedResponse(chessGame.getBoard().getFen(),
+                                chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                                gamePlayerDto1));
+                playerSession.getAsyncRemote().sendObject(resp2);
+            }
+        }
     }
 
     @OnMessage
     public void onMessage(GameMessageDto gameMessageDto, Session playerSession) throws IOException {
         String message = gameMessageDto.getMessage();
-        if (!message.equals(GameMessage.JSESSIONID)) {
-            Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
-            if (playerId == null) {
-                playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.NOT_AUTHENTICATED));
-                return;
-            }
-        }
         switch (message) {
-            case GameMessage.JSESSIONID:
-                Integer playerId = (Integer) playerSession.getUserProperties().get("player_id");
-                if (playerId == null) {
-                    stores.session.Session session = SimpleSessionManager.getInstance()
-                            .getSession(gameMessageDto.getData().toString());
-                    if (session == null) {
-                        playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.SESSION_NOT_VALID));
-                        playerSession.close();
-                    }
-                    UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO,
-                            UserPasswordDto.class);
-                    int userId = userPasswordDto.getId();
-                    ModelMapper modelMapper = new ModelMapper();
-
-                    if (chessGame.getPlayer1().getId() == userId) {
-                        playerSession.getUserProperties().put("player_id", userId);
-                        player1Session = playerSession;
-                        GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
-                                GamePlayerDto.class);
-                        gamePlayerDto.setWhite(chessGame.getPlayer1().isWhite());
-                        GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                                new PlayerJoinedResponse(chessGame.getBoard().getFen(),
-                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                        gamePlayerDto));
-                        sendToAllPlayer(resp);
-                    } else if (chessGame.getPlayer2().getId() == userId) {
-                        playerSession.getUserProperties().put("player_id", userId);
-                        player2Session = playerSession;
-                        GamePlayerDto gamePlayerDto = modelMapper.map(userPasswordDto,
-                                GamePlayerDto.class);
-                        gamePlayerDto.setWhite(chessGame.getPlayer2().isWhite());
-                        GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
-                                new PlayerJoinedResponse(chessGame.getBoard().getFen(),
-                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                        gamePlayerDto));
-                        sendToAllPlayer(resp);
-                    } else {
-                        playerSession.close();
-                    }
-                }
-                break;
-
             case GameMessage.MOVE:
-            modules.game_chesslib.custom.Move move = gson.fromJson(gameMessageDto.getData().toString(), modules.game_chesslib.custom.Move.class);
+                modules.game_chesslib.custom.Move move = gson.fromJson(gameMessageDto.getData().toString(),
+                        modules.game_chesslib.custom.Move.class);
                 if (isRightTurn(playerSession)) {
                     Square from = Square.valueOf(move.getFrom().toUpperCase());
                     Square to = Square.valueOf(move.getTo().toUpperCase());
@@ -151,8 +175,11 @@ public class GamePlayerEndPoint {
     }
 
     boolean isRightTurn(Session playerSession) {
-        int playerId = (Integer) playerSession.getUserProperties().get("player_id");
-        GamePlayer gamePlayer = playerId == chessGame.getPlayer1().getId() ? chessGame.getPlayer1()
+        String sessionId = (String) playerSession.getUserProperties().get("sid");
+        stores.session.Session session = SimpleSessionManager.getInstance()
+                .getSession(sessionId);
+        UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
+        GamePlayer gamePlayer = userPasswordDto.getId() == chessGame.getPlayer1().getId() ? chessGame.getPlayer1()
                 : chessGame.getPlayer2();
         Side side = chessGame.getBoard().getSideToMove();
         // check right turn
