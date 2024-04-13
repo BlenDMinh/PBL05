@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { path } from 'src/constants/path'
-import { AppContext, AppContextType } from 'src/contexts/app.context'
+import { AppContext, AppContextType, AuthenticateState } from 'src/contexts/app.context'
 import DefaultLayout from 'src/layouts/DefaultLayout'
 
 function PrivateRoutes() {
@@ -9,10 +9,12 @@ function PrivateRoutes() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // if (!isAuthenticated) {
-    //   navigate(path.login)
-    // }
-  }, [])
+    if(isAuthenticated == AuthenticateState.UNKNOWN)
+      return
+    if (isAuthenticated != AuthenticateState.AUTHENTICATED) {
+      navigate(path.login)
+    }
+  }, [isAuthenticated])
   // TODO useRoutes
   // if (!isAuthenticated) {
   //   return null

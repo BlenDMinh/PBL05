@@ -12,6 +12,7 @@ import Game from 'src/pages/game/Game'
 import GameV2 from 'src/pages/gamev2/GameV2'
 import Chat from 'src/pages/chat/Chat'
 import BotGameV2 from 'src/pages/gamev2/BotGameV2'
+import PlayWithBot from 'src/pages/play-with-bot/PlayWithBot'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -82,6 +83,10 @@ export const GAME_ROUTES: RouteObject[] = [
 ]
 
 export const GAME_V2_ROUTES: RouteObject[] = [
+  {
+    path: path.playWithBot,
+    element: <PlayWithBot />
+  },
   {
     path: path.pvpv2,
     element: <GameV2 />

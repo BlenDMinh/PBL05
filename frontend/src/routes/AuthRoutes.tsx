@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { path } from 'src/constants/path'
-import { AppContext, AppContextType } from 'src/contexts/app.context'
+import { AppContext, AppContextType, AuthenticateState } from 'src/contexts/app.context'
 import AuthLayout from 'src/layouts/AuthLayout'
 
 function AuthRoutes() {
@@ -9,12 +9,12 @@ function AuthRoutes() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated == AuthenticateState.AUTHENTICATED) {
       navigate(path.home)
     }
   }, [])
   // TODO useRoutes
-  if (isAuthenticated) {
+  if (isAuthenticated == AuthenticateState.AUTHENTICATED) {
     return null
   }
   return (

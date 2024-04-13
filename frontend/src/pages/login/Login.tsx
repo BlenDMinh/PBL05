@@ -9,7 +9,7 @@ import { useMutation } from 'react-query'
 import { AuthErrorResponse, LoginReqBody } from 'src/types/auth.type'
 import authApi from 'src/apis/auth.api'
 import { useContext } from 'react'
-import { AppContext, AppContextType } from 'src/contexts/app.context'
+import { AppContext, AppContextType, AuthenticateState } from 'src/contexts/app.context'
 import { AUTH_FIELD_NAME } from 'src/constants/common'
 import { AUTH_MESSAGES } from 'src/constants/message'
 import { isAxiosError } from 'src/utils/utils'
@@ -39,7 +39,7 @@ export default function Login(props: LoginProps) {
       toast.success(AUTH_MESSAGES.LOGIN_SUCCESS, {
         progressClassName: 'bg-primary'
       })
-      setIsAuthenticated(true)
+      setIsAuthenticated(AuthenticateState.AUTHENTICATED)
       setUser(data.data.user)
       navigate(path.home)
     },

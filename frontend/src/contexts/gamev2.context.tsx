@@ -71,7 +71,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   }, [fen])
 
   const wsUrl = useMemo(
-    () => (gameType == GameType.PVP ? ws.pvpgamev2(gameId) : ws.botgamev2(gameId)),
+    () => (gameType == GameType.PVP ? ws.pvpgamev2(gameId, getSessionIdFromLS()) : ws.botgamev2(gameId, getSessionIdFromLS())),
     [gameId, gameType]
   )
 
@@ -87,15 +87,15 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         console.log(message)
         sendMessage(message)
       } else if (gameType == GameType.BOT) {
-        const message = JSON.stringify({
-          message: 'Human join',
-          data: {
-            sessionId: getSessionIdFromLS(),
-            difficulty: config.botDifficulty
-          }
-        })
-        console.log(message)
-        sendMessage(message)
+        // const message = JSON.stringify({
+        //   message: 'Human join',
+        //   data: {
+        //     sessionId: getSessionIdFromLS(),
+        //     difficulty: config.botDifficulty
+        //   }
+        // })
+        // console.log(message)
+        // sendMessage(message)
       }
     }
   }, [readyState])

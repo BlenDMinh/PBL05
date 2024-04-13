@@ -5,9 +5,14 @@ import { ReactWithChild } from 'src/interface/app'
 import { User } from 'src/types/users.type'
 import { clearLS, getAccessTokenFromLS, getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
 
+export enum AuthenticateState {
+  UNKNOWN,
+  NOT_AUTHENTICATED,
+  AUTHENTICATED
+}
 export interface AppContextType {
-  isAuthenticated: boolean
-  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>
+  isAuthenticated: AuthenticateState
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<AuthenticateState>>
   showSidebar: boolean
   setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>
   user: User | null
@@ -15,7 +20,7 @@ export interface AppContextType {
 }
 
 const initAppContext: AppContextType = {
-  isAuthenticated: Boolean(getSessionIdFromLS()),
+  isAuthenticated: AuthenticateState.UNKNOWN,
   setIsAuthenticated: () => null,
   showSidebar: true,
   setShowSidebar: () => null,
@@ -26,17 +31,23 @@ const initAppContext: AppContextType = {
 export const AppContext = createContext<AppContextType>(initAppContext)
 
 const AppContextProvider = ({ children }: ReactWithChild) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(initAppContext.isAuthenticated)
+  const [isAuthenticated, setIsAuthenticated] = useState<AuthenticateState>(initAppContext.isAuthenticated)
   const [showSidebar, setShowSidebar] = useState<boolean>(initAppContext.showSidebar)
   const [user, setUser] = useState<User | null>(initAppContext.user)
 
   useEffect(() => {
     authApi.loginFromSessionId().then((res) => {
       if (res.status != HttpStatusCode.Ok) {
-        // setIsAuthenticated(false)
-        // setUser(null)
-        // clearLS()
+        setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
+        setUser(null)
+        clearLS()
+      } else {
+        setIsAuthenticated(AuthenticateState.AUTHENTICATED)
       }
+    }).catch(e => {
+      setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
+      setUser(null)
+      clearLS()
     })
   }, [])
 

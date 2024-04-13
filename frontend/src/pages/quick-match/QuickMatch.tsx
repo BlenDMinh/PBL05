@@ -14,7 +14,7 @@ enum State {
 export default function QuickMatch() {
   const [state, setState] = useState(State.START_FINDING)
   const [isError, setIsError] = useState(false)
-  const [wsUrl, setWsUrl] = useState(ws.findOpponent)
+  const [wsUrl, setWsUrl] = useState(ws.findOpponent(getSessionIdFromLS()))
   const { sendMessage, lastMessage, readyState } = useWebSocket(wsUrl)
 
   const navigate = useNavigate()

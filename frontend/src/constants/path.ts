@@ -13,8 +13,9 @@ export const path = {
   gamev2: '/game/v2',
   pvp: '/game/:gameId',
   pvpv2: '/game/v2/:gameId',
-  botv2: '/game/v2/bot',
+  botv2: '/game/v2/bot/:gameId',
   quickMatch: '/game/quickmatch',
+  playWithBot: '/game/v2/play-with-bot',
   chat: '/chat',
   chatbox: '/chat/:id'
 } as const
