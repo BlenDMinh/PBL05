@@ -6,8 +6,6 @@ export const path = {
   patients: '/patients',
   patientDetail: '/patients/:patientId',
   patientDetailExamination: '/patients/:patientId/medical-records/:examinationId',
-  schedules: '/schedules',
-  surveys: '/surveys',
   personals: '/personals',
   game: '/game',
   gamev2: '/game/v2',
@@ -17,5 +15,6 @@ export const path = {
   quickMatch: '/game/quickmatch',
   playWithBot: '/game/v2/play-with-bot',
   chat: '/chat',
-  chatbox: '/chat/:id'
+  chatbox: '/chat/:id',
+  friend: '/friend'
 } as const

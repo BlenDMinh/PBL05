@@ -1,6 +1,6 @@
 import { path } from 'src/constants/path'
 import { PoliciesOption } from 'src/data/auth'
-import { FaChessBishop, FaComments, FaHome } from 'react-icons/fa';
+import { FaChessBishop, FaComments, FaHome, FaUserFriends } from 'react-icons/fa';
 
 import { IconType } from 'react-icons'
 
@@ -35,5 +35,11 @@ export const sidebarOption: SidebarOption[] = [
     title: 'Messages',
     to: path.chat,
     icon: FaComments
+  },
+  {
+    id: 3,
+    title: 'Friends',
+    to: path.friend,
+    icon: FaUserFriends
   }
 ]

@@ -8,7 +8,7 @@ import { HiBars3, HiArrowRightOnRectangle } from 'react-icons/hi2'
 import { clearLS } from 'src/utils/auth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChessKing } from '@fortawesome/free-solid-svg-icons'
-import { matchPath } from "react-router-dom";
+import { matchPath } from 'react-router-dom'
 
 export interface SidebarProps {}
 
