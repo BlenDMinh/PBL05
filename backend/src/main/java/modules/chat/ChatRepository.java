@@ -83,4 +83,32 @@ public class ChatRepository {
         }
         return userInChatDtos;
     }
+
+    public List<MessageResponseDto> getListMessageOfPair(int user1, int user2) {
+        List<MessageResponseDto> messageResponseDtos = new ArrayList<>();
+        String query = "select * from messages"
+                + " where (sender_id = ? and receiver_id = ?)"
+                + " or (sender_id = ? and receiver_id = ?)"
+                + " order by sended_at";
+        Connection conn = null;
+        try {
+            conn = ConnectionPool.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, user1);
+            stmt.setInt(2, user2);
+            stmt.setInt(3, user2);
+            stmt.setInt(4, user1);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                messageResponseDtos.add(new MessageResponseDto(rs));
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            if (conn != null) {
+                ConnectionPool.releaseConnection(conn);
+            }
+        }
+        return messageResponseDtos;
+    }
 }
