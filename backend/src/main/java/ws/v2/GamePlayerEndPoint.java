@@ -3,6 +3,7 @@ package ws.v2;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import javax.websocket.EncodeException;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -14,6 +15,7 @@ import javax.websocket.server.ServerEndpoint;
 import org.apache.log4j.Logger;
 import org.modelmapper.ModelMapper;
 
+import com.github.bhlangonijr.chesslib.Piece;
 import com.github.bhlangonijr.chesslib.Side;
 import com.github.bhlangonijr.chesslib.Square;
 import com.github.bhlangonijr.chesslib.move.Move;
@@ -144,17 +146,21 @@ public class GamePlayerEndPoint {
     }
 
     @OnMessage
-    public void onMessage(GameMessageDto gameMessageDto, Session playerSession) throws IOException {
+    public void onMessage(GameMessageDto gameMessageDto, Session playerSession) throws IOException, EncodeException {
         String message = gameMessageDto.getMessage();
+        Square from, to;
+        Move chessMove;
+        boolean validMove = false;
+        modules.game_chesslib.custom.Move move;
         switch (message) {
             case GameMessage.MOVE:
-                modules.game_chesslib.custom.Move move = gson.fromJson(gameMessageDto.getData().toString(),
+                move = gson.fromJson(gameMessageDto.getData().toString(),
                         modules.game_chesslib.custom.Move.class);
                 if (isRightTurn(playerSession)) {
-                    Square from = Square.valueOf(move.getFrom().toUpperCase());
-                    Square to = Square.valueOf(move.getTo().toUpperCase());
-                    Move chessMove = new Move(from, to);
-                    boolean validMove = false;
+                    from = Square.valueOf(move.getFrom().toUpperCase());
+                    to = Square.valueOf(move.getTo().toUpperCase());
+                    chessMove = new Move(from, to);
+                    validMove = false;
                     try {
                         validMove = chessGame.getBoard()
                                 .isMoveLegal(
@@ -168,6 +174,35 @@ public class GamePlayerEndPoint {
                         sendToAllPlayer(
                                 new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
                                         chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                        postCheck();
+                        return;
+                    }
+                }
+                playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                break;
+            case GameMessage.PROMOTION:
+                move = gson.fromJson(gameMessageDto.getData().toString(),
+                        modules.game_chesslib.custom.Move.class);
+                if (isRightTurn(playerSession)) {
+                    from = Square.valueOf(move.getFrom().toUpperCase());
+                    to = Square.valueOf(move.getTo().toUpperCase());
+                    Piece promotion = Piece.fromValue(move.getPromotion());
+                    chessMove = new Move(from, to, promotion);
+                    validMove = false;
+                    try {
+                        validMove = chessGame.getBoard()
+                                .isMoveLegal(
+                                        chessMove,
+                                        true);
+                    } catch (Exception e) {
+                        validMove = false;
+                    }
+                    if (validMove) {
+                        chessGame.getBoard().doMove(chessMove);
+                        sendToAllPlayer(
+                                new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
+                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                        postCheck();
                         return;
                     }
                 }
@@ -176,6 +211,16 @@ public class GamePlayerEndPoint {
             default:
                 playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.UNKNOWN));
                 return;
+        }
+
+    }
+
+    void postCheck() throws IOException, EncodeException {
+        if (chessGame.getBoard().isDraw()) {
+            sendToAllPlayer(new GameMessageDto(GameMessage.DRAW));
+        } else if (chessGame.getBoard().isMated()) {
+            sendToAllPlayer(new GameMessageDto(GameMessage.MATE, new MoveResponse(chessGame.getBoard().getFen(),
+                    chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
         }
     }
 
@@ -202,12 +247,12 @@ public class GamePlayerEndPoint {
         return true;
     }
 
-    void sendToAllPlayer(GameMessageDto message) {
+    void sendToAllPlayer(GameMessageDto message) throws IOException, EncodeException {
         if (player1Session != null) {
-            player1Session.getAsyncRemote().sendObject(message);
+            player1Session.getBasicRemote().sendObject(message);
         }
         if (player2Session != null) {
-            player2Session.getAsyncRemote().sendObject(message);
+            player2Session.getBasicRemote().sendObject(message);
         }
     }
 

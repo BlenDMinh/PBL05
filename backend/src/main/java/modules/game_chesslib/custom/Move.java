@@ -12,4 +12,5 @@ import lombok.Setter;
 public class Move {
     String from;
     String to;
+    String promotion;
 }

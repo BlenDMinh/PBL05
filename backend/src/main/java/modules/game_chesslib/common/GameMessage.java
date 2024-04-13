@@ -16,6 +16,7 @@ public final class GameMessage {
     public static final String INVALID_MOVE = "Invalid move";
     public static final String HUMAN_JOIN = "Human join";
     
-    public static final String CASTLE = "Castle";
     public static final String PROMOTION = "Promotion";
+    public static final String DRAW = "Draw";
+    public static final String MATE = "Mate";
 }
