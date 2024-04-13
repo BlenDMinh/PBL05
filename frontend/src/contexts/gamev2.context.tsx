@@ -12,6 +12,13 @@ export enum GameType {
   BOT
 }
 
+export enum GameResult {
+  UNKNOWN,
+  WIN,
+  LOSE,
+  DRAW
+}
+
 export interface GameConfig {
   botDifficulty: number
 }
@@ -25,27 +32,33 @@ export interface GameV2ContextInterface {
   startGame: (gameId: string, gameType?: GameType, gameConfig?: GameConfig) => void
   core: Chess | null
   fen: string
-  side: 'white' | 'black'
+  side: 'white' | 'black' | undefined
   setFen: React.Dispatch<React.SetStateAction<string>>
   lastMove: Key[]
   setLastMove: React.Dispatch<React.SetStateAction<Key[]>>
   getMoveableDests: () => Dests
   turn: 'white' | 'black' | undefined
-  move: (from: Key, to: Key) => void
+  move: (from: Key, to: Key) => void,
+  isPromoting: boolean,
+  promote: (piece?: "q" | "r" | "b" | "n" | null) => void,
+  result: GameResult
 }
 
 const initContext: GameV2ContextInterface = {
   core: null,
   gameId: '',
-  side: 'white',
+  side: undefined,
   startGame: () => null,
   fen: '',
   setFen: () => null,
   lastMove: [],
   setLastMove: () => null,
   getMoveableDests: () => new Map(),
-  turn: 'white',
-  move: () => null
+  turn: undefined,
+  move: () => null,
+  isPromoting: false,
+  promote: () => null,
+  result: GameResult.UNKNOWN
 }
 
 export const GameV2Context = createContext<GameV2ContextInterface>(initContext)
@@ -55,9 +68,12 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [gameId, setGameId] = useState('')
   const [fen, setFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
   const [core, setCore] = useState<Chess | null>(new Chess())
-  const [side, setSide] = useState<'black' | 'white'>('white')
+  const [side, setSide] = useState<'black' | 'white' | undefined>(undefined)
   const [lastMove, setLastMove] = useState<Key[]>([])
-
+  const [isPromoting, setPromoting] = useState(false)
+  const [pendeingMove, setPendingMove] = useState<Key[]>([])
+  const [turn, setTurn] = useState<'white' | 'black' | undefined>(undefined)
+  const [result, setResult] = useState(initContext.result)
   const [config, setConfig] = useState(DEFAULT_CONFIG)
 
   const startGame = (gameId: string, gameType: GameType = GameType.PVP, gameConfig: GameConfig = DEFAULT_CONFIG) => {
@@ -67,7 +83,19 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   }
 
   useEffect(() => {
-    if (fen !== core?.fen()) setCore(new Chess(fen))
+    if (fen !== core?.fen()) {
+      const core = new Chess(fen)
+      setCore(core)
+      if(core.isGameOver() && side) {
+        if(core.isCheckmate() && turn == side) {
+          setResult(GameResult.LOSE)
+        }
+        if(core.isCheckmate() && turn != side) {
+          setResult(GameResult.WIN)
+        }
+        setResult(GameResult.DRAW)
+      }
+    }
   }, [fen])
 
   const wsUrl = useMemo(
@@ -80,12 +108,12 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   useEffect(() => {
     if (readyState == ReadyState.OPEN) {
       if (gameType == GameType.PVP) {
-        const message = JSON.stringify({
-          message: 'JSESSIONID',
-          data: getSessionIdFromLS()
-        })
-        console.log(message)
-        sendMessage(message)
+        // const message = JSON.stringify({
+        //   message: 'JSESSIONID',
+        //   data: getSessionIdFromLS()
+        // })
+        // console.log(message)
+        // sendMessage(message)
       } else if (gameType == GameType.BOT) {
         // const message = JSON.stringify({
         //   message: 'Human join',
@@ -108,16 +136,16 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     // console.log(data.gamePlayer.displayName + " " + getProfileFromLS().displayName)
     if (json.message === 'Player joined') {
       if (data.gamePlayer && data.gamePlayer.id === getProfileFromLS().id) {
-        // console.log(data.gamePlayer.white ? "white" : "black")
         setSide(data.gamePlayer.white ? 'white' : 'black')
-      } else return
+      }
     }
 
-    setFen(data.fen)
-    setTurn(data.white ? 'white' : 'black')
-  }, [lastMessage])
+    if(data.fen)
+      setFen(data.fen)
+    if(data.white != undefined)
+      setTurn(data.white ? 'white' : 'black')
 
-  const [turn, setTurn] = useState<'white' | 'black' | undefined>(undefined)
+  }, [lastMessage])
 
   const move = (from: Key, to: Key) => {
     if (!core) return
@@ -126,11 +154,11 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
       return
     }
     const moves = core.moves({ verbose: true })
-    // console.log(moves)
     for (let i = 0, len = moves.length; i < len; i++) {
       /* eslint-disable-line */
       if (moves[i].flags.indexOf('p') !== -1 && moves[i].from === from) {
-        // setPendingMove([from, to])
+        setPendingMove([from, to])
+        setPromoting(true)
         // setSelectVisible(true)
         return
       }
@@ -170,6 +198,33 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     return dests
   }
 
+  const promote = (piece?: "q" | "r" | "b" | "n" | null) => {
+    setPromoting(false)
+    if(!core) {
+      return
+    }
+    if(!piece) {
+      setFen(core.fen())
+      setCore(new Chess(core.fen()))
+      return
+    }
+    if(core.move({from: pendeingMove[0], to: pendeingMove[1], promotion: piece})) {
+      setLastMove(pendeingMove)
+      const pieceStr = (side == "white" ? "WHITE_" : "BLACK_") + (piece == 'b' ? "BISHOP" : piece == 'n' ? "KNIGHT" : piece == 'q' ? "QUEEN" : "ROOK")
+      console.log(pieceStr)
+      const message = {
+        message: 'Promotion',
+        data: {
+          from: pendeingMove[0],
+          to: pendeingMove[1],
+          promotion: pieceStr
+        }
+      }
+      sendMessage(JSON.stringify(message))
+      setFen(core.fen())
+    }
+  }
+
   return (
     <GameV2Context.Provider
       value={{
@@ -183,7 +238,10 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         setLastMove,
         getMoveableDests,
         turn,
-        move
+        move,
+        isPromoting,
+        promote,
+        result
       }}
     >
       {children}
