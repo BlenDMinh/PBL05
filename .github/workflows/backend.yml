@@ -1,0 +1,15 @@
+name: Build and Deploy
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - "backend/**"
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Restart server
+        run: docker-compose up -d --build

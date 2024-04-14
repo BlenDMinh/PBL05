@@ -1,0 +1,15 @@
+name: Reset database
+on:
+  workflow_dispatch: {}
+  push:
+    paths:
+      - "database/**"
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Reset database
+        run: cd database && npm run db:reset
