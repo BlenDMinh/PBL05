@@ -16,5 +16,6 @@ export const path = {
   playWithBot: '/game/v2/play-with-bot',
   chat: '/chat',
   chatbox: '/chat/:id',
-  friend: '/friend'
+  friend: '/friend',
+  profile: '/profile/:id'
 } as const

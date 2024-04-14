@@ -1,6 +1,6 @@
 import { path } from 'src/constants/path'
 import { PoliciesOption } from 'src/data/auth'
-import { FaChessBishop, FaComments, FaHome, FaUserFriends } from 'react-icons/fa';
+import { FaComments, FaHome, FaUserFriends } from 'react-icons/fa';
 
 import { IconType } from 'react-icons'
 
@@ -14,7 +14,7 @@ export const quickOptionsNavbar: QuickOptionNavbar[] = [
   {
     id: 1,
     title: 'Profile',
-    to: '/'
+    to: path.profile
   },
   {
     id: 2,
