@@ -47,9 +47,9 @@ export default function Sidebar(props: SidebarProps) {
               <Link to='/' className='flex·w-max·items-center·px-0'>
                 {showSidebar ? (
                   <div className='flex items-center'>
-                    <FontAwesomeIcon icon={faChessKing} size='4x' style={{ color: '#0066CC' }} />
+                    <FontAwesomeIcon icon={faChessKing} size='4x' className='text-primary' />
                     <h3 className='w-max pt-4 text-4xl font-semibold'>
-                      <span style={{ color: '#003399' }}>CHESS</span>
+                      <span className='text-primary'>CHESS</span>
                     </h3>
                   </div>
                 ) : (

@@ -15,7 +15,10 @@ const fetchChat = async (id: any, page: number) => {
     const res = await chatApi.getConversationChat(id ?? "", page, 32)
     if(!res)
         return []
-    const messages = (res as AxiosResponse<PairChatResponse, any>).data.messages
+    const data = (res as AxiosResponse<PairChatResponse, any>).data
+    if(page > data.totalPages)
+        return []
+    const messages = data.messages
     messages.map(m => {
         m.isFromUser = m.senderId != id
     })
