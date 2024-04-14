@@ -13,5 +13,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Copy .env
+        run: cp .env.example .env
       - name: Restart server
         run: docker-compose up -d --build
