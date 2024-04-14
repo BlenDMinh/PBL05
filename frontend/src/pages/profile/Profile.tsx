@@ -1,7 +1,8 @@
 import * as React from 'react'
 import IconFriend from '../../assets/svgs/friends.svg'
-import { FaGamepad, FaLock, FaMinusCircle, FaMinusSquare, FaPlusCircle, FaPlusSquare, FaSquare } from 'react-icons/fa'
-
+import { FaGamepad, FaMinusSquare, FaSquare } from 'react-icons/fa'
+import { BiMessage } from 'react-icons/bi'
+import { Link } from 'react-router-dom'
 interface ProfileProps {}
 
 const Profile: React.FC<ProfileProps> = () => {
@@ -34,37 +35,38 @@ const Profile: React.FC<ProfileProps> = () => {
         <table className='w-full'>
           <thead>
             <tr>
-              <th className='p-3'></th>
-              <th className='p-3'>Các kỳ thủ</th>
-              <th className='p-3'>Kết quả</th>
-              <th className='p-3'>Ngày</th>
+              <th className='p-3 w-1/5'></th>
+              <th className='p-3 w-2/5'>Các kỳ thủ</th>
+              <th className='p-3 w-1/5'>Kết quả</th>
+              <th className='p-3 w-1/5'>Ngày</th>
             </tr>
           </thead>
           <tbody className='w-full'>
             <tr>
-              <td className='p-3'>
+              <td className='p-3 w-1/5'>
                 <FaGamepad className='text-blue-500' size={28} />
               </td>
-              <td className='p-3'>
+              <td className='p-3 w-2/5'>
                 <p className='flex items-center'>
                   <FaSquare className='text-green-500 inline-block align-middle mr-1' />
                   <span>Martinvelo</span> <span className='text-xs'>(432)</span>
+                  <Link to={`/chat/:id`}>
+                    <BiMessage className='ml-2' />
+                  </Link>
                 </p>
                 <p className='flex items-center'>
                   <FaSquare className='text-green-500 inline-block align-middle mr-1' />
                   <span>thuuhee</span> <span className='text-xs'>(232)</span>
                 </p>
               </td>
-              <td className='p-3 flex items-center justify-center'>
+              <td className='p-3 flex items-center justify-center w-1/5'>
                 <span className='flex items-center'>
                   <p>1</p>
                   <FaMinusSquare className='text-red-500 m-2' />
                   <p>0</p>
                 </span>
               </td>
-              <td className='p-3 flex items-center justify-center'>
-                <p>2024/04/14</p>
-              </td>
+              <td className='p-3 flex items-center justify-center w-1/5'></td>
             </tr>
           </tbody>
         </table>
