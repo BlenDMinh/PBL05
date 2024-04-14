@@ -17,7 +17,7 @@ public class ChessBackendServlet extends HttpServlet {
     out.println("<TITLE>Hello From Servlet</TITLE>");
     out.println("</HEAD>");
     out.println("<BODY>");
-    out.println("Servlet live ");
+    out.println("Servlet live !!!");
     try {
       out.println(ConnectionPool.getConnection() != null ? "Database connected" : "Database disconnected");
     } catch (InterruptedException | SQLException e) {
