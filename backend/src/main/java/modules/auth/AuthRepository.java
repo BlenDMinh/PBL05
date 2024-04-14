@@ -41,4 +41,32 @@ public class AuthRepository {
         }
         return userPasswordDto;
     }
+
+    public String register(String displayName, String email, String password, String verifyCode) {
+        Connection conn = null;
+        String id = null;
+        String sql = "insert into player_registers (display_name, email, password, verify_code) VALUES (?, ?, ?) returning id";
+        try {
+            conn = ConnectionPool.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, displayName);
+            stmt.setString(2, email);
+            stmt.setString(3, password);
+            stmt.setString(3, verifyCode);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                id = rs.getString("id");
+            } else {
+                throw new SQLException("Cannot create message");
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            if (conn != null) {
+                ConnectionPool.releaseConnection(conn);
+            }
+        }
+        return id;
+    }
 }

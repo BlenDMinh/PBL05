@@ -1,4 +1,4 @@
-package api.chatting;
+package api.chatting.pair;
 
 import java.io.IOException;
 
