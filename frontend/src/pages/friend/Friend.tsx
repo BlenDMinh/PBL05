@@ -1,7 +1,7 @@
 import * as React from 'react'
 import IconFriend from '../../assets/svgs/friends.svg'
 import { Link } from 'react-router-dom'
-import { FaSearch, FaUserAlt, FaUserAltSlash, FaUserMinus, FaUserPlus } from 'react-icons/fa'
+import { FaSearch, FaUserPlus } from 'react-icons/fa'
 export interface Friend {}
 
 export default function Friend() {

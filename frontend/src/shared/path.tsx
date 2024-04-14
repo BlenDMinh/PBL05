@@ -11,6 +11,7 @@ import Chat from 'src/pages/chat/Chat'
 import BotGameV2 from 'src/pages/gamev2/BotGameV2'
 import PlayWithBot from 'src/pages/play-with-bot/PlayWithBot'
 import Friend from 'src/pages/friend/Friend'
+import Profile from 'src/pages/profile/Profile'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -44,6 +45,10 @@ export const PRIVATE_ROUTER: RouteObject[] = [
   {
     path: path.friend,
     element: <Friend />
+  },
+  {
+    path: path.profile,
+    element: <Profile />
   }
 ]
 
