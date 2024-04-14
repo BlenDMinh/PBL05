@@ -5,7 +5,8 @@ export type User = {
   status: string
   online: boolean,
   elo: number
-  role: string
+  role: string,
+  avatarUrl: string
 }
 
 export type PatientType = {

@@ -31,7 +31,11 @@ function BeginChatting() {
     </>
 }
 
-export default function ChatBox() {
+export interface ChatBoxProps {
+    id?: number | string
+}
+
+export default function ChatBox(props: ChatBoxProps) {
     const { id } = useParams()
     const [messages, setMessages] = useState<MessageType[]>([])
     const messagesRef = useRef<MessageType[]>()
@@ -39,7 +43,7 @@ export default function ChatBox() {
     const chat = useChat()
     const [page, setPage] = useState(1)
     const [isEnd, setEnd] = useState(false)
-    const query = useQuery(['chat', id, page], () => fetchChat(id, page))
+    const query = useQuery(['chat', id, page], () => fetchChat(id ?? (props.id?.toString() ?? ""), page))
 
     useEffect(() => {
         if(query.status == "success") {
@@ -53,10 +57,12 @@ export default function ChatBox() {
     messagesRef.current = messages
 
     useEffect(() => {
-        if(chat.state != ReadyState.OPEN)
+        if(chat.state != ReadyState.OPEN) {
+            console.log("Starting chat")
             chat.startChat(getSessionIdFromLS())
+        }
         else {
-            chat.onMessage(id ?? "", (message) => {
+            chat.onMessage(id ?? (props.id?.toString() ?? ""), (message) => {
                 const newMessages = [...messagesRef.current as MessageType[]]
                 newMessages.unshift(message)
                 setMessages(newMessages)
@@ -65,17 +71,24 @@ export default function ChatBox() {
     }, [chat.state])
     const send = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        chat.sendMessage(sendingMessage, id ?? "")
+        chat.sendMessage(sendingMessage, id ?? (props.id?.toString() ?? ""))
         setSendingMessage("")
     }
     const fetch = () => {
         setPage(page + 1)
     }
-
-    if(!id) {
+    if(!id && !props.id) {
         return <>
             <div className="w-full h-full flex flex-col justify-center items-center">
                 <span className="text-base-content font-bold text-xl">Click on a conversation to start chatting</span>
+            </div>
+        </>
+    }
+    if(chat.state != ReadyState.OPEN) {
+        return <>
+            <div className="w-full h-full flex flex-col justify-center items-center">
+                <span className="loading loading-spinner loading-lg" />
+                <span className="text-base-content font-bold text-xl">Connecting to server...</span>
             </div>
         </>
     }
@@ -83,7 +96,7 @@ export default function ChatBox() {
         <div className="w-full h-full flex flex-col">
             <div id="chatBoxContainer" className="flex-1 flex flex-col-reverse overflow-y-auto ">
                 <InfiniteScroll
-                    className="gap-2 p-5"
+                    className="p-5"
                     dataLength={messages.length}
                     next={fetch}
                     style={{ display: "flex", flexDirection: "column-reverse" }} //To put endMessage and loader to the top.
@@ -93,7 +106,7 @@ export default function ChatBox() {
                     endMessage={<BeginChatting />}
                     scrollableTarget='chatBoxContainer'
                 >
-                    {messages.map(m => <Message key={m.id} side={m.isFromUser ? "right" : "left"} message={m.content} />)}
+                    {messages.map(m => <Message key={m.id} side={m.isFromUser ? "right" : "left"} message={m.content} senderId={m.receiverId} />)}
                 </InfiniteScroll>
             </div>
             <form className="w-full flex p-2 gap-2" onSubmit={send}>

@@ -6,6 +6,7 @@ import { ws } from 'src/constants/ws'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 import { getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
 import { GameV2SocketData } from 'src/pages/gamev2/types/game.v2.type'
+import { User } from 'src/types/users.type'
 
 export enum GameType {
   PVP,
@@ -41,7 +42,8 @@ export interface GameV2ContextInterface {
   move: (from: Key, to: Key) => void,
   isPromoting: boolean,
   promote: (piece?: "q" | "r" | "b" | "n" | null) => void,
-  result: GameResult
+  result: GameResult,
+  opponentId: number | null
 }
 
 const initContext: GameV2ContextInterface = {
@@ -58,7 +60,8 @@ const initContext: GameV2ContextInterface = {
   move: () => null,
   isPromoting: false,
   promote: () => null,
-  result: GameResult.UNKNOWN
+  result: GameResult.UNKNOWN,
+  opponentId: null
 }
 
 export const GameV2Context = createContext<GameV2ContextInterface>(initContext)
@@ -75,6 +78,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [turn, setTurn] = useState<'white' | 'black' | undefined>(undefined)
   const [result, setResult] = useState(initContext.result)
   const [config, setConfig] = useState(DEFAULT_CONFIG)
+  const [opponentId, setOpponentId] = useState(initContext.opponentId)
 
   const startGame = (gameId: string, gameType: GameType = GameType.PVP, gameConfig: GameConfig = DEFAULT_CONFIG) => {
     setGameType(gameType)
@@ -87,13 +91,16 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
       const core = new Chess(fen)
       setCore(core)
       if(core.isGameOver() && side) {
-        if(core.isCheckmate() && turn == side) {
+        console.log(turn, side)
+        if(turn === side) {
           setResult(GameResult.LOSE)
         }
-        if(core.isCheckmate() && turn != side) {
+        else if(turn !== side) {
           setResult(GameResult.WIN)
         }
-        setResult(GameResult.DRAW)
+        else {
+          setResult(GameResult.DRAW)
+        }
       }
     }
   }, [fen])
@@ -135,9 +142,17 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     const data = json.data as GameV2SocketData
     // console.log(data.gamePlayer.displayName + " " + getProfileFromLS().displayName)
     if (json.message === 'Player joined') {
-      if (data.gamePlayer && data.gamePlayer.id === getProfileFromLS().id) {
-        setSide(data.gamePlayer.white ? 'white' : 'black')
+      if(data.gamePlayer) {
+        if (data.gamePlayer.id === getProfileFromLS().id) {
+          setSide(data.gamePlayer.white ? 'white' : 'black')
+        } else {
+          setOpponentId(data.gamePlayer.id)
+        }
       }
+    }
+
+    if(json.message === "Mate") {
+
     }
 
     if(data.fen)
@@ -241,7 +256,8 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         move,
         isPromoting,
         promote,
-        result
+        result,
+        opponentId
       }}
     >
       {children}

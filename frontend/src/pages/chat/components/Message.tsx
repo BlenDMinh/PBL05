@@ -1,34 +1,37 @@
 import classNames from "classnames"
+import { useQuery } from "react-query"
+import { Link } from "react-router-dom"
+import profileApi from "src/apis/profile.api"
 
 export interface MessageProps {
     side: "left" | "right",
     message: string,
-    senderAvatar?: string,
-    senderName?: string,
+    senderId: number
 }
 
 export default function Message(props: MessageProps) {
-    return <div className={classNames("flex gap-5", {
-        "self-start": props.side == "left",
-        "self-end": props.side == "right"
+    const profile = useQuery(['profile', props.senderId], () => profileApi.getProfile(props.senderId))
+
+    return <div className={classNames("flex gap-5 chat", {
+        "self-start chat-start": props.side == "left",
+        "self-end chat-end": props.side == "right"
     })}>
         {
             props.side == "left" ?
-            <div className="avatar btn btn-circle btn-ghost">
+            <Link to={`/profile/${props.senderId}`} target="_blank" className="avatar chat-image btn btn-circle btn-ghost">
                 <img
                     className="w-10 rounded-full"
                     alt='Tailwind CSS Navbar component'
-                    src={props.senderAvatar ?? 'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'}
+                    src={profile.data?.data.avatarUrl ?? 'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'}
                 />
-            </div>
+            </Link>
             :
             <></>
         }
-        <p className={classNames("shadow-xl card w-fit text-wrap break-normal p-2 justify-center max-w-2xl items-center", {
-            "bg-primary text-primary-content": props.side == "right",
-            "bg-base-300 text-base-content": props.side == "left"
+        <div className={classNames("chat-bubble", {
+            "chat-bubble-primary": props.side == "right"
         })}>
             {props.message}
-        </p>
+        </div>
     </div>
 }
