@@ -7,14 +7,14 @@ export default function Home() {
   return (
     <div className='flex flex-col w-full h-full items-center py-10 px-16'>
       <div className='w-full flex gap-5'>
-        <div className='avatar btn btn-circle btn-ghost'>
+        <Link to={`/profile/:id`} className='avatar btn btn-circle btn-ghost'>
           <div className='w-20 rounded-full'>
             <img
               alt='Tailwind CSS Navbar component'
               src='https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'
             />
           </div>
-        </div>
+        </Link>
         <span className='text-base-content text-3xl font-bold'>{user?.displayName}</span>
       </div>
       <div className='w-full flex gap-5'>
