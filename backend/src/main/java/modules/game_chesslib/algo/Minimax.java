@@ -37,7 +37,7 @@ public class Minimax {
                     Board childBoard = new Board();
                     childBoard.loadFromFen(board.getFen());
                     childBoard.doMove(newGameMove);
-                    return alphaBeta(depth - 1, childBoard, -10000, 10000, false);
+                    return alphaBeta(depth - 1, childBoard, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, false);
                 };
             };
             future = executor.submit(callable);
@@ -50,7 +50,7 @@ public class Minimax {
         for (int i = 0; i < futures.size(); i++) {
             try {
                 double value = futures.get(i).get();
-                if (value >= bestMove) {
+                if (value > bestMove) {
                     bestMove = value;
                     bestMoveFound = newGameMoves.get(i);
                 }
@@ -65,9 +65,6 @@ public class Minimax {
     double alphaBeta(int depth, Board board, double alpha, double beta, boolean isMaximisingPlayer) {
         if (depth == 0) {
             return -evaluateBoard(board);
-        }
-        if (board.isKingAttacked()) {
-            return Math.pow(10, 10);
         }
         List<Move> newGameMoves = board.legalMoves();
         Collections.shuffle(newGameMoves);
@@ -122,13 +119,13 @@ public class Minimax {
         if (pieceType.equals(PieceType.PAWN))
             return 100;
         if (pieceType.equals(PieceType.KNIGHT))
-            return 280;
+            return 300;
         if (pieceType.equals(PieceType.ROOK))
-            return 479;
+            return 500;
         if (pieceType.equals(PieceType.BISHOP))
-            return 320;
+            return 300;
         if (pieceType.equals(PieceType.QUEEN))
-            return 929;
+            return 900;
         if (pieceType.equals(PieceType.KING) && end)
             return 60000;
         return 60000;
