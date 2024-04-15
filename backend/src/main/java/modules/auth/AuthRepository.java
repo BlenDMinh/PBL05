@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 import org.apache.log4j.Logger;
 
-import modules.auth.dto.UserPasswordDto;
+import common.dto.UserPasswordDto;
 import utils.ConnectionPool;
 
 public class AuthRepository {
@@ -49,7 +49,6 @@ public class AuthRepository {
         try {
             conn = ConnectionPool.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt = conn.prepareStatement(sql);
             stmt.setString(1, displayName);
             stmt.setString(2, email);
             stmt.setString(3, password);

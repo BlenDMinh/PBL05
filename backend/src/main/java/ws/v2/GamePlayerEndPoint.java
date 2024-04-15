@@ -22,6 +22,7 @@ import com.github.bhlangonijr.chesslib.move.Move;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import common.dto.UserPasswordDto;
 import modules.game_chesslib.common.GameMessage;
 import modules.game_chesslib.common.GameMessageDto;
 import modules.game_chesslib.common.MessageDecoder;
@@ -36,7 +37,6 @@ import modules.game_chesslib.dto.RuleSetDto;
 import modules.game_chesslib.service.GameService;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
-import modules.auth.dto.UserPasswordDto;
 import modules.game_chesslib.GameStore;
 import modules.game_chesslib.custom.ChessGame;
 

@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import modules.auth.dto.UserPasswordDto;
+import common.dto.UserPasswordDto;
 import modules.chat.dto.PaginationMessageResponseDto;
 import modules.chat.service.ChatService;
 import stores.session.Session;

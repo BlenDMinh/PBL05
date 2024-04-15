@@ -5,7 +5,6 @@
 const tableName = "friend_requests";
 exports.up = async (knex) => {
   await knex.schema.createTable(tableName, (table) => {
-    table.increments("id").unsigned().primary();
     table
       .integer("sender_id")
       .unsigned()
@@ -19,6 +18,7 @@ exports.up = async (knex) => {
       .references("id")
       .inTable("users");
     table.timestamp("created_at").defaultTo(knex.fn.now());
+    table.primary(["sender_id", "receiver_id"]);
   });
 };
 /**

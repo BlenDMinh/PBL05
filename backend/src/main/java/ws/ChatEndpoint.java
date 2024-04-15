@@ -12,7 +12,7 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-import modules.auth.dto.UserPasswordDto;
+import common.dto.UserPasswordDto;
 import modules.chat.MessageDecoder;
 import modules.chat.MessageEncoder;
 import modules.chat.ServerMessage;

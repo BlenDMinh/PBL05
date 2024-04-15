@@ -2,8 +2,8 @@ package modules.auth.service;
 
 import java.util.Random;
 
+import common.dto.UserPasswordDto;
 import modules.auth.AuthRepository;
-import modules.auth.dto.UserPasswordDto;
 
 public class AuthService {
     private final BcryptService bcryptService;

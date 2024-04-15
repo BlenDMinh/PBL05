@@ -12,7 +12,7 @@ import javax.websocket.server.ServerEndpoint;
 
 import com.google.gson.Gson;
 
-import modules.auth.dto.UserPasswordDto;
+import common.dto.UserPasswordDto;
 import modules.game_chesslib.custom.GameDifficulty;
 import modules.game_chesslib.GameStore;
 import modules.game_chesslib.common.GameMessage;

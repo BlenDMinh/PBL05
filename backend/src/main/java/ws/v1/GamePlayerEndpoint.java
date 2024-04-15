@@ -18,7 +18,8 @@ import org.modelmapper.ModelMapper;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import modules.auth.dto.UserPasswordDto;
+
+import common.dto.UserPasswordDto;
 import modules.game.common.GameMessage;
 import modules.game.common.GameMessageDto;
 import modules.game.common.MessageDecoder;

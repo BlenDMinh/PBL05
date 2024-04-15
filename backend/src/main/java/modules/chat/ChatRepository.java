@@ -26,7 +26,6 @@ public class ChatRepository {
         try {
             conn = ConnectionPool.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
-            stmt = conn.prepareStatement(sql);
             stmt.setString(1, content);
             stmt.setInt(2, senderId);
             stmt.setInt(3, receiverId);

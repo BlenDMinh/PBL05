@@ -16,5 +16,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Copy .env
         run: cp .env.example .env
+      - name: Install dependencies
+        run: cd database && npm i
       - name: Reset database
         run: cd database && npm run db:reset

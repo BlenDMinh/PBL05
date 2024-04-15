@@ -21,7 +21,7 @@ import com.github.bhlangonijr.chesslib.Square;
 import com.github.bhlangonijr.chesslib.move.Move;
 import com.google.gson.Gson;
 
-import modules.auth.dto.UserPasswordDto;
+import common.dto.UserPasswordDto;
 import modules.game_chesslib.common.nested.MoveResponse;
 import modules.game_chesslib.common.nested.PlayerJoinedResponse;
 import modules.game_chesslib.custom.player.BotPlayer;

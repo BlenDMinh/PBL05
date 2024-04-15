@@ -1,14 +1,14 @@
-package modules.auth.dto;
+package common.dto;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import common.AccountStatus;
+import common.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import modules.auth.common.AccountStatus;
-import modules.auth.common.Role;
 
 @Getter
 @Setter

@@ -1,4 +1,4 @@
-package modules.auth.common;
+package common;
 
 public enum Role {
     ADMIN(0),
