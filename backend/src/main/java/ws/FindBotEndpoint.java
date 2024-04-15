@@ -58,7 +58,7 @@ public class FindBotEndpoint {
         }
         String gameId = UUID.randomUUID().toString();
         int humanId = (int) playerSession.getUserProperties().get("user_id");
-        GameDifficulty difficulty = GameDifficulty.fromValue(botConfigRequest.getDifficulty());
+        GameDifficulty difficulty = GameDifficulty.valueOf(botConfigRequest.getDifficulty());
         GameStore.getInstance().addGame(new ChessGame(gameId, humanId, difficulty, side.equals("white")));
         playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_CREATED, gameId));
         playerSession.close();

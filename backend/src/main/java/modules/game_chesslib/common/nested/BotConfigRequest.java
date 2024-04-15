@@ -11,5 +11,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BotConfigRequest {
     String side;
-    int difficulty;
+    String difficulty;
 }
