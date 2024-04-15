@@ -1,7 +1,9 @@
 import classNames from "classnames"
-import { useQuery } from "react-query"
+import { useEffect, useState } from "react"
+import { useMutation, useQuery } from "react-query"
 import { Link } from "react-router-dom"
 import profileApi from "src/apis/profile.api"
+import { User } from "src/types/users.type"
 
 export interface MessageProps {
     side: "left" | "right",
@@ -10,7 +12,16 @@ export interface MessageProps {
 }
 
 export default function Message(props: MessageProps) {
-    const profile = useQuery(['profile', props.senderId], () => profileApi.getProfile(props.senderId))
+    const [user, setUser] = useState<User | null>(null)
+    const profileMutation = useMutation({
+        mutationFn: (id: number) => profileApi.getProfile(id),
+        onSuccess: (data) => {
+            setUser(data.data as User)
+        }
+    })
+    useEffect(() => {
+        profileMutation.mutate(props.senderId)
+    }, [props.senderId])
 
     return <div className={classNames("flex gap-5 chat", {
         "self-start chat-start": props.side == "left",
@@ -18,13 +29,20 @@ export default function Message(props: MessageProps) {
     })}>
         {
             props.side == "left" ?
-            <Link to={`/profile/${props.senderId}`} target="_blank" className="avatar chat-image btn btn-circle btn-ghost">
-                <img
-                    className="w-10 rounded-full"
-                    alt='Tailwind CSS Navbar component'
-                    src={profile.data?.data.avatarUrl ?? 'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'}
-                />
-            </Link>
+            <>
+            {
+                user ?
+                <Link to={`/profile/${user?.id}`} target="_blank" className="avatar chat-image btn btn-circle btn-ghost">
+                    <img
+                        className="w-10 rounded-full"
+                        alt='Tailwind CSS Navbar component'
+                        src={user?.avatarUrl ?? 'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'}
+                    />
+                </Link>
+                :
+                <div className="rounded-full skeleton btn btn-circle btn-ghost w-12 h-12"></div>
+            }
+            </>
             :
             <></>
         }

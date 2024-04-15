@@ -10,10 +10,10 @@ export interface ConversationProps {
 
 export default function Conversation(props: ConversationProps) {
     const calcTimeDif = (from: any, to: any) => {
-        console.log(from, to)
+        // console.log(from, to)
         const fromDate = new Date(from).getTime()
         const toDate = new Date(to).getTime()
-        console.log(fromDate, toDate)
+        // console.log(fromDate, toDate)
         const dif = toDate - fromDate
         const seconds = dif / 1000;
         const minutes = seconds / 60;

@@ -7,7 +7,7 @@ export const URL_CHATTING_PAIR = '/chatting/pair/'
 
 const profileApi = {
     getProfile(id: any) {
-        return http.get<User>(`${URL_PROFILE}/${id}`)
+        return http.get<User>(`${URL_PROFILE}${id}`)
     }
 }
 

@@ -40,24 +40,40 @@ export interface ChatBoxProps {
 
 export default function ChatBox(props: ChatBoxProps) {
     const { id } = useParams()
+    const [previousId, setPreviousId] = useState<string | undefined>(undefined)
     const [messages, setMessages] = useState<MessageType[]>([])
     const messagesRef = useRef<MessageType[]>()
     const [sendingMessage, setSendingMessage] = useState("")
     const chat = useChat()
     const [page, setPage] = useState(1)
     const [isEnd, setEnd] = useState(false)
-    const query = useQuery(['chat', id, page], () => fetchChat(id ?? (props.id?.toString() ?? ""), page))
 
     useEffect(() => {
-        if(query.status == "success") {
-            if(query.data.length)
-                setMessages(messages.concat(query.data))
-            else
-                setEnd(true)
+        console.log(id, page)
+        if(id != previousId) {
+            setPage(1)
+            setEnd(false)
+            setPreviousId(id)
+            if(page == 1) {
+                fetchChat(id ?? (props.id?.toString() ?? ""), 1).then((_messages) => {
+                    setMessages(_messages)
+                })
+            } else {
+                setMessages([])
+            }
+        } else {
+            fetchChat(id ?? (props.id?.toString() ?? ""), page).then((_messages) => {
+                if(_messages.length)
+                    setMessages(messages.concat(_messages))
+                else
+                    setEnd(true)
+            })
         }
-    }, [query.status])
+    }, [id, page])
 
-    messagesRef.current = messages
+    useEffect(() => {
+        messagesRef.current = messages
+    }, [id, messages])
 
     useEffect(() => {
         if(chat.state != ReadyState.OPEN) {
@@ -66,12 +82,10 @@ export default function ChatBox(props: ChatBoxProps) {
         }
         else {
             chat.onMessage(id ?? (props.id?.toString() ?? ""), (message) => {
-                const newMessages = [...messagesRef.current as MessageType[]]
-                newMessages.unshift(message)
-                setMessages(newMessages)
+                setMessages([message].concat(messagesRef.current as MessageType[]))
             })
         }
-    }, [chat.state])
+    }, [id, chat.state])
     const send = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         chat.sendMessage(sendingMessage, id ?? (props.id?.toString() ?? ""))
@@ -109,7 +123,7 @@ export default function ChatBox(props: ChatBoxProps) {
                     endMessage={<BeginChatting />}
                     scrollableTarget='chatBoxContainer'
                 >
-                    {messages.map(m => <Message key={m.id} side={m.isFromUser ? "right" : "left"} message={m.content} senderId={m.receiverId} />)}
+                    {messages.map(m => <Message key={m.id} side={m.isFromUser ? "right" : "left"} message={m.content} senderId={m.senderId} />)}
                 </InfiniteScroll>
             </div>
             <form className="w-full flex p-2 gap-2" onSubmit={send}>
