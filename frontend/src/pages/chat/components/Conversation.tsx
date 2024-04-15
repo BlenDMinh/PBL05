@@ -48,7 +48,7 @@ export default function Conversation(props: ConversationProps) {
     })}
         to={`/chat/${props.conversation.id}`}
     >
-        <div className="avatar h-16 w-16">
+        <div className="avatar h-16 w-16 min-h-[4rem] min-w-[4rem]">
             <img
                 className="rounded-full"
                 alt='Avatar'
@@ -62,7 +62,7 @@ export default function Conversation(props: ConversationProps) {
             <span className="text-base-content font-bold">{props.conversation.displayName}</span>
             <div className="flex w-full">
                 <p className="text-start w-4/5 text-base-content font-thin truncate">{props.conversation.message.isFromUser ? "You: " : ""}{props.conversation.message.content}</p>
-                <p className="text-base-content font-thin text-ellipsis">{" "}.{lastTime}</p>
+                <p className="text-base-content font-thin text-ellipsis min-w-fit">{" "}.{lastTime}</p>
             </div>
         </div>
     </Link>
