@@ -1,18 +1,18 @@
-const dotenv = require('dotenv')
-const { join } = require('path')
+const dotenv = require("dotenv");
+const { join } = require("path");
 
-dotenv.config({ path: join(__dirname, '../../.env') })
+dotenv.config({ path: join(__dirname, "../../.env") });
 
 module.exports = {
   development: {
-    client: 'pg',
+    client: "pg",
     connection: {
-      host: '13.215.156.97',
+      host: "localhost",
       port: process.env.DB_PORT,
       user: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      charset: 'utf8',
+      charset: "utf8",
     },
     migrations: {
       directory: `${__dirname}/migrations`,
@@ -21,4 +21,4 @@ module.exports = {
       directory: `${__dirname}/seeds`,
     },
   },
-}
+};

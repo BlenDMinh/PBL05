@@ -17,4 +17,4 @@ jobs:
       - name: Copy .env
         run: cp .env.example .env
       - name: Restart server
-        run: docker-compose up -d --build
+        run: docker compose up -d --build
