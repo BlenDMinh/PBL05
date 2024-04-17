@@ -24,7 +24,7 @@ export default function Sidebar(props: SidebarProps) {
     navigate(path.login)
   }
   return (
-    <div className='drawer fixed z-10 w-max bg-base-200 lg:drawer-open'>
+    <div className='drawer fixed z-10 w-max bg-base-200 lg:drawer-open top-0'>
       <input id='my-drawer-2' type='checkbox' className='drawer-toggle' />
       <div className='drawer-content flex h-16 flex-col items-center justify-center pl-2  lg:hidden'>
         <label htmlFor='my-drawer-2' aria-label='open sidebar' className='btn drawer-button h-3/5'>

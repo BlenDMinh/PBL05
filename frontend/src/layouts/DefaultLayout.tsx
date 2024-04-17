@@ -6,18 +6,22 @@ import { useContext } from 'react'
 import { AppContext, AppContextType } from 'src/contexts/app.context'
 
 export default function DefaultLayout({ children }: ReactWithChild) {
-  const { showSidebar } = useContext<AppContextType>(AppContext)
+  const { showSidebar, setShowSidebar } = useContext<AppContextType>(AppContext)
   return (
     <div className='bg-base'>
       <Navbar />
       <Sidebar />
       <div
-        className={classNames('flex min-h-screen h-screen w-full flex-col items-center pt-16', {
-          'lg:pl-72': showSidebar,
-          'lg:pl-[88px]': !showSidebar
+        className={classNames({
+          'brightness-50': showSidebar
         })}
+        onClick={(e) => {
+          setShowSidebar(false)
+        }}
       >
-        {children}
+        <div className={classNames('flex min-h-screen h-screen w-full flex-col items-center pt-16 lg:pl-[88px]')}>
+          {children}
+        </div>
       </div>
     </div>
   )
