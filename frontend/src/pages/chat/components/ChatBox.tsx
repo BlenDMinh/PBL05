@@ -88,8 +88,10 @@ export default function ChatBox(props: ChatBoxProps) {
     }, [id, chat.state])
     const send = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
-        chat.sendMessage(sendingMessage, id ?? (props.id?.toString() ?? ""))
-        setSendingMessage("")
+        if(sendingMessage) {
+            chat.sendMessage(sendingMessage, id ?? (props.id?.toString() ?? ""))
+            setSendingMessage("")
+        }
     }
     const fetch = () => {
         setPage(page + 1)

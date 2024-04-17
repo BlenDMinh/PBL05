@@ -8,7 +8,7 @@ export interface YourFriendProps {
 }
 
 export default function YourFriend(props: YourFriendProps) {
-    return <div className='bg-base-200 p-2 rounded-md relative flex items-center justify-between'>
+    return <div className='bg-base-100 p-2 rounded-md relative flex items-center justify-between'>
         <div className="flex gap-5 items-center">
             <Link to={`/profile/${props.friend.id}`} className='avatar btn btn-circle btn-ghost'>
                 <div className='w-20 rounded-full'>

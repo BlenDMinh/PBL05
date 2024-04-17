@@ -2,6 +2,7 @@ import classNames from "classnames"
 import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { Conversation as ConversationType } from "src/types/chat.type"
+import { calcTimeDif } from "src/utils/utils"
 
 export interface ConversationProps {
     conversation: ConversationType,
@@ -9,28 +10,6 @@ export interface ConversationProps {
 }
 
 export default function Conversation(props: ConversationProps) {
-    const calcTimeDif = (from: any, to: any) => {
-        // console.log(from, to)
-        const fromDate = new Date(from).getTime()
-        const toDate = new Date(to).getTime()
-        // console.log(fromDate, toDate)
-        const dif = toDate - fromDate
-        const seconds = dif / 1000;
-        const minutes = seconds / 60;
-        if(minutes < 60)
-            return `${Math.max(Math.floor(minutes), 1)} m`
-        const hours = minutes / 60;
-        if(hours < 24)
-            return `${Math.floor(hours)} h`
-        const days = hours / 24;
-        if(days <= 60)
-            return `${Math.floor(days)} D`
-        const months = days / 30;
-        if(months <= 24)
-            return `${Math.floor(months)} M`
-        const years = months / 12;
-        return `${Math.floor(years)} Y`
-    }
     const [lastTime, setLastTime] = useState(calcTimeDif(props.conversation.message.sendedAt + " UTC", Date.now()))
     useEffect(() => {
         setInterval(() => {
