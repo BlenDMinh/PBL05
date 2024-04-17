@@ -10,6 +10,8 @@ import 'src/pages/gamev2/css/chessground.brown.css'
 import 'src/pages/gamev2/css/chessground.cburnett.css'
 import Chessground from '@react-chess/chessground'
 import classNames from 'classnames'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faChessKing, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'
 
 export default function PlayWithBot() {
   const [wsUrl, setWsUrl] = useState(ws.findBot(getSessionIdFromLS()))
@@ -64,12 +66,12 @@ export default function PlayWithBot() {
     )
 
   return (
-    <div className='flex w-full h-screen items-center justify-center px-32 pt-32 pb-16 gap-12'>
+    <div className='flex w-full h-screen items-center flex-row-reverse px-32 pt-32 pb-16 gap-12'>
       <div
         className={classNames(
           `flex-1 min-w-[${Math.min(window.innerWidth, window.innerHeight) * 0.8}px] min-h-[${
             Math.min(window.innerWidth, window.innerHeight) * 0.8
-          }px] h-full rounded-lg border-2 border-base-300 flex items-center justify-center pointer-events-none`
+          }px] h-full rounded-lg border-2 border-base-300 pointer-events-none`
         )}
       >
         <Chessground
@@ -87,16 +89,34 @@ export default function PlayWithBot() {
             <td>
               <span className='text-base-content font-bold text-lg'>Your side to move</span>
             </td>
-            <td>
-              <select
-                value={side}
-                className='select select-primary'
-                onChange={(e) => setSide(e.target.value as 'random' | 'white' | 'black')}
+            <td className='flex gap-2'>
+              <div
+                className={classNames(
+                  'cursor-pointer rounded-md w-12 h-12 flex justify-center items-center bg-gray-800',
+                  {
+                    'outline outline-green-600': side === 'white'
+                  }
+                )}
+                onClick={() => setSide('white')}
               >
-                <option value='random'>Random</option>
-                <option value='white'>White</option>
-                <option value='black'>Black</option>
-              </select>
+                <FontAwesomeIcon size='2x' icon={faChessKing} color='white'></FontAwesomeIcon>
+              </div>
+              <div
+                className={classNames('cursor-pointer rounded-md w-12 h-12 flex justify-center items-center', {
+                  'outline outline-green-600': side === 'random'
+                })}
+                onClick={() => setSide('random')}
+              >
+                <FontAwesomeIcon size='2x' icon={faQuestionCircle}></FontAwesomeIcon>
+              </div>
+              <div
+                className={classNames('cursor-pointer rounded-md w-12 h-12 flex justify-center items-center bg-white', {
+                  'outline outline-green-600': side === 'black'
+                })}
+                onClick={() => setSide('black')}
+              >
+                <FontAwesomeIcon size='2x' icon={faChessKing} color='black'></FontAwesomeIcon>
+              </div>
             </td>
           </tr>
           <tr>
