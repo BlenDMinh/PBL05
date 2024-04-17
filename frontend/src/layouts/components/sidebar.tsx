@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { path } from 'src/constants/path'
 import { AppContext, AppContextType, AuthenticateState } from 'src/contexts/app.context'
@@ -9,6 +9,7 @@ import { clearLS } from 'src/utils/auth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChessKing } from '@fortawesome/free-solid-svg-icons'
 import { matchPath } from 'react-router-dom'
+import { number } from 'yup'
 
 export interface SidebarProps {}
 
@@ -23,6 +24,19 @@ export default function Sidebar(props: SidebarProps) {
     setUser(null)
     navigate(path.login)
   }
+  const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth)
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth)
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
   return (
     <div className='drawer fixed z-10 w-max bg-base-200 lg:drawer-open'>
       <input id='my-drawer-2' type='checkbox' className='drawer-toggle' />
