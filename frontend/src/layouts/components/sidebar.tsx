@@ -2,14 +2,14 @@ import classNames from 'classnames'
 import { useContext } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { path } from 'src/constants/path'
-import { AppContext, AppContextType } from 'src/contexts/app.context'
+import { AppContext, AppContextType, AuthenticateState } from 'src/contexts/app.context'
 import { sidebarOption } from 'src/data/layout'
 import { HiBars3, HiArrowRightOnRectangle } from 'react-icons/hi2'
 import { clearLS } from 'src/utils/auth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChessKing } from '@fortawesome/free-solid-svg-icons'
 import { matchPath } from 'react-router-dom'
-
+import './sidebar.css'
 export interface SidebarProps {}
 
 export default function Sidebar(props: SidebarProps) {
@@ -19,25 +19,26 @@ export default function Sidebar(props: SidebarProps) {
 
   const handleSignOut = () => {
     clearLS()
-    setIsAuthenticated(false)
+    setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
     setUser(null)
     navigate(path.login)
   }
   return (
-    <div className='drawer fixed z-10 w-max bg-base-200 lg:drawer-open top-0'>
+    <div className='drawer fixed z-10 w-max bg-base-200 lg:drawer-open'>
       <input id='my-drawer-2' type='checkbox' className='drawer-toggle' />
       <div className='drawer-content flex h-16 flex-col items-center justify-center pl-2  lg:hidden'>
         <label htmlFor='my-drawer-2' aria-label='open sidebar' className='btn drawer-button h-3/5'>
           <HiBars3 className='h-6 w-6' />
         </label>
       </div>
-      <div className='drawer-side overflow-y-clip'>
+
+      <div className='h-[100vh] overflow-y-clip'>
         <label htmlFor='my-drawer-2' aria-label='close sidebar' className='drawer-overlay'></label>
         <ul
           className={classNames(
             'menu min-h-full justify-between shadow-inner bg-base-200 p-4 pt-0 text-base font-semibold text-black !transition-all',
             {
-              'lg:w-72': showSidebar,
+              'lg:w-60': showSidebar,
               'lg:w-[5.5rem]': !showSidebar
             }
           )}
@@ -57,7 +58,6 @@ export default function Sidebar(props: SidebarProps) {
                 )}
               </Link>
             </div>
-
             <div className='flex flex-col gap-1'>
               {sidebarOption.map(({ icon: Icon, id, title, to }) => (
                 <li key={id}>

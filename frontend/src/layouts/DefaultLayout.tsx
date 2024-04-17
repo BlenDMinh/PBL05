@@ -12,14 +12,18 @@ export default function DefaultLayout({ children }: ReactWithChild) {
       <Navbar />
       <Sidebar />
       <div
-        className={classNames({
+        className={classNames('max-h-max overflow-y-auto', {
           'brightness-50': showSidebar
         })}
         onClick={(e) => {
           setShowSidebar(false)
         }}
       >
-        <div className={classNames('flex min-h-screen h-screen w-full flex-col items-center pt-16 lg:pl-[88px]')}>
+        <div
+          className={classNames('flex min-h-screen h-screen w-full flex-col items-center pt-16 lg:pl-[88px]', {
+            'pointer-events-none': showSidebar
+          })}
+        >
           {children}
         </div>
       </div>

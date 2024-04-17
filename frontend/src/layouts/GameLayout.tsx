@@ -15,14 +15,20 @@ export default function GameLayout({ children }: ReactWithChild) {
         <Navbar />
         <Sidebar />
         <div
-          className={classNames({
+          className={classNames('max-h-max overflow-y-auto', {
             'brightness-50': showSidebar
           })}
           onClick={(e) => {
             setShowSidebar(false)
           }}
         >
-          <div className='flex flex-col min-h-screen w-full items-center justify-center'>{children}</div>
+          <div
+            className={classNames('flex flex-col min-h-screen w-full items-center justify-center', {
+              'pointer-events-none': showSidebar
+            })}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </>
