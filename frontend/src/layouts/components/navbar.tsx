@@ -10,7 +10,7 @@ import { clearLS } from 'src/utils/auth'
 export interface NavbarProps {}
 
 export default function Navbar(props: NavbarProps) {
-  const { showSidebar, setShowSidebar } = useContext<AppContextType>(AppContext)
+  const { showSidebar, setShowSidebar, isAuthenticated } = useContext<AppContextType>(AppContext)
   const handleShowSidebar = () => {
     setShowSidebar(!showSidebar)
   }
@@ -21,7 +21,7 @@ export default function Navbar(props: NavbarProps) {
     clearLS()
     setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
     setUser(null)
-    navigate(path.login)
+    navigate(path.home)
   }
 
   return (
@@ -54,54 +54,65 @@ export default function Navbar(props: NavbarProps) {
           </div>
         </form>
       </div> */}
-      <div className='navbar-end flex flex-[30%] items-center'>
-        <button className='btn btn-circle btn-ghost mt-1'>
-          <div className='indicator'>
-            <HiOutlineBell className='h-6 w-6' />
-            <span className='badge indicator-item badge-primary badge-xs'></span>
-          </div>
-        </button>
-        <div className='dropdown dropdown-end'>
-          <div tabIndex={0} role='button' className='avatar btn btn-circle btn-ghost'>
-            <div className='w-10 rounded-full'>
-              <img
-                alt='Tailwind CSS Navbar component'
-                src='https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'
-              />
+      {isAuthenticated === AuthenticateState.AUTHENTICATED && (
+        <div className='navbar-end flex flex-[30%] items-center'>
+          <button className='btn btn-circle btn-ghost mt-1'>
+            <div className='indicator'>
+              <HiOutlineBell className='h-6 w-6' />
+              <span className='badge indicator-item badge-primary badge-xs'></span>
             </div>
-          </div>
-          <div
-            tabIndex={0}
-            role='button'
-            className='dropdown-content top-[120%] z-[1] flex w-56 flex-col rounded-md bg-base-100 shadow'
-          >
-            <div className='w-full border-b border-dashed border-black p-4 py-3'>
-              <h3 className='line-clamp-1 text-base font-semibold'>{user?.displayName} &nbsp;</h3>
-              <p className='line-clamp-1 text-sm'>{user?.email} &nbsp;</p>
+          </button>
+
+          <div className='dropdown dropdown-end'>
+            <div tabIndex={0} role='button' className='avatar btn btn-circle btn-ghost'>
+              <div className='w-10 rounded-full'>
+                <img alt='Tailwind CSS Navbar component' src={user?.avatarUrl} />
+              </div>
             </div>
-            <ul className='menu menu-sm gap-[1px]'>
-              {quickOptionsNavbar.map((option) => (
-                <li key={option.id} className='rounded'>
-                  <Link
+            <div
+              tabIndex={0}
+              role='button'
+              className='dropdown-content top-[120%] z-[1] flex w-56 flex-col rounded-md bg-base-300 shadow-2xl'
+            >
+              <div className='w-full border-b border-dashed border-black p-4 py-3'>
+                <h3 className='line-clamp-1 text-base font-semibold'>{user?.displayName} &nbsp;</h3>
+                <p className='line-clamp-1 text-sm'>{user?.email} &nbsp;</p>
+              </div>
+              <ul className='menu menu-sm gap-[1px]'>
+                {quickOptionsNavbar.map((option) => (
+                  <li key={option.id} className='rounded'>
+                    <Link
+                      className='hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary'
+                      to={option.to}
+                    >
+                      {option.title}
+                    </Link>
+                  </li>
+                ))}
+                <li className='rounded'>
+                  <button
                     className='hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary'
-                    to={option.to}
+                    onClick={handleSignOut}
                   >
-                    {option.title}
-                  </Link>
+                    Sign out
+                  </button>
                 </li>
-              ))}
-              <li className='rounded'>
-                <button
-                  className='hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary'
-                  onClick={handleSignOut}
-                >
-                  Sign out
-                </button>
-              </li>
-            </ul>
+              </ul>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {isAuthenticated === AuthenticateState.NOT_AUTHENTICATED && (
+        <div className='flex gap-1'>
+          <button className='btn btn-primary flex-1' onClick={() => navigate(path.login)}>
+            Login
+          </button>
+          <button className='btn btn-neutral flex-1' onClick={() => navigate(path.register)}>
+            Sign up
+          </button>
+        </div>
+      )}
     </div>
   )
 }

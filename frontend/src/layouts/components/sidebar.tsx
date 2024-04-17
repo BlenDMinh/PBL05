@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { path } from 'src/constants/path'
 import { AppContext, AppContextType, AuthenticateState } from 'src/contexts/app.context'
-import { sidebarOption } from 'src/data/layout'
+import { publicSidebarOption, sidebarOption } from 'src/data/layout'
 import { HiBars3, HiArrowRightOnRectangle } from 'react-icons/hi2'
 import { clearLS } from 'src/utils/auth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -14,7 +14,7 @@ import { number } from 'yup'
 export interface SidebarProps {}
 
 export default function Sidebar(props: SidebarProps) {
-  const { showSidebar, setIsAuthenticated, setUser } = useContext<AppContextType>(AppContext)
+  const { showSidebar, setIsAuthenticated, setUser, isAuthenticated } = useContext<AppContextType>(AppContext)
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
@@ -22,7 +22,7 @@ export default function Sidebar(props: SidebarProps) {
     clearLS()
     setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
     setUser(null)
-    navigate(path.login)
+    navigate(path.home)
   }
   const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth)
 
@@ -48,7 +48,7 @@ export default function Sidebar(props: SidebarProps) {
 
       <div
         className={classNames('overflow-y-clip h-[100vh]', {
-          'drawer-side': window.innerWidth < 640
+          'drawer-side': windowWidth < 640
         })}
       >
         <label htmlFor='my-drawer-2' aria-label='close sidebar' className='drawer-overlay'></label>
@@ -77,39 +77,43 @@ export default function Sidebar(props: SidebarProps) {
               </Link>
             </div>
             <div className='flex flex-col gap-1'>
-              {sidebarOption.map(({ icon: Icon, id, title, to }) => (
-                <li key={id}>
-                  <Link
-                    className={classNames(
-                      'text-base-content text-nowrap hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary active:!text-white',
-                      {
-                        'tooltip tooltip-right': !showSidebar,
-                        'bg-primary text-white': matchPath(pathname, to)
-                      }
-                    )}
-                    to={to}
-                    data-tip={title}
-                  >
-                    <Icon className='h-6 w-6' />
-                    {showSidebar && title}
-                  </Link>
-                </li>
-              ))}
+              {(isAuthenticated === AuthenticateState.AUTHENTICATED ? sidebarOption : publicSidebarOption).map(
+                ({ icon: Icon, id, title, to }) => (
+                  <li key={id}>
+                    <Link
+                      className={classNames(
+                        'text-base-content text-nowrap hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary active:!text-white',
+                        {
+                          'tooltip tooltip-right': !showSidebar,
+                          'bg-primary text-white': matchPath(pathname, to)
+                        }
+                      )}
+                      to={to}
+                      data-tip={title}
+                    >
+                      <Icon className='h-6 w-6' />
+                      {showSidebar && title}
+                    </Link>
+                  </li>
+                )
+              )}
             </div>
           </div>
 
-          <li>
-            <button
-              className={`text-base-content hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary active:!text-white ${
-                !showSidebar && 'tooltip tooltip-right'
-              }`}
-              data-tip={'Sign out'}
-              onClick={handleSignOut}
-            >
-              <HiArrowRightOnRectangle className='h-6 w-6' />
-              {showSidebar && 'Sign out'}
-            </button>
-          </li>
+          {isAuthenticated === AuthenticateState.AUTHENTICATED && (
+            <li>
+              <button
+                className={`text-base-content hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary active:!text-white ${
+                  !showSidebar && 'tooltip tooltip-right'
+                }`}
+                data-tip={'Sign out'}
+                onClick={handleSignOut}
+              >
+                <HiArrowRightOnRectangle className='h-6 w-6' />
+                {showSidebar && 'Sign out'}
+              </button>
+            </li>
+          )}
         </ul>
       </div>
     </div>

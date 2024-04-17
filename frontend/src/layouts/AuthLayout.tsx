@@ -7,12 +7,12 @@ import { ReactWithChild } from 'src/interface/app'
 export default function AuthLayout({ children }: ReactWithChild) {
   return (
     <div className='grid min-h-screen'>
-      <section className='col-span-full flex flex-col justify-between lg:p-2 bg-base'>
+      <section className='col-span-full flex flex-col justify-between lg:p-4 bg-base'>
         <div className='ml-2 md:ml-0 flex items-center'>
           <Link to={path.home}>
-            <FontAwesomeIcon icon={faChessKing} size='6x' style={{ color: '#0066CC' }} />
+            <FontAwesomeIcon icon={faChessKing} size='4x' style={{ color: '#0066CC' }} />
           </Link>
-          <div className='ml-4 flex flex-col pt-10'>
+          <div className='ml-4 flex flex-col'>
             <h3 className='pl-0 text-4xl font-semibold md:pl-8 xl:pl-0'>
               CH<span className='text-primary'>ESS</span>
             </h3>

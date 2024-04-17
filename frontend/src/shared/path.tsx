@@ -56,14 +56,14 @@ export const GAME_ROUTES: RouteObject[] = [
   {
     path: path.pvp,
     element: <Game />
-  },
-  {
-    path: path.quickMatch,
-    element: <QuickMatch />
   }
 ]
 
 export const GAME_V2_ROUTES: RouteObject[] = [
+  {
+    path: path.quickMatch,
+    element: <QuickMatch />
+  },
   {
     path: path.playWithBot,
     element: <PlayWithBot />

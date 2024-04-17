@@ -43,3 +43,12 @@ export const sidebarOption: SidebarOption[] = [
     icon: FaUserFriends
   }
 ]
+
+export const publicSidebarOption: SidebarOption[] = [
+  {
+    id: 1,
+    title: 'Home',
+    to: path.home,
+    icon: FaHome
+  },
+]

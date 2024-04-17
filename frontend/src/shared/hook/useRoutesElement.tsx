@@ -2,16 +2,14 @@ import { RouteObject, useRoutes } from 'react-router-dom'
 import { AUTH_ROUTER, GAME_ROUTES, GAME_V2_ROUTES, PRIVATE_ROUTER } from '../path'
 
 // component
-import { Children, Suspense, lazy } from 'react'
+import { Suspense, lazy } from 'react'
 import { RouteLazy } from '../../interface/app'
 import NotFoundPage from '../../pages/not-found'
 import PrivateRoutes from '../../routes/PrivateRoutes'
 import AuthRoutes from 'src/routes/AuthRoutes'
 import { path } from 'src/constants/path'
 import GameRoutes from 'src/routes/GameRoutes'
-import GameV2 from 'src/pages/gamev2/GameV2'
 import GameV2Routes from 'src/routes/GameV2Routes'
-import Chat from 'src/pages/chat/Chat'
 
 interface RouteElement {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
