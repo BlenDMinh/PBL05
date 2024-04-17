@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import { useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { AppContext, AppContextType } from 'src/contexts/app.context'
+import { AppContext, AppContextType, AuthenticateState } from 'src/contexts/app.context'
 import { quickOptionsNavbar } from 'src/data/layout'
 import { HiChevronDoubleLeft, HiOutlineBell } from 'react-icons/hi2'
 import Button from 'src/components/button/Button'
@@ -19,7 +19,7 @@ export default function Navbar(props: NavbarProps) {
 
   const handleSignOut = () => {
     clearLS()
-    setIsAuthenticated(false)
+    setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
     setUser(null)
     navigate(path.login)
   }
@@ -27,7 +27,7 @@ export default function Navbar(props: NavbarProps) {
   return (
     <div
       className={classNames('navbar fixed z-10 h-16 justify-between bg-base-200 py-2 px-16', {
-        'lg:pl-[19rem]': showSidebar,
+        'lg:pl-[16rem]': showSidebar,
         'lg:pl-24': !showSidebar
       })}
     >

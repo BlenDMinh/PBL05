@@ -9,7 +9,7 @@ import { clearLS } from 'src/utils/auth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChessKing } from '@fortawesome/free-solid-svg-icons'
 import { matchPath } from 'react-router-dom'
-import './sidebar.css'
+
 export interface SidebarProps {}
 
 export default function Sidebar(props: SidebarProps) {
@@ -32,7 +32,11 @@ export default function Sidebar(props: SidebarProps) {
         </label>
       </div>
 
-      <div className='h-[100vh] overflow-y-clip'>
+      <div
+        className={classNames('overflow-y-clip h-[100vh]', {
+          'drawer-side': window.innerWidth < 640
+        })}
+      >
         <label htmlFor='my-drawer-2' aria-label='close sidebar' className='drawer-overlay'></label>
         <ul
           className={classNames(
