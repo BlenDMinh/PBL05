@@ -4,9 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import modules.profile.dto.GameHistoryDto;
+import modules.profile.dto.PaginationGameHistoryDto;
 import modules.profile.dto.PlayerDto;
 import utils.ConnectionPool;
 
@@ -41,4 +46,69 @@ public class ProfileRepository {
         }
         return playerDto;
     }
+
+    public int countGameHistoryByPlayerId(int playerId) {
+        int result = 0;
+        String query = "select count(*) from games"
+                + " where (player1_id = ? or player2_id = ?)"
+                + " and status in (2,3,4)";
+        Connection conn = null;
+        try {
+            conn = ConnectionPool.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, playerId);
+            stmt.setInt(2, playerId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                result = rs.getInt(1);
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            if (conn != null) {
+                ConnectionPool.releaseConnection(conn);
+            }
+        }
+        return result;
+    }
+
+    public PaginationGameHistoryDto getPaginationGameHistoryByPlayerId(int playerId, int page, int size) {
+        List<GameHistoryDto> gameHistoryDtos = new ArrayList<>();
+        String query = "select * from games"
+                + " where (player1_id = ? or player2_id = ?)"
+                + " and status in (2,3,4)"
+                + " order by created_at asc"
+                + " offset ? limit ?";
+        int totalElements = 0, totalPages = 0;
+        Connection conn = null;
+        try {
+            conn = ConnectionPool.getConnection();
+            totalElements = this.countGameHistoryByPlayerId(playerId);
+            totalPages = (int) Math.ceil((double) totalElements / size);
+            int upToFull = totalPages * size - totalElements;
+            int offset = 0;
+            if (totalElements >= size) {
+                offset = (totalPages - page) * size - upToFull;
+            }
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setInt(1, playerId);
+            stmt.setInt(2, playerId);
+            stmt.setInt(3, offset);
+            stmt.setInt(4, size);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                gameHistoryDtos.add(new GameHistoryDto(rs));
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            // Release resources in a finally block
+            if (conn != null) {
+                ConnectionPool.releaseConnection(conn);
+            }
+        }
+        Collections.reverse(gameHistoryDtos);
+        return new PaginationGameHistoryDto(gameHistoryDtos, totalPages, totalElements);
+    }
+
 }

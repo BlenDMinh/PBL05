@@ -1,4 +1,4 @@
-package api.profile.player;
+package api.profile.info;
 
 import java.io.IOException;
 
@@ -15,8 +15,8 @@ import modules.profile.service.ProfileService;
 import utils.RequestUtils;
 import utils.ResponseUtils;
 
-@WebServlet("/profile/player/*")
-public class PlayerProfileServlet extends HttpServlet {
+@WebServlet("/profile/info/*")
+public class ProfileInfoServlet extends HttpServlet {
     final RequestUtils requestUtils = new RequestUtils();
     final ResponseUtils responseUtils = new ResponseUtils();
     final ProfileService profileService = new ProfileService();
