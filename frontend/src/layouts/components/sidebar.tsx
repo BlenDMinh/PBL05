@@ -48,7 +48,7 @@ export default function Sidebar(props: SidebarProps) {
 
       <div
         className={classNames('overflow-y-clip h-[100vh]', {
-          'drawer-side': windowWidth < 640
+          'drawer-side': windowWidth < 1024
         })}
       >
         <label htmlFor='my-drawer-2' aria-label='close sidebar' className='drawer-overlay'></label>

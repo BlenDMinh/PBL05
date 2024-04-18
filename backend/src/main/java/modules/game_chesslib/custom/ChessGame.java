@@ -31,7 +31,7 @@ public class ChessGame {
     public ChessGame(String id, int humanId, GameDifficulty difficulty, boolean botWhite){
         this.id = id;
         this.player1 = new UserPlayer(humanId, this, !botWhite);
-        this.player2 = new BotPlayer(this, botWhite);
+        this.player2 = new BotPlayer(this, botWhite, difficulty);
         this.board = new Board();
     }
 }

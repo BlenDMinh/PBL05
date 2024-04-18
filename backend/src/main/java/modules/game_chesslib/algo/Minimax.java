@@ -38,6 +38,7 @@ public class Minimax {
                     childBoard.loadFromFen(board.getFen());
                     childBoard.doMove(newGameMove);
                     return alphaBeta(depth - 1, childBoard, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, false);
+                    // return minimax(depth, board, false);
                 };
             };
             future = executor.submit(callable);
@@ -98,6 +99,56 @@ public class Minimax {
             }
             return bestMove;
         }
+    }
+
+    double minimax(int depth, Board board, boolean isMaximisingPlayer) {
+        if (depth == 0) {
+            return -evaluateBoard(board);
+        }
+        List<Move> newGameMoves = board.legalMoves();
+        Collections.shuffle(newGameMoves);
+        ExecutorService executor = Executors
+                .newFixedThreadPool(Math.min(newGameMoves.size(),
+                        Runtime.getRuntime().availableProcessors()));
+        double bestMove = Double.NEGATIVE_INFINITY;
+        double worstMove = Double.POSITIVE_INFINITY;
+
+        List<Future<Double>> futures = new ArrayList<>();
+        Callable<Double> callable;
+        Future<Double> future;
+        for (Move newGameMove : newGameMoves) {
+            callable = new Callable<Double>() {
+                public Double call() throws Exception {
+                    Board childBoard = new Board();
+                    childBoard.loadFromFen(board.getFen());
+                    childBoard.doMove(newGameMove);
+                    return minimax(depth - 1, childBoard, !isMaximisingPlayer);
+                };
+            };
+            future = executor.submit(callable);
+            futures.add(future);
+        }
+        executor.shutdown();
+        while (!executor.isTerminated()) {
+            // Running ...
+        }
+        for (int i = 0; i < futures.size(); i++) {
+            try {
+                double value = futures.get(i).get();
+                if (isMaximisingPlayer) {
+                    if (value > bestMove) {
+                        bestMove = value;
+                    }
+                } else {
+                    if (value < worstMove) {
+                        worstMove = value;
+                    }
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            }
+        }
+        return isMaximisingPlayer ? bestMove : worstMove;
     }
 
     public static double evaluateBoard(Board board) {
