@@ -22,7 +22,7 @@ export interface AppContextType {
 const initAppContext: AppContextType = {
   isAuthenticated: AuthenticateState.UNKNOWN,
   setIsAuthenticated: () => null,
-  showSidebar: true,
+  showSidebar: false,
   setShowSidebar: () => null,
   user: getProfileFromLS(),
   setUser: () => null

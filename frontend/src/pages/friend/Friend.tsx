@@ -1,11 +1,3 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { FaSearch } from 'react-icons/fa'
-import { getProfileFromLS } from 'src/utils/auth'
-import { useQuery } from 'react-query'
-import { Friend as FriendType } from 'src/types/users.type'
-import friendApi from 'src/apis/friend.api'
-import YourFriend from './components/YourFriend'
 import FriendList from './components/FriendList'
 import RequestList from './components/RequestList'
 export interface Friend {}

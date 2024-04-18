@@ -3,6 +3,7 @@ import { AppContext, AppContextType, AuthenticateState } from 'src/contexts/app.
 import { Link } from 'react-router-dom'
 import { FaClock, FaRobot, FaUser } from 'react-icons/fa'
 import { path } from 'src/constants/path'
+import GameHistory from '../profile/components/GameHistory'
 
 export default function Home() {
   const { user, isAuthenticated } = useContext<AppContextType>(AppContext)
@@ -27,7 +28,7 @@ export default function Home() {
           </div>
         </div>
       )}
-      <div className='flex w-full gap-10 h-96'>
+      <div className='flex w-full gap-10 h-96 px-16'>
         <div className='flex flex-col w-1/3 h-full justify-evenly gap-10'>
           <Link className='btn bg-base-200 w-full h-1/4 border-b-8 border-base-300' to={path.quickMatch}>
             <span className='text-base-content font-bold text-xl flex gap-2 items-center'>
@@ -82,8 +83,8 @@ export default function Home() {
       {isAuthenticated === AuthenticateState.AUTHENTICATED && (
         <div className='w-full flex flex-col gap-5'>
           <span className='w-full text-base-content font-bold text-2xl'>Your games</span>
-          <div className='w-full flex justify-center bg-base-300 rounded-lg p-5'>
-            <span className='font-bold text-xl'>You haven't play any game yet</span>
+          <div className='px-16'>
+            <GameHistory id={user?.id} />
           </div>
         </div>
       )}
