@@ -134,6 +134,10 @@ public class ChatRepository {
             if (totalElements >= size) {
                 offset = (totalPages - page) * size - upToFull;
             }
+            if (offset < 0){
+                size = size + offset;
+                offset = 0;
+            }
             PreparedStatement stmt = conn.prepareStatement(query);
             stmt.setInt(1, user1);
             stmt.setInt(2, user2);

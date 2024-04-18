@@ -78,6 +78,10 @@ public class FriendRepository {
             if (totalElements >= size) {
                 offset = (totalPages - page) * size - upToFull;
             }
+            if (offset < 0){
+                size = size + offset;
+                offset = 0;
+            }
             PreparedStatement stmt = conn.prepareStatement(sql);
             stmt.setInt(1, receiverId);
             stmt.setInt(2, offset);
