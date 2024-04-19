@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/aria-role */
 import Chessground from '@react-chess/chessground'
 import { useEffect } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -16,6 +17,8 @@ import profileApi from 'src/apis/profile.api'
 import { useQuery } from 'react-query'
 import { getProfileFromLS } from 'src/utils/auth'
 import GameProfile from './components/GameProfile'
+import PromotionModal from './components/PromotionModal'
+import ResultModal from './components/ResultModal'
 
 export interface BaseGameProps {
   gameType: GameType
@@ -32,6 +35,8 @@ export default function BaseGame(props: BaseGameProps) {
 
   useEffect(() => {
     game.startGame(gameId ?? uuidv4(), props.gameType)
+    const modal = document.getElementById('resultModal') as HTMLDialogElement
+    modal.close()
   }, [gameId])
 
   useEffect(() => {
@@ -67,7 +72,9 @@ export default function BaseGame(props: BaseGameProps) {
           <div className='h-24 w-full flex items-center gap-5 border-2 rounded-lg border-base-300  bg-base-200 p-2'>
             <GameProfile profile={opponentQuery.data?.data} role='Opponent' />
           </div>
-          <div className='flex-1 border-base-300 rounded-lg border'>Timer</div>
+          <button className='btn' onClick={() => game.resign()}>
+            Resign
+          </button>
           <div className='h-24 w-full flex items-center gap-5 border-2 rounded-lg border-base-300 bg-base-200 p-2'>
             <GameProfile profile={player} role='You' />
           </div>
@@ -101,7 +108,14 @@ export default function BaseGame(props: BaseGameProps) {
             }}
           />
         </div>
-        {props.gameType == GameType.PVP ? (
+        <div className='flex w-1/4 h-full border-2 rounded-lg border-base-300 bg-base-200'>
+          {game.moveHistories.map((move) => (
+            <div key={'aaaaaaa'} className='flex gap-5'>
+              {move.from} {move.to} {move.piece} {move.promotiom}
+            </div>
+          ))}
+        </div>
+        {/* {props.gameType == GameType.PVP ? (
           <ChatContextProvider>
             <div className='flex w-1/4 h-full border-2 rounded-lg border-base-300 bg-base-200'>
               {game.opponentId ? <ChatBox id={game.opponentId} /> : <span className='loading loading-spinner' />}
@@ -109,67 +123,19 @@ export default function BaseGame(props: BaseGameProps) {
           </ChatContextProvider>
         ) : (
           <></>
-        )}
+        )} */}
       </div>
-      <dialog id='promotionModal' className='modal'>
-        <div className='modal-box'>
-          <h3 className='font-bold text-lg'>Promotion</h3>
-          <p className='py-4'>Choose one of the following piece</p>
-          <form method='dialog'>
-            <div className='w-full flex justify-evenly gap-5'>
-              <button className='btn btn-primary flex-1' onClick={() => game.promote('q')}>
-                Queen
-              </button>
-              <button className='btn btn-primary flex-1' onClick={() => game.promote('n')}>
-                Knight
-              </button>
-              <button className='btn btn-primary flex-1' onClick={() => game.promote('b')}>
-                Bishop
-              </button>
-              <button className='btn btn-primary flex-1' onClick={() => game.promote('r')}>
-                Rook
-              </button>
-            </div>
-            <button className='btn modal-action' onClick={() => game.promote()}>
-              Cancel
-            </button>
-          </form>
-        </div>
-      </dialog>
-      <dialog id='resultModal' className='modal'>
-        <div className='modal-box'>
-          <h3 className='font-bold text-lg text-center'>Game ended</h3>
-          <p
-            className={classNames('text-center text-6xl font-bold py-12', {
-              'text-info': game.result == GameResult.WIN,
-              'text-error': game.result == GameResult.LOSE,
-              'text-accent': game.result == GameResult.DRAW,
-              'text-base-content': game.result == GameResult.UNKNOWN
-            })}
-          >
-            {game.result == GameResult.WIN
-              ? 'WIN'
-              : game.result == GameResult.LOSE
-              ? 'LOSE'
-              : game.result == GameResult.DRAW
-              ? 'DRAW'
-              : 'IDK'}
-          </p>
-          <form method='dialog'>
-            <div className='w-full flex justify-evenly gap-5'>
-              <button
-                className='btn btn-primary flex-1 text-lg'
-                onClick={() => navigate(props.gameType == GameType.PVP ? path.quickMatch : path.playWithBot)}
-              >
-                Play again
-              </button>
-              <button className='btn flex-1 text-lg' onClick={() => navigate(path.home)}>
-                Exit
-              </button>
-            </div>
-          </form>
-        </div>
-      </dialog>
+      <PromotionModal />
+      <ResultModal
+        onReplay={() => {
+          game.onEnd()
+          navigate(props.gameType == GameType.PVP ? path.quickMatch : path.playWithBot)
+        }}
+        onExit={() => {
+          game.onEnd()
+          navigate(path.home)
+        }}
+      />
     </>
   )
 }
