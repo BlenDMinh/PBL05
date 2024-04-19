@@ -1,5 +1,4 @@
 package modules.game_chesslib.common.nested;
-
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -12,8 +11,9 @@ import modules.game_chesslib.custom.MoveHistory;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class MoveResponse {
+public class ResignResponse {
     String fen;
     boolean white;
+    boolean resignSide;
     List<MoveHistory> moveHistories;
 }

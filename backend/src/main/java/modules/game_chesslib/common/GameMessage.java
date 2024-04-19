@@ -15,6 +15,7 @@ public final class GameMessage {
     public static final String UNKNOWN = "Unknown message";
     public static final String INVALID_MOVE = "Invalid move";
     public static final String HUMAN_JOIN = "Human join";
+    public static final String RESIGN = "Resign";
     
     public static final String PROMOTION = "Promotion";
     public static final String DRAW = "Draw";

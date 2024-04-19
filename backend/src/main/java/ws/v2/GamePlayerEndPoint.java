@@ -29,6 +29,7 @@ import modules.game_chesslib.common.MessageDecoder;
 import modules.game_chesslib.common.MessageEncoder;
 import modules.game_chesslib.common.nested.MoveResponse;
 import modules.game_chesslib.common.nested.PlayerJoinedResponse;
+import modules.game_chesslib.common.nested.ResignResponse;
 import modules.game_chesslib.custom.GameRule;
 import modules.game_chesslib.custom.player.GamePlayer;
 import modules.game_chesslib.dto.GameDto;
@@ -97,7 +98,7 @@ public class GamePlayerEndPoint {
             GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
                     new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                             chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                            gameHumanDto));
+                            gameHumanDto, chessGame.getMoveHistories()));
             sendToAllPlayer(resp);
             if (player2Session != null) {
                 String player2SessionId = (String) player2Session.getUserProperties().get("sid");
@@ -112,7 +113,7 @@ public class GamePlayerEndPoint {
                 GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                gameHumanDto2));
+                                gameHumanDto2, chessGame.getMoveHistories()));
                 playerSession.getAsyncRemote().sendObject(resp2);
             }
         } else if (chessGame.getPlayer2().getId() == userId) {
@@ -124,7 +125,7 @@ public class GamePlayerEndPoint {
             GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
                     new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                             chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                            gameHumanDto));
+                            gameHumanDto, chessGame.getMoveHistories()));
             sendToAllPlayer(resp);
             if (player1Session != null) {
                 String player1SessionId = (String) player1Session.getUserProperties().get("sid");
@@ -139,7 +140,7 @@ public class GamePlayerEndPoint {
                 GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                gameHumanDto1));
+                                gameHumanDto1, chessGame.getMoveHistories()));
                 playerSession.getAsyncRemote().sendObject(resp2);
             }
         }
@@ -170,11 +171,12 @@ public class GamePlayerEndPoint {
                         validMove = false;
                     }
                     if (validMove) {
+                        chessGame.addMoveHistory(chessMove);
                         chessGame.getBoard().doMove(chessMove);
                         sendToAllPlayer(
                                 new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
-                        postCheck();
+                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
+                                        postCheck();
                         return;
                     }
                 }
@@ -198,16 +200,33 @@ public class GamePlayerEndPoint {
                         validMove = false;
                     }
                     if (validMove) {
+                        chessGame.addMoveHistory(chessMove);
                         chessGame.getBoard().doMove(chessMove);
                         sendToAllPlayer(
                                 new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
                         postCheck();
                         return;
                     }
                 }
                 playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
                 break;
+
+            case GameMessage.RESIGN:
+                String sessionId = (String) playerSession.getUserProperties().get("sid");
+                stores.session.Session session = SimpleSessionManager.getInstance()
+                        .getSession(sessionId);
+                UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO,
+                        UserPasswordDto.class);
+                GamePlayer gamePlayer = userPasswordDto.getId() == chessGame.getPlayer1().getId()
+                        ? chessGame.getPlayer1()
+                        : chessGame.getPlayer2();
+                boolean resignSide = gamePlayer.isWhite();
+                sendToAllPlayer(
+                        new GameMessageDto(GameMessage.RESIGN, new ResignResponse(chessGame.getBoard().getFen(),
+                                chessGame.getBoard().getSideToMove().equals(Side.WHITE), resignSide, chessGame.getMoveHistories())));
+                break;
+
             default:
                 playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.UNKNOWN));
                 return;
@@ -220,7 +239,7 @@ public class GamePlayerEndPoint {
             sendToAllPlayer(new GameMessageDto(GameMessage.DRAW));
         } else if (chessGame.getBoard().isMated()) {
             sendToAllPlayer(new GameMessageDto(GameMessage.MATE, new MoveResponse(chessGame.getBoard().getFen(),
-                    chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                    chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
         }
     }
 

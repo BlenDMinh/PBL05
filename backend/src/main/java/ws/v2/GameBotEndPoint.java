@@ -79,19 +79,19 @@ public class GameBotEndPoint {
         playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.PLAYER_JOINED,
                 new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                         chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                        gameHumanDto)));
+                        gameHumanDto, chessGame.getMoveHistories())));
         playerSession.getBasicRemote()
                 .sendObject(new GameMessageDto(GameMessage.BOT_JOINED,
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                gameBotDto)));
+                                gameBotDto, chessGame.getMoveHistories())));
         if (botPlayer.isWhite()) {
             Move bestMove = bot.getBestMove(botPlayer.getDifficulty().getValue(),
                     chessGame.getBoard());
             chessGame.getBoard().doMove(bestMove);
             sendToAllPlayer(
                     new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                            chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                            chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
         }
     }
 
@@ -125,13 +125,13 @@ public class GameBotEndPoint {
                     chessGame.getBoard().doMove(chessMove);
                     sendToAllPlayer(
                             new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
                     Move bestMove = bot.getBestMove(((BotPlayer) chessGame.getPlayer2()).getDifficulty().getValue(),
                             chessGame.getBoard());
                     chessGame.getBoard().doMove(bestMove);
                     sendToAllPlayer(
                             new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
                     postCheck();
                     return;
                 } else {
@@ -162,18 +162,24 @@ public class GameBotEndPoint {
                     chessGame.getBoard().doMove(chessMove);
                     sendToAllPlayer(
                             new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
                     Move bestMove = bot.getBestMove(((BotPlayer) chessGame.getPlayer2()).getDifficulty().getValue(),
                             chessGame.getBoard());
                     chessGame.getBoard().doMove(bestMove);
                     sendToAllPlayer(
                             new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
                     postCheck();
                     return;
                 } else {
                     playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
                 }
+                break;
+
+            case GameMessage.RESIGN:
+                sendToAllPlayer(
+                        new GameMessageDto(GameMessage.RESIGN, new MoveResponse(chessGame.getBoard().getFen(),
+                                chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
                 break;
             default:
                 playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.UNKNOWN));
@@ -192,7 +198,7 @@ public class GameBotEndPoint {
             sendToAllPlayer(new GameMessageDto(GameMessage.DRAW));
         } else if (chessGame.getBoard().isMated()) {
             sendToAllPlayer(new GameMessageDto(GameMessage.MATE, new MoveResponse(chessGame.getBoard().getFen(),
-                    chessGame.getBoard().getSideToMove().equals(Side.WHITE))));
+                    chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
         }
     }
 

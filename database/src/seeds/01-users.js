@@ -22,6 +22,7 @@ exports.seed = async function (knex) {
     avatar_url: fakerVI.image.avatar(),
     status: USER_STATUS.ACTIVE,
     role: USER_ROLE.USER_ROLE,
+    elo: Math.floor(Math.random() * 1000) + 1000,
   }));
   await knex(tableName).insert(users);
   await knex(tableName).insert([

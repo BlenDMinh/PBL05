@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import common.GameStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import modules.game_chesslib.common.GameStatus;
 
 @Getter
 @Setter
