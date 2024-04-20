@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.websocket.Session;
+
 import com.github.bhlangonijr.chesslib.Board;
 import com.github.bhlangonijr.chesslib.move.Move;
 
@@ -30,6 +32,8 @@ public class ChessGame {
 
     List<MoveHistory> moveHistories = new ArrayList<>();
     Date player1StartTime, player2StartTime, player1LastTime, player2LastTime;
+
+    Session player1Session, player2Session;
 
     public ChessGame(String id, int player1Id, int player2Id) {
         this.id = id;

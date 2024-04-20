@@ -19,7 +19,7 @@ public class GameService {
 
     public boolean isValidGame(GameDto gameDto) throws SQLException, Exception {
         return gameDto != null
-                && (gameDto.getStatus() == GameStatus.WAITING || gameDto.getStatus() == GameStatus.PLAYER1_WIN);
+                && (gameDto.getStatus().equals(GameStatus.WAITING) || gameDto.getStatus().equals(GameStatus.PLAYING));
     }
 
     public GameDto getById(String id) throws SQLException, Exception {

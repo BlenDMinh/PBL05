@@ -46,7 +46,7 @@ public class GamePlayerEndPoint {
     private final Logger logger = Logger.getLogger("GamePlayerEndpoint");
     private final GameService gameService = new GameService();
     private final Gson gson = new Gson();
-    static Session player1Session, player2Session;
+    private Session player1Session, player2Session;
     private ChessGame chessGame;
 
     @OnOpen
@@ -66,6 +66,8 @@ public class GamePlayerEndPoint {
         UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
         if (GameStore.getInstance().isGameExist(id)) {
             chessGame = GameStore.getInstance().getGameById(id);
+            player1Session = chessGame.getPlayer1Session();
+            player2Session = chessGame.getPlayer2Session();
         }
         GameDto gameDto = gameService.getById(id);
         boolean isValidGame = gameService.isValidGame(gameDto);
@@ -91,7 +93,8 @@ public class GamePlayerEndPoint {
 
         if (chessGame.getPlayer1().getId() == userId) {
             playerSession.getUserProperties().put("sid", sessionId);
-            player1Session = playerSession;
+            chessGame.setPlayer1Session(playerSession);
+            player1Session = chessGame.getPlayer1Session();
             GameHumanDto gameHumanDto = modelMapper.map(userPasswordDto,
                     GameHumanDto.class);
             gameHumanDto.setWhite(chessGame.getPlayer1().isWhite());
@@ -118,7 +121,8 @@ public class GamePlayerEndPoint {
             }
         } else if (chessGame.getPlayer2().getId() == userId) {
             playerSession.getUserProperties().put("sid", sessionId);
-            player2Session = playerSession;
+            chessGame.setPlayer2Session(playerSession);
+            player2Session = chessGame.getPlayer2Session();
             GameHumanDto gameHumanDto = modelMapper.map(userPasswordDto,
                     GameHumanDto.class);
             gameHumanDto.setWhite(chessGame.getPlayer2().isWhite());
@@ -175,8 +179,9 @@ public class GamePlayerEndPoint {
                         chessGame.getBoard().doMove(chessMove);
                         sendToAllPlayer(
                                 new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
-                                        postCheck();
+                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                                        chessGame.getMoveHistories())));
+                        postCheck();
                         return;
                     }
                 }
@@ -204,7 +209,8 @@ public class GamePlayerEndPoint {
                         chessGame.getBoard().doMove(chessMove);
                         sendToAllPlayer(
                                 new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
+                                        chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                                        chessGame.getMoveHistories())));
                         postCheck();
                         return;
                     }
@@ -224,7 +230,8 @@ public class GamePlayerEndPoint {
                 boolean resignSide = gamePlayer.isWhite();
                 sendToAllPlayer(
                         new GameMessageDto(GameMessage.RESIGN, new ResignResponse(chessGame.getBoard().getFen(),
-                                chessGame.getBoard().getSideToMove().equals(Side.WHITE), resignSide, chessGame.getMoveHistories())));
+                                chessGame.getBoard().getSideToMove().equals(Side.WHITE), resignSide,
+                                chessGame.getMoveHistories())));
                 break;
 
             default:
@@ -284,10 +291,10 @@ public class GamePlayerEndPoint {
 
     @OnClose
     public void handleClose(Session session) throws IOException {
-        if (session.equals(player1Session)) {
-            player1Session = null;
-        } else if (session.equals(player2Session)) {
-            player2Session = null;
+        if (session.equals(chessGame.getPlayer1Session())) {
+            chessGame.setPlayer1Session(null);
+        } else if (session.equals(chessGame.getPlayer2Session())) {
+            chessGame.setPlayer2Session(null);
         }
     }
 }
