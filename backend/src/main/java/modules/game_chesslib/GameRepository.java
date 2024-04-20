@@ -8,6 +8,7 @@ import java.sql.Statement;
 
 import org.apache.log4j.Logger;
 
+import common.GameStatus;
 import modules.game_chesslib.dto.GameDto;
 import utils.ConnectionPool;
 
@@ -17,7 +18,7 @@ public class GameRepository {
     public String createOne(int firstId, int secondId, int rulesetId) throws Exception {
         Connection conn = null;
         String gameId = null;
-        String sql = "insert into games (player1_id, player2_id, ruleset_id) VALUES (?, ?, ?)";
+        String sql = "insert into games (player1_id, player2_id, ruleset_id, status) VALUES (?, ?, ?, ?)";
         try {
             conn = ConnectionPool.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
@@ -25,6 +26,7 @@ public class GameRepository {
             stmt.setInt(1, firstId);
             stmt.setInt(2, secondId);
             stmt.setInt(3, rulesetId);
+            stmt.setInt(4, GameStatus.WAITING.getValue());
             stmt.executeUpdate();
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
