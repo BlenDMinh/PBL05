@@ -30,7 +30,7 @@ function App() {
           <p className='font-bold'>Please manually accept our server by following these steps:</p>
           <div className='flex flex-col justify-evenly'>
             <div>
-              1. Click on Advanced (or More)
+              1. Go to <a href={import.meta.env.VITE_API_URL}>{import.meta.env.VITE_API_URL}</a> and click on Advanced (or More)
               <img className='rounded-lg border-2 border-base-300' src="/cert-step-1.png" alt="" />
             </div>
             <div>
