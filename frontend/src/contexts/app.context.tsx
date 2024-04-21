@@ -4,6 +4,7 @@ import HttpStatusCode from 'src/constants/httpStatusCode.enum'
 import { ReactWithChild } from 'src/interface/app'
 import { User } from 'src/types/users.type'
 import { clearLS, getAccessTokenFromLS, getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
+import http from 'src/utils/http'
 
 export enum AuthenticateState {
   UNKNOWN,
@@ -11,7 +12,8 @@ export enum AuthenticateState {
   AUTHENTICATED
 }
 export interface AppContextType {
-  isAuthenticated: AuthenticateState
+  isAuthenticated: AuthenticateState,
+  certAuthenticated: boolean | undefined
   setIsAuthenticated: React.Dispatch<React.SetStateAction<AuthenticateState>>
   showSidebar: boolean
   setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>
@@ -21,6 +23,7 @@ export interface AppContextType {
 
 const initAppContext: AppContextType = {
   isAuthenticated: AuthenticateState.UNKNOWN,
+  certAuthenticated: undefined,
   setIsAuthenticated: () => null,
   showSidebar: false,
   setShowSidebar: () => null,
@@ -31,6 +34,7 @@ const initAppContext: AppContextType = {
 export const AppContext = createContext<AppContextType>(initAppContext)
 
 const AppContextProvider = ({ children }: ReactWithChild) => {
+  const [certAuthenticated, setCertAuthenticated] = useState<boolean | undefined>(undefined)
   const [isAuthenticated, setIsAuthenticated] = useState<AuthenticateState>(initAppContext.isAuthenticated)
   const [showSidebar, setShowSidebar] = useState<boolean>(initAppContext.showSidebar)
   const [user, setUser] = useState<User | null>(initAppContext.user)
@@ -49,10 +53,20 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
       setUser(null)
       clearLS()
     })
+
+    http.get('/').then((res) => {
+      if (res.status === HttpStatusCode.Ok) {
+        setCertAuthenticated(true)
+      } else {
+        setCertAuthenticated(false)
+      }
+    }).catch((e) => {
+      setCertAuthenticated(false)
+    })
   }, [])
 
   return (
-    <AppContext.Provider value={{ isAuthenticated, setIsAuthenticated, showSidebar, setShowSidebar, user, setUser }}>
+    <AppContext.Provider value={{ isAuthenticated, certAuthenticated, setIsAuthenticated, showSidebar, setShowSidebar, user, setUser }}>
       {children}
     </AppContext.Provider>
   )
