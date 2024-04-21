@@ -14,7 +14,6 @@
     "lint:fix": "eslint --fix --ext ts,tsx src/",
     "prettier": "prettier --check \"src/**/(*.tsx|*.ts|*.css|*.scss)\"",
     "prettier:fix": "prettier --write \"src/**/(*.tsx|*.ts|*.css|*.scss)\"",
-    "prepare": "cd .. && husky install frontend/.husky",
     "lint-staged": "lint-staged",
     "lint-pass": "echo 'Format code complete'"
   },
