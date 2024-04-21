@@ -25,21 +25,19 @@ function App() {
       <dialog id="certModal" className="modal">
         <div className="modal-box w-11/12 max-w-5xl">
           <h3 className="font-bold text-xl">Opps</h3>
-          <p>It seems that our developers forgot to get a SSL Certificate</p>
-          <br />
-          <p className='font-bold'>Please manually accept our server by following these steps:</p>
+          <p>It seems that our developers forgot to get a SSL Certificate. Please manually accept our server by following these steps:</p>
           <div className='flex flex-col justify-evenly'>
-            <div>
-              1. Go to <a href={import.meta.env.VITE_API_URL}>{import.meta.env.VITE_API_URL}</a> and click on Advanced (or More)
-              <img className='rounded-lg border-2 border-base-300' src="/cert-step-1.png" alt="" />
+            <div className='h-1/3'>
+              1. Go to <a className='font-bold' href={import.meta.env.VITE_API_URL}>{import.meta.env.VITE_API_URL}</a> and click on Advanced (or More)
+              <img className='rounded-lg border-2 border-base-300 w-96' src="/cert-step-1.png" alt="" />
             </div>
-            <div>
+            <div className='h-1/3'>
               2. Proceed to the following link
-              <img className='rounded-lg border-2 border-base-300' src="/cert-step-2.png" alt="" />
+              <img className='rounded-lg border-2 border-base-300 w-96' src="/cert-step-2.png" alt="" />
             </div>
-            <div>
+            <div className='h-1/3'>
               3. If you're seeing this page, go back to our website and Refresh
-              <img className='rounded-lg border-2 border-base-300' src="/cert-step-3.png" alt="" />
+              <img className='rounded-lg border-2 border-base-300 w-96' src="/cert-step-3.png" alt="" />
             </div>
           </div>
           <div className="modal-action">
