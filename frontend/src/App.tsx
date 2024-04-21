@@ -28,7 +28,7 @@ function App() {
           <p>It seems that our developers forgot to get a SSL Certificate. Please manually accept our server by following these steps:</p>
           <div className='flex flex-col justify-evenly'>
             <div className='h-1/3'>
-              1. Go to <a className='font-bold' href={import.meta.env.VITE_API_URL}>{import.meta.env.VITE_API_URL}</a> and click on Advanced (or More)
+              1. Go to <a className='font-bold' target='_blank' href={import.meta.env.VITE_API_URL}>{import.meta.env.VITE_API_URL}</a> and click on Advanced (or More)
               <img className='rounded-lg border-2 border-base-300 w-96' src="/cert-step-1.png" alt="" />
             </div>
             <div className='h-1/3'>
