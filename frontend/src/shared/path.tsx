@@ -5,7 +5,6 @@ import Register from 'src/pages/register/Register'
 import { RouteObject } from 'react-router-dom'
 import { path } from 'src/constants/path'
 import QuickMatch from 'src/pages/quick-match/QuickMatch'
-import Game from 'src/pages/game/Game'
 import GameV2 from 'src/pages/gamev2/GameV2'
 import Chat from 'src/pages/chat/Chat'
 import BotGameV2 from 'src/pages/gamev2/BotGameV2'
@@ -49,13 +48,6 @@ export const PRIVATE_ROUTER: RouteObject[] = [
   {
     path: path.profile,
     element: <Profile />
-  }
-]
-
-export const GAME_ROUTES: RouteObject[] = [
-  {
-    path: path.pvp,
-    element: <Game />
   }
 ]
 

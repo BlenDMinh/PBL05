@@ -5,6 +5,7 @@ import 'src/index.css'
 import { BrowserRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from 'react-query'
 import AppContextProvider from 'src/contexts/app.context'
+import { Helmet } from "react-helmet";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,7 +17,9 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"></meta>
+    <Helmet>
+      <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"></meta>
+    </Helmet>
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AppContextProvider>

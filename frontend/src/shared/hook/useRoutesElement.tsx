@@ -1,5 +1,5 @@
 import { RouteObject, useRoutes } from 'react-router-dom'
-import { AUTH_ROUTER, GAME_ROUTES, GAME_V2_ROUTES, PRIVATE_ROUTER } from '../path'
+import { AUTH_ROUTER, GAME_V2_ROUTES, PRIVATE_ROUTER } from '../path'
 
 // component
 import { Suspense, lazy } from 'react'
@@ -8,7 +8,6 @@ import NotFoundPage from '../../pages/not-found'
 import PrivateRoutes from '../../routes/PrivateRoutes'
 import AuthRoutes from 'src/routes/AuthRoutes'
 import { path } from 'src/constants/path'
-import GameRoutes from 'src/routes/GameRoutes'
 import GameV2Routes from 'src/routes/GameV2Routes'
 
 interface RouteElement {
@@ -55,11 +54,6 @@ export default function useRouteElements() {
       path: path.auth,
       element: <AuthRoutes />,
       children: AUTH_ROUTER
-    },
-    {
-      path: path.game,
-      element: <GameRoutes />,
-      children: GAME_ROUTES
     },
     {
       path: path.gamev2,
