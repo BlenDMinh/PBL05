@@ -30,7 +30,7 @@ public class ChessGame {
     GamePlayer player2;
     GameStatus status = GameStatus.WAITING;
 
-    List<MoveHistory> moveHistories = new ArrayList<>();
+    List<MoveHistory> moveHistories =new ArrayList<>();
     Date player1StartTime, player2StartTime, player1LastTime, player2LastTime;
 
     Session player1Session, player2Session;

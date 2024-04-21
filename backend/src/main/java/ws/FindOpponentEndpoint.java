@@ -7,6 +7,7 @@ import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -36,46 +37,53 @@ public class FindOpponentEndpoint {
 
     private final GameService gameService = new GameService();
 
+    static ReentrantLock lock = new ReentrantLock();
+
     @OnOpen
     public void onOpen(Session userSession) throws IOException {
-        String queryString = userSession.getQueryString();
-        if (!queryString.startsWith("sid=")) {
-            userSession.close();
-        }
-        String sessionId = queryString.substring("sid=".length());
-        stores.session.Session session = SimpleSessionManager.getInstance()
-                .getSession(sessionId);
-        if (session == null) {
-            userSession.getBasicRemote().sendText(GameMessage.SESSION_NOT_VALID);
-            userSession.close();
-            return;
-        }
-        UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
-        int elo = userPasswordDto.getElo();
-        Rank rank = getRank(elo);
-        userSession.getUserProperties().put("player_id", userPasswordDto.getId());
-        userSession.getUserProperties().put("rank", rank);
-        Set<Session> set = group.get(rank.getValue());
-        if (set.contains(userSession)) {
-            userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
-            return;
-        }
-        if (set.isEmpty()) {
-            set.add(userSession);
-            userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
-        } else {
-            Iterator<Session> iterator = set.iterator();
-            Session opponentSession = null;
-            try {
-                do {
-                    opponentSession = iterator.next();
-                } while ((int) opponentSession.getUserProperties().get("player_id") == userPasswordDto.getId());
-            } catch (NoSuchElementException ex) {
+        lock.lock();
+        try {
+            String queryString = userSession.getQueryString();
+            if (!queryString.startsWith("sid=")) {
+                userSession.close();
+            }
+            String sessionId = queryString.substring("sid=".length());
+            stores.session.Session session = SimpleSessionManager.getInstance()
+                    .getSession(sessionId);
+            if (session == null) {
+                userSession.getBasicRemote().sendText(GameMessage.SESSION_NOT_VALID);
+                userSession.close();
+                return;
+            }
+            UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
+            int elo = userPasswordDto.getElo();
+            Rank rank = getRank(elo);
+            userSession.getUserProperties().put("player_id", userPasswordDto.getId());
+            userSession.getUserProperties().put("rank", rank);
+            Set<Session> set = group.get(rank.getValue());
+            if (set.contains(userSession)) {
                 userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
                 return;
             }
-            set.remove(opponentSession);
-            matchingGame(userSession, opponentSession);
+            if (set.isEmpty()) {
+                set.add(userSession);
+                userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
+            } else {
+                Iterator<Session> iterator = set.iterator();
+                Session opponentSession = null;
+                try {
+                    do {
+                        opponentSession = iterator.next();
+                    } while ((int) opponentSession.getUserProperties().get("player_id") == userPasswordDto.getId());
+                } catch (NoSuchElementException ex) {
+                    userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
+                    return;
+                }
+                set.remove(opponentSession);
+                matchingGame(userSession, opponentSession);
+            }
+        } finally {
+            lock.unlock();
         }
     }
 

@@ -7,7 +7,7 @@ import java.util.WeakHashMap;
 import modules.game_chesslib.custom.ChessGame;
 
 public class GameStore {
-    static GameStore instance;
+    static volatile GameStore instance;
 
     public static GameStore getInstance() {
         return instance;

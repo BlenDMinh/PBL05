@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SimpleSessionManager implements SessionManager {
-    private static SimpleSessionManager instance;
+    private static volatile SimpleSessionManager instance;
 
     public static SimpleSessionManager getInstance() {
         return instance;
