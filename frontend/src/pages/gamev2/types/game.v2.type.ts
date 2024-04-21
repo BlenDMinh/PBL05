@@ -15,6 +15,6 @@ export type GameV2SocketData = {
 export type MoveHistory = {
     from: Key,
     to: Key,
-    promotiom: string,
+    promotion: string,
     piece: string
 }

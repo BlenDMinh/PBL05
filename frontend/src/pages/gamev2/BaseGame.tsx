@@ -1,10 +1,9 @@
 /* eslint-disable jsx-a11y/aria-role */
 import Chessground from '@react-chess/chessground'
 import { useEffect, useState } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { GameResult, GameType, useGameV2 } from 'src/contexts/gamev2.context'
 import { v4 as uuidv4 } from 'uuid'
-import Modal from 'react-modal'
 
 import 'src/pages/gamev2/css/chessground.base.css'
 import 'src/pages/gamev2/css/chessground.brown.css'
@@ -19,9 +18,9 @@ import { getProfileFromLS } from 'src/utils/auth'
 import GameProfile from './components/GameProfile'
 import PromotionModal from './components/PromotionModal'
 import ResultModal from './components/ResultModal'
-import { FaFlag, FaHandHolding, FaHandshake } from 'react-icons/fa'
+import { FaArrowRight, FaFlag, FaHandHolding, FaHandshake } from 'react-icons/fa'
 import ChatModal from '../chat/ChatModal'
-import { pieceTexture } from './texture/piece.texture'
+import { PieceTextureKey, pieceTexture } from './texture/piece.texture'
 import { User } from 'src/types/users.type'
 
 export interface BaseGameProps {
@@ -29,6 +28,7 @@ export interface BaseGameProps {
 }
 
 export default function BaseGame(props: BaseGameProps) {
+  
   const { gameId } = useParams()
   const game = useGameV2()
   const navigate = useNavigate()
@@ -129,23 +129,39 @@ export default function BaseGame(props: BaseGameProps) {
           />
         </div>
         <div className='flex flex-col h-full w-1/4 gap-5'>
-          <div className='flex justify-end'>
+          {props.gameType == GameType.PVP && <div className='flex justify-end'>
             <ChatContextProvider>
               <ChatModal id={opponentQuery.data?.data.id} />
             </ChatContextProvider>
-          </div>
-          <div className='flex-1 flex flex-col gap-3 w-full border-2 p-3 rounded-lg border-base-300 bg-base-200 overflow-y-auto'>
-            {game.moveHistories.map((move, id) => (
-              <div key={id} className='flex items-center justify-center gap-5 h-10 bg-base-100 rounded-lg p-2'>
-                <div className={classNames('rounded-full w-8 h-8', {
-                  'bg-slate-500': move.piece.includes('WHITE'),
-                  'bg-slate-200': move.piece.includes('BLACK')
-                })}>
-                  <img src={pieceTexture[move.piece]} alt="" />
+          </div>}
+          <div className='flex-1 flex flex-col-reverse w-full border-2 p-3 rounded-lg border-base-300 bg-base-200 overflow-y-auto justify-start'>
+            <div className='flex-1'></div>
+            <div className='h-fit grid grid-cols-2 gap-3'>
+              {game.moveHistories.map((move, id) => (
+                <div key={id} className='flex items-center justify-start gap-5 h-10 bg-base-100 rounded-lg p-2'>
+                  <div className={classNames('rounded-full w-8 h-8 p-1', {
+                    'bg-slate-500': move.piece.includes('WHITE'),
+                    'bg-slate-200': move.piece.includes('BLACK')
+                  })}>
+                    <img src={pieceTexture[move.piece as PieceTextureKey]} alt="" />
+                  </div>
+                  <span className='font-bold'>{move.to}</span>
+                  {
+                    move.promotion !== 'NONE' ? <>
+                      <FaArrowRight />
+                      <div className={classNames('rounded-full w-8 h-8 p-1', {
+                        'bg-slate-500': move.piece.includes('WHITE'),
+                        'bg-slate-200': move.piece.includes('BLACK')
+                      })}>
+                        <img src={pieceTexture[move.promotion as PieceTextureKey]} alt="" />
+                      </div>
+                    </>
+                    :
+                    <></>
+                  }
                 </div>
-                <span className='font-bold'>{move.to}</span>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>
