@@ -31,7 +31,7 @@ export const ChatContextProvider = ({children}: ReactWithChild) => {
     const wsUrl = useMemo(() => ws.chat(sessionId), [sessionId])
     const chatSocket = useWebSocket(wsUrl)
     const state = chatSocket.readyState
-    const [callbackMap, setCallbackMap] = useState(new Map<string, (message: Message) => void>())
+    const callbackMap = useMemo(() => new Map<string, ((message: Message) => void)[]>(), [])
     
     const startChat = (sessionId: string) => {
         setSessionId(sessionId)
@@ -51,7 +51,14 @@ export const ChatContextProvider = ({children}: ReactWithChild) => {
     }
 
     const onMessage = (senderId: string, callback: (message: Message) => void) => {
-        callbackMap.set(senderId, callback)
+        if(callbackMap.has(senderId)) {
+            const callbackList = callbackMap.get(senderId)
+            if(callbackList!.indexOf(callback) == -1) {
+                callbackList?.push(callback)
+            }
+        } else {
+            callbackMap.set(senderId, [callback])
+        }
     }
 
     useEffect(() => {
@@ -60,11 +67,11 @@ export const ChatContextProvider = ({children}: ReactWithChild) => {
         if(!json)
             return
         json.isFromUser = json.senderId == getProfileFromLS().id
-        const callback1 = callbackMap.get(json.senderId.toString())
-        callback1?.call(this, json)
+        const callbackList1 = callbackMap.get(json.senderId.toString())
+        callbackList1?.forEach(callback => callback.call(this, json))
 
-        const callback2 = callbackMap.get(json.receiverId.toString())
-        callback2?.call(this, json)
+        const callbackList2 = callbackMap.get(json.receiverId.toString())
+        callbackList2?.forEach(callback => callback.call(this, json))
 
         const conveId = conversations.findIndex((m) => m.id == json.senderId || m.id == json.receiverId)
         if(conveId != -1) {

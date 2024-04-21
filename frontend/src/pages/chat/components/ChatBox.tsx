@@ -40,6 +40,7 @@ export interface ChatBoxProps {
 
 export default function ChatBox(props: ChatBoxProps) {
     const { id } = useParams()
+    const userId = id ?? (props.id?.toString() ?? "")
     const [previousId, setPreviousId] = useState<string | undefined>(undefined)
     const [messages, setMessages] = useState<MessageType[]>([])
     const messagesRef = useRef<MessageType[]>()
@@ -49,31 +50,32 @@ export default function ChatBox(props: ChatBoxProps) {
     const [isEnd, setEnd] = useState(false)
 
     useEffect(() => {
-        console.log(id, page)
-        if(id != previousId) {
+        if(userId != previousId) {
             setPage(1)
             setEnd(false)
-            setPreviousId(id)
+            setPreviousId(userId)
             if(page == 1) {
-                fetchChat(id ?? (props.id?.toString() ?? ""), 1).then((_messages) => {
+                fetchChat(userId, 1).then((_messages) => {
                     setMessages(_messages)
                 })
             } else {
                 setMessages([])
             }
         } else {
-            fetchChat(id ?? (props.id?.toString() ?? ""), page).then((_messages) => {
+            fetchChat(userId, page).then((_messages) => {
                 if(_messages.length)
                     setMessages(messages.concat(_messages))
                 else
                     setEnd(true)
             })
         }
-    }, [id, page])
+    }, [userId, page])
+
+    messagesRef.current = messages
 
     useEffect(() => {
         messagesRef.current = messages
-    }, [id, messages])
+    }, [userId, messages])
 
     useEffect(() => {
         if(chat.state != ReadyState.OPEN) {
@@ -81,22 +83,23 @@ export default function ChatBox(props: ChatBoxProps) {
             chat.startChat(getSessionIdFromLS())
         }
         else {
-            chat.onMessage(id ?? (props.id?.toString() ?? ""), (message) => {
+            console.log("Registered")
+            chat.onMessage(userId, (message) => {
                 setMessages([message].concat(messagesRef.current as MessageType[]))
             })
         }
-    }, [id, chat.state])
+    }, [userId, chat.state])
     const send = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if(sendingMessage) {
-            chat.sendMessage(sendingMessage, id ?? (props.id?.toString() ?? ""))
+            chat.sendMessage(sendingMessage, userId)
             setSendingMessage("")
         }
     }
     const fetch = () => {
         setPage(page + 1)
     }
-    if(!id && !props.id) {
+    if(!userId) {
         return <>
             <div className="w-full h-full flex flex-col justify-center items-center">
                 <span className="text-base-content font-bold text-xl">Click on a conversation to start chatting</span>

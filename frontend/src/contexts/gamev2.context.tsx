@@ -123,6 +123,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
 
   useEffect(() => {
     if (readyState == ReadyState.OPEN) {
+      console.log("Connected to game socket")
       setResult(GameResult.UNKNOWN)
       if (gameType == GameType.PVP) {
         // const message = JSON.stringify({
@@ -142,6 +143,8 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         // console.log(message)
         // sendMessage(message)
       }
+    } else {
+      console.log(readyState)
     }
   }, [readyState])
 
@@ -181,8 +184,10 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
       if (data.white != undefined) setTurn(data.white ? 'white' : 'black')
       if (data.moveHistories) {
         setMoveHistories(data.moveHistories)
-        const lastMove = data.moveHistories[data.moveHistories.length - 1]
-        setLastMove([lastMove.from, lastMove.to])
+        if(data.moveHistories.length > 0) {
+          const lastMove = data.moveHistories[data.moveHistories.length - 1]
+          setLastMove([lastMove.from.toLowerCase() as Key, lastMove.to.toLowerCase() as Key])
+        }
       }
     }
   }, [lastMessage])
@@ -213,11 +218,12 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
             to: to
           }
         }
+        console.log("Sending", JSON.stringify(message))
         sendMessage(JSON.stringify(message))
         setFen(core.fen())
       }
     } catch (e) {
-      console.log(core.fen())
+      console.log(e)
       setFen(core.fen())
       setCore(new Chess(core.fen()))
     }

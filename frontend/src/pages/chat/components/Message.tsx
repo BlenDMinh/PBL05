@@ -12,16 +12,8 @@ export interface MessageProps {
 }
 
 export default function Message(props: MessageProps) {
-    const [user, setUser] = useState<User | null>(null)
-    const profileMutation = useMutation({
-        mutationFn: (id: number) => profileApi.getProfile(id),
-        onSuccess: (data) => {
-            setUser(data.data as User)
-        }
-    })
-    useEffect(() => {
-        profileMutation.mutate(props.senderId)
-    }, [props.senderId])
+    const profileQuery = useQuery(['profile', props.senderId], () => profileApi.getProfile(props.senderId))
+    const user = profileQuery.data?.data
 
     return <div className={classNames("flex gap-5 chat", {
         "self-start chat-start": props.side == "left",

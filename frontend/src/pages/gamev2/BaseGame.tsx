@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/aria-role */
 import Chessground from '@react-chess/chessground'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { GameResult, GameType, useGameV2 } from 'src/contexts/gamev2.context'
 import { v4 as uuidv4 } from 'uuid'
@@ -19,6 +19,10 @@ import { getProfileFromLS } from 'src/utils/auth'
 import GameProfile from './components/GameProfile'
 import PromotionModal from './components/PromotionModal'
 import ResultModal from './components/ResultModal'
+import { FaFlag, FaHandHolding, FaHandshake } from 'react-icons/fa'
+import ChatModal from '../chat/ChatModal'
+import { pieceTexture } from './texture/piece.texture'
+import { User } from 'src/types/users.type'
 
 export interface BaseGameProps {
   gameType: GameType
@@ -29,7 +33,14 @@ export default function BaseGame(props: BaseGameProps) {
   const game = useGameV2()
   const navigate = useNavigate()
 
-  const opponentQuery = useQuery(['profile', game.opponentId], () => profileApi.getProfile(game.opponentId))
+  const opponentQuery = useQuery(['profile', game.opponentId], () => game.opponentId ? profileApi.getProfile(game.opponentId) : null)
+  const [opponent, setOpponent] = useState<User>()
+
+  useEffect(() => {
+    if(opponentQuery.data?.data) {
+      setOpponent(opponentQuery.data?.data)
+    }
+  }, [opponentQuery.status])
 
   const player = getProfileFromLS()
 
@@ -63,8 +74,6 @@ export default function BaseGame(props: BaseGameProps) {
 
   if (!game.core) return <>Loading...</>
 
-  console.log(game.result)
-
   return (
     <>
       <div className='flex w-full h-screen items-center justify-center px-32 pt-32 pb-16 gap-12'>
@@ -72,9 +81,20 @@ export default function BaseGame(props: BaseGameProps) {
           <div className='h-24 w-full flex items-center gap-5 border-2 rounded-lg border-base-300  bg-base-200 p-2'>
             <GameProfile profile={opponentQuery.data?.data} role='Opponent' />
           </div>
-          <button className='btn' onClick={() => game.resign()}>
-            Resign
-          </button>
+          <div className='flex-1 bg-base-200 rounded-lg'>
+          </div>
+          <div className='flex w-full justify-around'>
+            <button className='btn btn-error' onClick={() => game.resign()}>
+              <FaFlag />
+              Resign
+            </button>
+            <div className='tooltip' data-tip='Not working yet'>
+              <button className='btn btn-info btn-disabled' onClick={() => game.resign()}>
+                <FaHandshake />
+                Draw
+              </button>
+            </div>
+          </div>
           <div className='h-24 w-full flex items-center gap-5 border-2 rounded-lg border-base-300 bg-base-200 p-2'>
             <GameProfile profile={player} role='You' />
           </div>
@@ -108,22 +128,26 @@ export default function BaseGame(props: BaseGameProps) {
             }}
           />
         </div>
-        <div className='flex w-1/4 h-full border-2 rounded-lg border-base-300 bg-base-200'>
-          {game.moveHistories.map((move) => (
-            <div key={'aaaaaaa'} className='flex gap-5'>
-              {move.from} {move.to} {move.piece} {move.promotiom}
-            </div>
-          ))}
+        <div className='flex flex-col h-full w-1/4 gap-5'>
+          <div className='flex justify-end'>
+            <ChatContextProvider>
+              <ChatModal id={opponentQuery.data?.data.id} />
+            </ChatContextProvider>
+          </div>
+          <div className='flex-1 flex flex-col gap-3 w-full border-2 p-3 rounded-lg border-base-300 bg-base-200 overflow-y-auto'>
+            {game.moveHistories.map((move, id) => (
+              <div key={id} className='flex items-center justify-center gap-5 h-10 bg-base-100 rounded-lg p-2'>
+                <div className={classNames('rounded-full w-8 h-8', {
+                  'bg-slate-500': move.piece.includes('WHITE'),
+                  'bg-slate-200': move.piece.includes('BLACK')
+                })}>
+                  <img src={pieceTexture[move.piece]} alt="" />
+                </div>
+                <span className='font-bold'>{move.to}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        {/* {props.gameType == GameType.PVP ? (
-          <ChatContextProvider>
-            <div className='flex w-1/4 h-full border-2 rounded-lg border-base-300 bg-base-200'>
-              {game.opponentId ? <ChatBox id={game.opponentId} /> : <span className='loading loading-spinner' />}
-            </div>
-          </ChatContextProvider>
-        ) : (
-          <></>
-        )} */}
       </div>
       <PromotionModal />
       <ResultModal

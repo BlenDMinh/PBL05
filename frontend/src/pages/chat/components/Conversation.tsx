@@ -25,7 +25,7 @@ export default function Conversation(props: ConversationProps) {
   return (
     <Link
       className={classNames('h-24 w-full btn flex flex-nowrap justify-start', {
-        'btn-active': !props.active
+        'btn-active': props.active
       })}
       to={`/chat/${props.conversation.id}`}
     >
