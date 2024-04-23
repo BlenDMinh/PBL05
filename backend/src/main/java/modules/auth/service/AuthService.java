@@ -4,6 +4,7 @@ import java.util.Random;
 
 import common.dto.UserPasswordDto;
 import modules.auth.AuthRepository;
+import modules.auth.dto.RegisterIdAndVerifyCodeDto;
 
 public class AuthService {
     private final BcryptService bcryptService;
@@ -22,7 +23,7 @@ public class AuthService {
         return user;
     }
 
-    public String register(String displayName, String email, String password) {
+    public RegisterIdAndVerifyCodeDto register(String displayName, String email, String password) {
         String passwordHash = bcryptService.getHash(password);
         int length = 6;
         StringBuilder sb = new StringBuilder(length);
@@ -32,6 +33,11 @@ public class AuthService {
             sb.append(randomNumber);
         }
         String code = sb.toString();
-        return authRepository.register(displayName, email, passwordHash, code);
+        String id = authRepository.insertIntoPlayerRegister(displayName, email, passwordHash, code);
+        return new RegisterIdAndVerifyCodeDto(id, code);
+    }
+
+    public boolean verifyAndCreateAccount(String id, String code) {
+        return authRepository.deletePlayerRegisterAndCreatePlayer(id, code);
     }
 }

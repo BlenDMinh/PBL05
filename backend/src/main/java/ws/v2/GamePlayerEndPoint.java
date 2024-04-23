@@ -188,9 +188,6 @@ public class GamePlayerEndPoint {
                             validMove = false;
                         }
                         if (validMove) {
-                            String mess = GameMessage.MOVE;
-                            if (chessMove.getFrom().equals(Square.E1)) {
-                            }
                             chessGame.addMoveHistory(chessMove);
                             chessGame.getBoard().doMove(chessMove);
                             sendToAllPlayer(
