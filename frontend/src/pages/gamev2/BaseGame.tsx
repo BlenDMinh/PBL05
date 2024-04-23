@@ -18,7 +18,7 @@ import { getProfileFromLS } from 'src/utils/auth'
 import GameProfile from './components/GameProfile'
 import PromotionModal from './components/PromotionModal'
 import ResultModal from './components/ResultModal'
-import { FaArrowRight, FaFlag, FaHandHolding, FaHandshake } from 'react-icons/fa'
+import { FaArrowRight, FaCheck, FaFlag, FaHandHolding, FaHandshake } from 'react-icons/fa'
 import ChatModal from '../chat/ChatModal'
 import { PieceTextureKey, pieceTexture } from './texture/piece.texture'
 import { User } from 'src/types/users.type'
@@ -32,6 +32,8 @@ export default function BaseGame(props: BaseGameProps) {
   const { gameId } = useParams()
   const game = useGameV2()
   const navigate = useNavigate()
+
+  const [resign, setResign] = useState(false)
 
   const opponentQuery = useQuery(['profile', game.opponentId], () => game.opponentId ? profileApi.getProfile(game.opponentId) : null)
   const [opponent, setOpponent] = useState<User>()
@@ -84,10 +86,22 @@ export default function BaseGame(props: BaseGameProps) {
           <div className='flex-1 bg-base-200 rounded-lg'>
           </div>
           <div className='flex w-full justify-around'>
-            <button className='btn btn-error' onClick={() => game.resign()}>
-              <FaFlag />
-              Resign
-            </button>
+            {
+              resign ? 
+              <div className='flex w-1/2 gap-2 justify-evenly'>
+                <button className='btn btn-error w-1/2' onClick={() => game.resign()}>
+                  Yes
+                </button>
+                <button className='btn btn-primary w-1/2' onClick={() => setResign(false)}>
+                  No
+                </button>
+              </div>
+              :
+              <button className='btn btn-error' onClick={() => setResign(true)}>
+                <FaFlag />
+                Resign
+              </button>
+            }
             <div className='tooltip' data-tip='Not working yet'>
               <button className='btn btn-info btn-disabled' onClick={() => game.resign()}>
                 <FaHandshake />
