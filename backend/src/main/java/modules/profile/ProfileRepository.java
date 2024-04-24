@@ -90,7 +90,7 @@ public class ProfileRepository {
             if (totalElements >= size) {
                 offset = (totalPages - page) * size - upToFull;
             }
-            if (offset < 0){
+            if (offset < 0) {
                 size = size + offset;
                 offset = 0;
             }
@@ -115,4 +115,33 @@ public class ProfileRepository {
         return new PaginationGameHistoryDto(gameHistoryDtos, totalPages, totalElements);
     }
 
+    public boolean updateAvartarUrl(int userId, String url) {
+        boolean result = false;
+        Connection conn = null;
+        String sql = "update users set avatar_url = ? where id = ?";
+        try {
+            conn = ConnectionPool.getConnection();
+            conn.setAutoCommit(false);
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt.setString(1, url);
+            stmt.setInt(2, userId);
+            int numRow = stmt.executeUpdate();
+            if (numRow == 0) {
+                throw new Exception();
+            }
+            result = true;
+            conn.commit();
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            try {
+                conn.rollback();
+            } catch (SQLException e1) {
+            }
+        } finally {
+            if (conn != null) {
+                ConnectionPool.releaseConnection(conn);
+            }
+        }
+        return result;
+    }
 }

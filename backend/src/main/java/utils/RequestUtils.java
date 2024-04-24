@@ -1,9 +1,12 @@
 package utils;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.Part;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -35,5 +38,9 @@ public class RequestUtils {
             throw new CustomException(HttpStatusCode.NOT_ACCEPTABLE, "Session not valid");
         }
         return session;
+    }
+
+    public Part getImagePartMultipartFormData(HttpServletRequest request) throws IOException, ServletException {
+        return request.getPart("image");
     }
 }
