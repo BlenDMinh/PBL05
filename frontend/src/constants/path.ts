@@ -3,6 +3,7 @@ export const path = {
   auth: '/auth',
   login: '/auth/login',
   register: '/auth/register',
+  verify: '/auth/verify/:id',
   patients: '/patients',
   patientDetail: '/patients/:patientId',
   patientDetailExamination: '/patients/:patientId/medical-records/:examinationId',

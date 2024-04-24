@@ -1,3 +1,4 @@
+import { register } from 'module'
 import { PRESCRIPTION_ROW_NAME } from 'src/constants/common'
 import {
   CONFIRM_PASSWORD_MESSAGES,
@@ -16,6 +17,17 @@ export const authSchema = yup.object({
     .required(CONFIRM_PASSWORD_MESSAGES.required)
     .oneOf([yup.ref('password')], CONFIRM_PASSWORD_MESSAGES.isMatch)
 })
+
+export const registerSchema = yup.object().shape({
+  displayName: yup.string().required('Display name is required'),
+  email: yup.string().required(EMAIL_MESSAGES.required).email(EMAIL_MESSAGES.isEmail),
+  password: yup.string().required(PASSWORD_MESSAGES.required),
+  confirmPassword: yup
+    .string()
+    .required(CONFIRM_PASSWORD_MESSAGES.required)
+    .oneOf([yup.ref('password')], CONFIRM_PASSWORD_MESSAGES.isMatch)
+})
+
 export const prescriptionSchema = yup.object().shape({
   [PRESCRIPTION_ROW_NAME]: yup
     .array()
@@ -32,5 +44,6 @@ export const prescriptionSchema = yup.object().shape({
   date: yup.object({ startDate: yup.string(), endDate: yup.string() })
 })
 
+export type RegisterSchema = yup.InferType<typeof registerSchema>
 export type AuthSchema = yup.InferType<typeof authSchema>
 export type PrescriptionSchema = yup.InferType<typeof prescriptionSchema>
