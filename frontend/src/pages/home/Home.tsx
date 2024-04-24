@@ -12,7 +12,7 @@ export default function Home() {
       {isAuthenticated === AuthenticateState.AUTHENTICATED && (
         <div className='flex flex-col gap-5 w-full'>
           <div className='w-full flex gap-5'>
-            <Link to={`${path.profile}/${user?.id}`} className='avatar btn btn-circle btn-ghost'>
+            <Link to={path.profile.replace(':id', user?.id + '')} className='avatar btn btn-circle btn-ghost'>
               <div className='w-20 rounded-full'>
                 <img
                   alt='Tailwind CSS Navbar component'

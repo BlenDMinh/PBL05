@@ -11,13 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.Part;
 
-import common.HttpStatusCode;
 import common.dto.UserPasswordDto;
 import common.service.UploadService;
-import exceptions.CustomException;
 import exceptions.ServerException;
 import modules.auth.AuthRepository;
-import modules.auth.service.AuthService;
 import modules.profile.dto.UrlDto;
 import modules.profile.service.ProfileService;
 import stores.session.Session;
