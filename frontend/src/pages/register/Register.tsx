@@ -9,14 +9,14 @@ import Button from 'src/components/button/Button'
 import Input from 'src/components/input/Input'
 import { AUTH_MESSAGES } from 'src/constants/message'
 import { path } from 'src/constants/path'
-import { AuthErrorResponse, RegisterReqBody } from 'src/types/auth.type'
-import { AuthSchema, authSchema } from 'src/utils/rules'
+import { AuthErrorResponse, RegisterReqBody, RegisterResponse } from 'src/types/auth.type'
+import { RegisterSchema, registerSchema } from 'src/utils/rules'
 import { isAxiosError } from 'src/utils/utils'
 
 export interface RegisterProps {}
 
-type SchemaRegister = AuthSchema
-const schemaRegister = authSchema
+type SchemaRegister = RegisterSchema
+const schemaRegister = registerSchema
 
 export default function Register(props: RegisterProps) {
   const {
@@ -25,6 +25,7 @@ export default function Register(props: RegisterProps) {
     formState: { errors }
   } = useForm<SchemaRegister>({
     defaultValues: {
+      displayName: '',
       email: '',
       password: '',
       confirmPassword: ''
@@ -35,13 +36,13 @@ export default function Register(props: RegisterProps) {
   const registerMutation = useMutation({
     mutationFn: (body: RegisterReqBody) => authApi.register(body),
     onSuccess: (data) => {
-      toast.success(data.data.message, {
+      toast.success(data.data.message ?? "Successfully registered", {
         progressClassName: 'bg-primary'
       })
-      navigate(path.login)
+      navigate(`/auth/verify/${data.data.registerId}`)
     },
     onError: (error) => {
-      if (isAxiosError<AuthErrorResponse>(error)) {
+      if (isAxiosError<RegisterResponse>(error)) {
         toast.error(error.response?.data.message)
       }
     }
@@ -52,6 +53,7 @@ export default function Register(props: RegisterProps) {
       return toast.error(AUTH_MESSAGES.AGREE_PRIVACY)
     }
     const body: RegisterReqBody = {
+      displayName: data.displayName,
       email: data.email,
       password: data.password
     }
@@ -64,6 +66,12 @@ export default function Register(props: RegisterProps) {
       </h1>
       <div className='w-full'>
         <form className='flex flex-col gap-1' onSubmit={handleSubmit(onSubmit)}>
+          <Input<Pick<SchemaRegister, 'displayName'>>
+            register={register}
+            name='displayName'
+            placeholder='Display Name'
+            errorMessage={errors.displayName?.message || ' '}
+          />
           <Input<Pick<SchemaRegister, 'email'>>
             register={register}
             name='email'

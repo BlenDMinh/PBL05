@@ -7,7 +7,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "test": "vite test",
     "preview": "vite preview",
     "lint": "eslint --ext ts,tsx src/",

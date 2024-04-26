@@ -16,7 +16,7 @@ export default function GameLayout({ children }: ReactWithChild) {
         <Sidebar />
         <div
           className={classNames('max-h-max overflow-y-auto', {
-            'brightness-50': showSidebar
+            'backdrop-blur-sm bg-white/30 brightness-50': showSidebar
           })}
           onClick={(e) => {
             setShowSidebar(false)

@@ -101,7 +101,6 @@ public class GamePlayerEndPoint {
 
             int userId = userPasswordDto.getId();
             ModelMapper modelMapper = new ModelMapper();
-            logger.info(userId);
             if (chessGame.getPlayer1().getId() == userId) {
                 playerSession.getUserProperties().put("sid", sessionId);
                 chessGame.setPlayer1Session(playerSession);
@@ -157,11 +156,6 @@ public class GamePlayerEndPoint {
                     playerSession.getBasicRemote().sendObject(resp2);
                 }
             }
-            if (chessGame.getPlayer1Session() != null)
-                logger.info("Player1");
-            if (chessGame.getPlayer2Session() != null)
-                logger.info("Player2");
-            logger.info(userId);
         } finally {
             lock.unlock();
         }

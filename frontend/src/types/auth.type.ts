@@ -19,7 +19,9 @@ export type LoginResponse = {
   sessionId: string
 }
 export type RegisterResponse = {
-  message: string
+  registerId?: string,
+  message?: string,
+  code?: string
 }
 
 export type LoginReqBody = {
@@ -27,7 +29,21 @@ export type LoginReqBody = {
   password: string
 }
 
-export type RegisterReqBody = LoginReqBody
+export type RegisterReqBody = {
+  displayName: string,
+  email: string,
+  password: string
+}
+
+export type VerifyReqBody = {
+  registerId: string,
+  code: string
+}
+
+export type VerifyResponse = {
+  message: string,
+  code?: string
+}
 
 export type AuthErrorResponse = {
   message: string
@@ -38,3 +54,4 @@ export type AuthErrorResponse = {
     message: string
   }[]
 }
+
