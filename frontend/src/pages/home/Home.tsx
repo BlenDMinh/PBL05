@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { FaClock, FaRobot, FaUser } from 'react-icons/fa'
 import { path } from 'src/constants/path'
 import GameHistory from '../profile/components/GameHistory'
+import { blankAvatar } from 'src/assets/images'
 
 export default function Home() {
   const { user, isAuthenticated } = useContext<AppContextType>(AppContext)
@@ -14,10 +15,7 @@ export default function Home() {
           <div className='w-full flex gap-5'>
             <Link to={path.profile.replace(':id', user?.id + '')} className='avatar btn btn-circle btn-ghost'>
               <div className='w-20 rounded-full'>
-                <img
-                  alt='Tailwind CSS Navbar component'
-                  src={user?.avatarUrl ?? 'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'}
-                />
+                <img alt='Tailwind CSS Navbar component' src={user?.avatarUrl ?? blankAvatar} />
               </div>
             </Link>
             <span className='text-base-content text-3xl font-bold'>{user?.displayName}</span>

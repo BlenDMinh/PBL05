@@ -28,7 +28,7 @@ public class VerifyServlet extends HttpServlet {
         boolean result = authService.verifyAndCreateAccount(registerIdAndVerifyCodeDto.getRegisterId(),
                 registerIdAndVerifyCodeDto.getCode());
         if (!result) {
-            throw new CustomException(HttpStatusCode.CONFLICT, "Verify Failed");
+            throw new CustomException(HttpStatusCode.INTERNAL_SERVER_ERROR, "Verify Failed");
         } else {
             responseUtils.responseMessage(resp, "Verify Success! Please sign in again");
         }

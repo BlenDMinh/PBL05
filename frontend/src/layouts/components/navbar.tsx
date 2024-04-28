@@ -7,6 +7,7 @@ import { HiChevronDoubleLeft, HiOutlineBell } from 'react-icons/hi2'
 import Button from 'src/components/button/Button'
 import { path } from 'src/constants/path'
 import { clearLS } from 'src/utils/auth'
+import { blankAvatar } from 'src/assets/images'
 export interface NavbarProps {}
 
 export default function Navbar(props: NavbarProps) {
@@ -82,7 +83,7 @@ export default function Navbar(props: NavbarProps) {
           <div className='dropdown dropdown-end'>
             <div tabIndex={0} role='button' className='avatar btn btn-circle btn-ghost'>
               <div className='w-10 rounded-full'>
-                <img alt='Tailwind CSS Navbar component' src={user?.avatarUrl} />
+                <img alt='Tailwind CSS Navbar component' src={user?.avatarUrl ?? blankAvatar} />
               </div>
             </div>
             <div
