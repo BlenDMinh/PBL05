@@ -16,11 +16,6 @@ export const quickOptionsNavbar: QuickOptionNavbar[] = [
     title: 'Profile',
     to: path.profile
   },
-  {
-    id: 2,
-    title: 'Settings',
-    to: '/'
-  },
 ]
 
 export const sidebarOption: SidebarOption[] = [

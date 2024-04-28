@@ -7,7 +7,7 @@ import { HiChevronDoubleLeft, HiOutlineBell } from 'react-icons/hi2'
 import Button from 'src/components/button/Button'
 import { path } from 'src/constants/path'
 import { clearLS } from 'src/utils/auth'
-import { blankAvatar } from 'src/assets/images'
+import blankAvatar from 'src/assets/images/blankavatar.webp'
 export interface NavbarProps {}
 
 export default function Navbar(props: NavbarProps) {
@@ -57,20 +57,6 @@ export default function Navbar(props: NavbarProps) {
           Icon={HiChevronDoubleLeft}
         />
       </div>
-      {/* <div className='navbar-center flex-[30%]'>
-        <form className='w-full'>
-          <div className='relative'>
-            <div className='pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3'>
-              <HiMagnifyingGlass className='h-5 w-5' />
-            </div>
-            <input
-              type='text'
-              className='input input-bordered !h-11 w-full !rounded-xl ps-10 hover:border-primary focus:border-primary focus:outline-none'
-              placeholder='Search...'
-            />
-          </div>
-        </form>
-      </div> */}
       {isAuthenticated === AuthenticateState.AUTHENTICATED && (
         <div className='navbar-end flex flex-[30%] items-center'>
           <button className='btn btn-circle btn-ghost mt-1'>
@@ -96,16 +82,14 @@ export default function Navbar(props: NavbarProps) {
                 <p className='line-clamp-1 text-sm'>{user?.email} &nbsp;</p>
               </div>
               <ul className='menu menu-sm gap-[1px]'>
-                {quickOptionsNavbar.map((option) => (
-                  <li key={option.id} className='rounded'>
-                    <Link
-                      className='hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary'
-                      to={option.to}
-                    >
-                      {option.title}
-                    </Link>
-                  </li>
-                ))}
+                <li className='rounded'>
+                  <Link
+                    className='hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary'
+                    to={path.profile.replace(':id', user?.id?.toString() ?? "")}
+                  >
+                    Profile
+                  </Link>
+                </li>
                 <li className='rounded'>
                   <button
                     className='hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary'

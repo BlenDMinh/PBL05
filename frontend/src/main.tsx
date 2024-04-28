@@ -17,9 +17,9 @@ const queryClient = new QueryClient({
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
-    <Helmet>
+    {/* <Helmet>
       <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests"></meta>
-    </Helmet>
+    </Helmet> */}
     <BrowserRouter>
       <QueryClientProvider client={queryClient}>
         <AppContextProvider>
