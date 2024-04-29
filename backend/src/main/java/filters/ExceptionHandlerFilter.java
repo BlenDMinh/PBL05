@@ -28,7 +28,6 @@ public class ExceptionHandlerFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         try {
-            request.setCharacterEncoding("UTF-8");
             chain.doFilter(request, response);
         } catch (CustomException ex) {
             HttpServletResponse httpResponse = (HttpServletResponse) response;
