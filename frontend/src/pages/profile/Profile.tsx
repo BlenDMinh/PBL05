@@ -35,7 +35,7 @@ const Profile: React.FC<ProfileProps> = () => {
             <AvatarModal />
           </div>
           </>}
-          <img src={profile.avatarUrl ?? blankAvatar} alt='Avatar' className='avatar w-48 h-48 rounded-full' />
+          <img src={profile.avatarUrl ?? blankAvatar} alt='Avatar' className='avatar w-48 h-48 rounded-full object-cover' />
         </div>
         <h1 className='text-2xl font-bold'>{profile.displayName}</h1>
       </div>

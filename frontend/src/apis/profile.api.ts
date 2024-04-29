@@ -14,10 +14,15 @@ const profileApi = {
     getGameHistory(id: any, page: number, size: number = 8) {
         return http.get<GameHistoryResponse>(`${URL_PROFILE_GAME_HISTORY}${id}?page=${page}&size=${size}`)
     },
-    uploadAvatar(image: string) {
+    uploadAvatar(image: File) {
         const formData = new FormData()
         formData.append('image', image)
-        return http.post<{url: string}>(URL_PROFILE_UPLOAD_AVATAR, formData)
+        console.log(formData.entries().next().value)
+        return http.post<{url: string}>(URL_PROFILE_UPLOAD_AVATAR, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
     }
 }
 

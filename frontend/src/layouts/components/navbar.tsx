@@ -41,6 +41,10 @@ export default function Navbar(props: NavbarProps) {
     document.querySelector('html')!.setAttribute('data-theme', theme)
   }, [theme])
 
+  useEffect(() => {
+
+  }, [user])
+
   return (
     <div
       className={classNames('navbar fixed z-10 h-16 justify-between bg-base-200 py-2 px-16', {
