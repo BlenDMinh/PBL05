@@ -32,7 +32,6 @@ export default function AvatarModal(props: AvatarModalProps) {
             window.location.reload()
         })
         .catch(err => {
-            console.log(err)
             toast.error('Upload failed')
         })
         .finally(() => {

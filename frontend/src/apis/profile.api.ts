@@ -17,7 +17,6 @@ const profileApi = {
     uploadAvatar(image: File) {
         const formData = new FormData()
         formData.append('image', image)
-        console.log(formData.entries().next().value)
         return http.post<{url: string}>(URL_PROFILE_UPLOAD_AVATAR, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'

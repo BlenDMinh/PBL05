@@ -112,7 +112,7 @@ export class Http {
 
           clearLS()
           this.jsessionid = ''
-          console.log(`Error ${error.response?.data.data?.message || error.response?.data.message}`)
+         
           // window.location.reload()
         }
         return Promise.reject(error)

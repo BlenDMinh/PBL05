@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import modules.game_chesslib.custom.GameDifficulty;
 
 @Getter
 @Setter
@@ -11,5 +12,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class GameBotDto implements GamePlayerDto{
     boolean white;
-    int difficulty;
+    GameDifficulty difficulty;
 }

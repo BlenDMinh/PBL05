@@ -62,7 +62,6 @@ export const ChatContextProvider = ({children}: ReactWithChild) => {
     }
 
     useEffect(() => {
-        console.log(chatSocket.lastJsonMessage)
         const json = chatSocket.lastJsonMessage as Message
         if(!json)
             return

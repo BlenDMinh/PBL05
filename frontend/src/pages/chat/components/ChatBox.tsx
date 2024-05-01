@@ -79,11 +79,9 @@ export default function ChatBox(props: ChatBoxProps) {
 
     useEffect(() => {
         if(chat.state != ReadyState.OPEN) {
-            console.log("Starting chat")
             chat.startChat(getSessionIdFromLS())
         }
         else {
-            console.log("Registered")
             chat.onMessage(userId, (message) => {
                 setMessages([message].concat(messagesRef.current as MessageType[]))
             })

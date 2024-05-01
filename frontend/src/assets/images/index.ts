@@ -1,3 +1,4 @@
 import authImage1 from './authImage1.jpg'
 import blankAvatar from './blankavatar.webp'
-export { authImage1, blankAvatar }
+import botAvatar from './bot.jpg'
+export { authImage1, blankAvatar, botAvatar }

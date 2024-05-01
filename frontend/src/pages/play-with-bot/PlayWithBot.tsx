@@ -12,12 +12,13 @@ import Chessground from '@react-chess/chessground'
 import classNames from 'classnames'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChessKing, faQuestionCircle } from '@fortawesome/free-solid-svg-icons'
+import { BotDifficulty } from 'src/types/player.type'
 
 export default function PlayWithBot() {
   const [wsUrl, setWsUrl] = useState(ws.findBot(getSessionIdFromLS()))
   const socket = useWebSocket(wsUrl)
   const [side, setSide] = useState<'random' | 'white' | 'black'>('random')
-  const [difficulty, setDifficulty] = useState<'EASIEST' | 'EASY' | 'MEDIUM' | 'HARD' | 'HARDEST'>('MEDIUM')
+  const [difficulty, setDifficulty] = useState<BotDifficulty>(BotDifficulty.MEDIUM)
   const [isCreating, setCreating] = useState(false)
 
   useEffect(() => {}, [socket.readyState])
@@ -66,23 +67,8 @@ export default function PlayWithBot() {
     )
 
   return (
-    <div className='flex w-full h-screen items-center flex-row-reverse px-32 pt-32 pb-16 gap-12'>
-      <div
-        className={classNames(
-          `flex-1 min-w-[${Math.min(window.innerWidth, window.innerHeight) * 0.8}px] min-h-[${
-            Math.min(window.innerWidth, window.innerHeight) * 0.8
-          }px] h-full rounded-lg border-2 border-base-300 pointer-events-none`
-        )}
-      >
-        <Chessground
-          width={Math.min(window.innerWidth, window.innerHeight) * 0.7}
-          height={Math.min(window.innerWidth, window.innerHeight) * 0.7}
-          config={{
-            orientation: side === 'white' ? 'white' : 'black'
-          }}
-        />
-      </div>
-      <div className='w-full h-full flex flex-col items-center justify-center'>
+    <div className='flex justify-center flex-col md:flex-row w-full h-fit items-center pt-32 pb-16 gap-12'>
+      <div className='w-fit h-fit flex flex-col items-center justify-center'>
         <span className='text-base-content font-bold text-xl'>GAME SETTING</span>
         <table className='w-1/3 table'>
           <tr>
@@ -127,13 +113,13 @@ export default function PlayWithBot() {
               <select
                 value={difficulty}
                 className='select select-primary'
-                onChange={(e) => setDifficulty(e.target.value as 'EASIEST' | 'EASY' | 'MEDIUM' | 'HARD' | 'HARDEST')}
+                onChange={(e) => setDifficulty(e.target.value as BotDifficulty)}
               >
-                <option value='EASIEST'>EASIEST</option>
-                <option value='EASY'>EASY</option>
-                <option value='MEDIUM'>MEDIUM</option>
-                <option value='HARD'>HARD</option>
-                <option value='HARDEST'>HARDEST</option>
+                <option value={BotDifficulty.EASIEST}>EASIEST</option>
+                <option value={BotDifficulty.EASY}>EASY</option>
+                <option value={BotDifficulty.MEDIUM}>MEDIUM</option>
+                <option value={BotDifficulty.HARD}>HARD</option>
+                <option value={BotDifficulty.HARDEST}>HARDEST</option>
               </select>
             </td>
           </tr>
@@ -145,36 +131,36 @@ export default function PlayWithBot() {
                   type='radio'
                   name='rating-2'
                   className='mask mask-star-2 bg-orange-400'
-                  checked={difficulty === 'EASIEST'}
-                  onClick={() => setDifficulty('EASIEST')}
+                  checked={difficulty === BotDifficulty.EASIEST}
+                  onClick={() => setDifficulty(BotDifficulty.EASIEST)}
                 />
                 <input
                   type='radio'
                   name='rating-2'
                   className='mask mask-star-2 bg-orange-400'
-                  checked={difficulty === 'EASY'}
-                  onClick={() => setDifficulty('EASY')}
+                  checked={difficulty === BotDifficulty.EASY}
+                  onClick={() => setDifficulty(BotDifficulty.EASY)}
                 />
                 <input
                   type='radio'
                   name='rating-2'
                   className='mask mask-star-2 bg-orange-400'
-                  checked={difficulty === 'MEDIUM'}
-                  onClick={() => setDifficulty('MEDIUM')}
+                  checked={difficulty === BotDifficulty.MEDIUM}
+                  onClick={() => setDifficulty(BotDifficulty.MEDIUM)}
                 />
                 <input
                   type='radio'
                   name='rating-2'
                   className='mask mask-star-2 bg-orange-400'
-                  checked={difficulty === 'HARD'}
-                  onClick={() => setDifficulty('HARD')}
+                  checked={difficulty === BotDifficulty.HARD}
+                  onClick={() => setDifficulty(BotDifficulty.HARD)}
                 />
                 <input
                   type='radio'
                   name='rating-2'
                   className='mask mask-star-2 bg-orange-400'
-                  checked={difficulty === 'HARDEST'}
-                  onClick={() => setDifficulty('HARDEST')}
+                  checked={difficulty === BotDifficulty.HARDEST}
+                  onClick={() => setDifficulty(BotDifficulty.HARDEST)}
                 />
               </div>
             </td>
@@ -183,17 +169,28 @@ export default function PlayWithBot() {
         <button className='btn btn-primary w-1/3 mt-10 text-primary-content font-bold text-xl' onClick={createGame}>
           Start
         </button>
-        {isCreating ? (
+        {isCreating && (
           <div className='mt-10 h-24 flex flex-col items-center gap-5'>
             <span className='text-base-content font-bold'>Creating game</span>
             <span className='loading loading-spinner'></span>
           </div>
-        ) : (
-          <div className='mt-10 h-24 flex flex-col items-center gap-5'>
-            {/* <span className="text-base-content font-bold">Creating game</span>
-                    <span className="loading loading-spinner"></span> */}
-          </div>
         )}
+      </div>
+      <div
+        className={classNames(
+          `min-w-[${Math.min(window.innerWidth, window.innerHeight) * 0.8}px] min-h-[${
+            Math.min(window.innerWidth, window.innerHeight) * 0.8
+          }px] pointer-events-none`,
+          'hidden md:block'
+        )}
+      >
+        <Chessground
+          width={Math.min(window.innerWidth, window.innerHeight) * 0.7}
+          height={Math.min(window.innerWidth, window.innerHeight) * 0.7}
+          config={{
+            orientation: side === 'white' ? 'white' : 'black'
+          }}
+        />
       </div>
     </div>
   )

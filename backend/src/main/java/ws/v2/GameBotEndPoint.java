@@ -75,7 +75,7 @@ public class GameBotEndPoint {
                 GameHumanDto.class);
         gameHumanDto.setWhite(chessGame.getPlayer1().isWhite());
         BotPlayer botPlayer = (BotPlayer) chessGame.getPlayer2();
-        GameBotDto gameBotDto = new GameBotDto(botPlayer.isWhite(), botPlayer.getDifficulty().getValue());
+        GameBotDto gameBotDto = new GameBotDto(botPlayer.isWhite(), botPlayer.getDifficulty());
         playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.PLAYER_JOINED,
                 new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                         chessGame.getBoard().getSideToMove().equals(Side.WHITE),

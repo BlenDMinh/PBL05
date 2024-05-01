@@ -5,6 +5,7 @@ import { getSessionIdFromLS } from 'src/utils/auth'
 import { useNavigate } from 'react-router-dom'
 import board from '../../assets/images/board.png'
 import { GameSocketMessage } from 'src/types/game.type'
+import { path } from 'src/constants/path'
 enum State {
   START_FINDING,
   FINDING,
@@ -20,7 +21,6 @@ export default function QuickMatch() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    console.log(ReadyState[readyState])
     if (readyState != ReadyState.OPEN) return
     const sessionId = getSessionIdFromLS()
     if (!sessionId) return
@@ -43,9 +43,8 @@ export default function QuickMatch() {
       setState(State.GAME_FOUND)
       const gameId = json.data
       // Navigate to game
-      navigate(`/game/v2/${gameId}`)
+      navigate(`${path.gamev2}/${gameId}`)
     }
-    console.log(lastMessage)
   }, [lastMessage])
 
   if (state == State.START_FINDING) {

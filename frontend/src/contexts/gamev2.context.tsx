@@ -6,7 +6,7 @@ import { ws } from 'src/constants/ws'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 import { getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
 import { GameV2SocketData, MoveHistory } from 'src/pages/gamev2/types/game.v2.type'
-import { User } from 'src/types/users.type'
+import { Player } from 'src/types/player.type'
 
 export enum GameType {
   PVP,
@@ -44,7 +44,7 @@ export interface GameV2ContextInterface {
   isPromoting: boolean
   promote: (piece?: 'q' | 'r' | 'b' | 'n' | null) => void
   result: GameResult
-  opponentId: number | null
+  opponent: Player | undefined
   resign: () => void
   onEnd: () => void
 }
@@ -65,7 +65,7 @@ const initContext: GameV2ContextInterface = {
   isPromoting: false,
   promote: () => null,
   result: GameResult.UNKNOWN,
-  opponentId: null,
+  opponent: undefined,
   resign: () => null,
   onEnd: () => null
 }
@@ -85,7 +85,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [turn, setTurn] = useState<'white' | 'black' | undefined>(undefined)
   const [result, setResult] = useState(initContext.result)
   const [config, setConfig] = useState(DEFAULT_CONFIG)
-  const [opponentId, setOpponentId] = useState(initContext.opponentId)
+  const [opponent, setOpponent] = useState(initContext.opponent)
 
   const startGame = (gameId: string, gameType: GameType = GameType.PVP, gameConfig: GameConfig = DEFAULT_CONFIG) => {
     setGameType(gameType)
@@ -100,7 +100,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
       setCore(core)
     }
     if (core?.isGameOver() && side) {
-      console.log(turn, side)
       if (turn == side) {
         setResult(GameResult.LOSE)
       } else if (turn != side) {
@@ -123,7 +122,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
 
   useEffect(() => {
     if (readyState == ReadyState.OPEN) {
-      console.log("Connected to game socket")
       setResult(GameResult.UNKNOWN)
       if (gameType == GameType.PVP) {
         // const message = JSON.stringify({
@@ -144,14 +142,12 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         // sendMessage(message)
       }
     } else {
-      console.log(readyState)
     }
   }, [readyState])
 
   useEffect(() => {
     if (!lastMessage) return
     const json = JSON.parse(lastMessage?.data)
-    console.log(json)
     const data = json.data as GameV2SocketData
     // console.log(data.gamePlayer.displayName + " " + getProfileFromLS().displayName)
     if (json.message === 'Player joined') {
@@ -159,16 +155,14 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         if (data.gamePlayer.id === getProfileFromLS().id) {
           setSide(data.gamePlayer.white ? 'white' : 'black')
         } else {
-          setOpponentId(data.gamePlayer.id)
+          setOpponent(data.gamePlayer)
         }
       }
-    }
-
-    if (json.message === 'Mate') {
+    } else if (json.message === 'Bot joined') {
+      setOpponent({ difficulty: data.gamePlayer?.difficulty })
+    } else if (json.message === 'Mate') {
       //
-    }
-
-    if (json.message === 'Resign') {
+    } else if (json.message === 'Resign') {
       if (data.resignSide != undefined) {
         const resignSide = data.resignSide ? 'white' : 'black'
         if (resignSide === side) {
@@ -184,13 +178,17 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
       if (data.white != undefined) setTurn(data.white ? 'white' : 'black')
       if (data.moveHistories) {
         setMoveHistories(data.moveHistories)
-        if(data.moveHistories.length > 0) {
+        if (data.moveHistories.length > 0) {
           const lastMove = data.moveHistories[data.moveHistories.length - 1]
           setLastMove([lastMove.from.toLowerCase() as Key, lastMove.to.toLowerCase() as Key])
         }
       }
     }
   }, [lastMessage])
+
+  useEffect(() => {
+    console.log({ opponent })
+  }, [opponent])
 
   const move = (from: Key, to: Key) => {
     if (!core) return
@@ -218,12 +216,11 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
             to: to
           }
         }
-        console.log("Sending", JSON.stringify(message))
+        console.log('Sending', JSON.stringify(message))
         sendMessage(JSON.stringify(message))
         setFen(core.fen())
       }
     } catch (e) {
-      console.log(e)
       setFen(core.fen())
       setCore(new Chess(core.fen()))
     }
@@ -259,7 +256,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
       const pieceStr =
         (side == 'white' ? 'WHITE_' : 'BLACK_') +
         (piece == 'b' ? 'BISHOP' : piece == 'n' ? 'KNIGHT' : piece == 'q' ? 'QUEEN' : 'ROOK')
-      console.log(pieceStr)
       const message = {
         message: 'Promotion',
         data: {
@@ -274,9 +270,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   }
 
   const resign = () => {
-    console.log({
-      message: 'Resign'
-    })
     sendMessage(
       JSON.stringify({
         message: 'Resign'
@@ -306,7 +299,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         isPromoting,
         promote,
         result,
-        opponentId,
+        opponent,
         resign,
         onEnd
       }}

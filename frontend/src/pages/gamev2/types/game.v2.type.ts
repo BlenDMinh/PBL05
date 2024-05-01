@@ -4,8 +4,9 @@ export type GameV2SocketData = {
     fen: string,
     white: boolean,
     gamePlayer?: {
-        id: number,
-        displayName: string,
+        id?: number,
+        displayName?: string,
+        difficulty?: number,
         white: boolean
     },
     resignSide?: boolean,
