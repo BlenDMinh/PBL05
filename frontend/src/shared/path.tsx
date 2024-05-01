@@ -12,6 +12,7 @@ import PlayWithBot from 'src/pages/play-with-bot/PlayWithBot'
 import Friend from 'src/pages/friend/Friend'
 import Profile from 'src/pages/profile/Profile'
 import Verify from 'src/pages/verify/Verify'
+import AdminDashboard from 'src/pages/admin/dashboard/AdminDashboard'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -27,6 +28,13 @@ export const AUTH_ROUTER: RouteObject[] = [
     path: path.verify,
     element: <Verify />
   }
+]
+
+export const ADMIN_ROUTER: RouteObject[] = [
+  {
+    path: path.admin,
+    element: <AdminDashboard />
+  },
 ]
 
 export const PRIVATE_ROUTER: RouteObject[] = [

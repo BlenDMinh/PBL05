@@ -9,18 +9,19 @@ import { clearLS } from 'src/utils/auth'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChessKing } from '@fortawesome/free-solid-svg-icons'
 import { matchPath } from 'react-router-dom'
+import { useAdminApp } from 'src/contexts/app.admin.context'
 
-export interface SidebarProps {}
+export interface AdminSidebarProps {}
 
-export default function Sidebar(props: SidebarProps) {
-  const { showSidebar, setIsAuthenticated, setUser, isAuthenticated } = useContext<AppContextType>(AppContext)
+export default function AdminSidebar(props: AdminSidebarProps) {
+  const { showSidebar } = useAdminApp()
   const { pathname } = useLocation()
   const navigate = useNavigate()
 
   const handleSignOut = () => {
     clearLS()
-    setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
-    setUser(null)
+    // setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
+    // setUser(null)
     navigate(path.home)
   }
   const [windowWidth, setWindowWidth] = useState<number>(window.innerWidth)
@@ -37,7 +38,7 @@ export default function Sidebar(props: SidebarProps) {
     }
   }, [])
   return (
-    <div className='drawer fixed z-10 w-max bg-base-200 lg:drawer-open'>
+    <div className='drawer fixed z-10 w-max lg:drawer-open'>
       <input id='my-drawer-2' type='checkbox' className='drawer-toggle' />
       <div className='drawer-content flex h-16 flex-col items-center justify-center pl-2  lg:hidden'>
         <label htmlFor='my-drawer-2' aria-label='open sidebar' className='btn drawer-button h-3/5'>
@@ -55,10 +56,15 @@ export default function Sidebar(props: SidebarProps) {
           className={classNames(
             'menu min-h-full justify-between shadow-inner bg-base-200 p-4 pt-0 text-base font-semibold text-black !transition-all',
             {
-              'lg:w-60': showSidebar,
+              'lg:w-96': showSidebar,
               'lg:w-[5.5rem]': !showSidebar
             }
           )}
+          style={{
+              padding: '45px 0px 43px 0px',
+              gap: '40px',
+              opacity: '0px',
+            }}
         >
           <div className='flex w-full flex-col gap-8'>
             <div className='flex h-16 items-center justify-center'>
@@ -76,7 +82,7 @@ export default function Sidebar(props: SidebarProps) {
               </Link>
             </div>
             <div className='flex flex-col gap-1'>
-              {(isAuthenticated === AuthenticateState.AUTHENTICATED ? sidebarOption : publicSidebarOption).map(
+              {sidebarOption.map(
                 ({ icon: Icon, id, title, to }) => (
                   <li key={id}>
                     <Link
@@ -98,8 +104,7 @@ export default function Sidebar(props: SidebarProps) {
               )}
             </div>
           </div>
-
-          {isAuthenticated === AuthenticateState.AUTHENTICATED && (
+          {/* {isAuthenticated === AuthenticateState.AUTHENTICATED && (
             <li>
               <button
                 className={`text-base-content hover:bg-primary hover:text-white focus:!bg-primary focus:!text-white active:!bg-primary active:!text-white ${
@@ -112,7 +117,7 @@ export default function Sidebar(props: SidebarProps) {
                 {showSidebar && 'Sign out'}
               </button>
             </li>
-          )}
+          )} */}
         </ul>
       </div>
     </div>

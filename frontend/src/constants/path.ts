@@ -18,5 +18,6 @@ export const path = {
   chat: '/chat',
   chatbox: '/chat/:id',
   friend: '/friend',
-  profile: '/profile/:id'
+  profile: '/profile/:id',
+  admin: '/admin',
 } as const

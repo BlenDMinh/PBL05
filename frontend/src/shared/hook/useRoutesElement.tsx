@@ -1,14 +1,15 @@
 import { RouteObject, useRoutes } from 'react-router-dom'
-import { AUTH_ROUTER, GAME_V2_ROUTES, PRIVATE_ROUTER } from '../path'
+import { ADMIN_ROUTER, AUTH_ROUTER, GAME_V2_ROUTES, PRIVATE_ROUTER } from '../path'
 
 // component
-import { Suspense, lazy } from 'react'
+import { Children, Suspense, lazy } from 'react'
 import { RouteLazy } from '../../interface/app'
 import NotFoundPage from '../../pages/not-found'
 import PrivateRoutes from '../../routes/PrivateRoutes'
 import AuthRoutes from 'src/routes/AuthRoutes'
 import { path } from 'src/constants/path'
 import GameV2Routes from 'src/routes/GameV2Routes'
+import AdminRoutes from 'src/routes/AdminRoutes'
 
 interface RouteElement {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -59,6 +60,11 @@ export default function useRouteElements() {
       path: path.gamev2,
       element: <GameV2Routes />,
       children: GAME_V2_ROUTES
+    },
+    {
+      path: path.admin,
+      element: <AdminRoutes />,
+      children: ADMIN_ROUTER
     }
   ]
   return useRoutes(routeElements)
