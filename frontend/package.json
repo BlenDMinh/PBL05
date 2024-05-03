@@ -49,6 +49,7 @@
     "pixi.js": "^7.4.2",
     "query-string": "^8.2.0",
     "react": "^18.2.0",
+    "react-chessboard": "^4.5.0",
     "react-dom": "^18.2.0",
     "react-helmet": "^6.1.0",
     "react-hook-form": "^7.49.3",

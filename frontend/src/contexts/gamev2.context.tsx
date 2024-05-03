@@ -7,7 +7,12 @@ import useWebSocket, { ReadyState } from 'react-use-websocket'
 import { getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
 import { GameV2SocketData, MoveHistory } from 'src/pages/gamev2/types/game.v2.type'
 import { Player } from 'src/types/player.type'
-
+import { bool, boolean } from 'yup'
+interface SquareStyle {
+  background: string
+  borderRadius?: string
+}
+type Colour = string
 export enum GameType {
   PVP,
   BOT
@@ -47,6 +52,12 @@ export interface GameV2ContextInterface {
   opponent: Player | undefined
   resign: () => void
   onEnd: () => void
+  onSquareClick: (square: Square) => void
+  rightClickedSquares: {
+    [key in Square]?: { backgroundColor: Colour } | undefined
+  }
+  optionSquares: any
+  moveSquares: any
 }
 
 const initContext: GameV2ContextInterface = {
@@ -67,7 +78,11 @@ const initContext: GameV2ContextInterface = {
   result: GameResult.UNKNOWN,
   opponent: undefined,
   resign: () => null,
-  onEnd: () => null
+  onEnd: () => null,
+  onSquareClick: () => null,
+  rightClickedSquares: {},
+  optionSquares: {},
+  moveSquares: {},
 }
 
 export const GameV2Context = createContext<GameV2ContextInterface>(initContext)
@@ -216,7 +231,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
             to: to
           }
         }
-        console.log('Sending', JSON.stringify(message))
         sendMessage(JSON.stringify(message))
         setFen(core.fen())
       }
@@ -281,6 +295,125 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     setResult(GameResult.UNKNOWN)
   }
 
+  // Chessboard
+  const [moveFrom, setMoveFrom] = useState<Square | null>(null)
+  const [moveTo, setMoveTo] = useState<Square | null>(null)
+  const [moveSquares, setMoveSquares] = useState({})
+  const [optionSquares, setOptionSquares] = useState({})
+  const [rightClickedSquares, setRightClickedSquares] = useState<{
+    [key in Square]?: { backgroundColor: Colour } | undefined
+  }>({})
+  function onSquareRightClick(square: Square) {
+    const colour = 'rgba(0, 0, 255, 0.4)'
+    setRightClickedSquares({
+      ...rightClickedSquares,
+      [square]:
+        rightClickedSquares[square] && rightClickedSquares[square]?.backgroundColor === colour
+          ? undefined
+          : { backgroundColor: colour }
+    })
+  }
+  function getMoveOptions(square: Square) {
+    if (!core) return []
+    const moves = core.moves({
+      square,
+      verbose: true
+    })
+    if (moves.length === 0) {
+      setOptionSquares({})
+      return false
+    }
+
+    const newSquares: { [key: string]: SquareStyle } = {}
+    moves.map((move) => {
+      newSquares[move.to] = {
+        background:
+          core.get(move.to) && core.get(move.to).color !== core.get(square).color
+            ? 'radial-gradient(circle, rgba(0,0,0,.1) 85%, transparent 85%)'
+            : 'radial-gradient(circle, rgba(0,0,0,.1) 25%, transparent 25%)',
+        borderRadius: '50%'
+      }
+      return move
+    })
+    newSquares[square] = {
+      background: 'rgba(255, 255, 0, 0.4)'
+    }
+    setOptionSquares(newSquares)
+    return true
+  }
+
+  function onSquareClick(square: Square) {
+    if (!core) return
+    setRightClickedSquares({})
+
+    // from square
+    if (!moveFrom) {
+      const hasMoveOptions = getMoveOptions(square)
+      if (hasMoveOptions) setMoveFrom(square)
+      return
+    }
+
+    // to square
+    if (!moveTo) {
+      // check if valid move before showing dialog
+      const moves = core.moves({
+        verbose: true,
+        square: moveFrom
+      })
+      const foundMove = moves.find((m) => m.from === moveFrom && m.to === square)
+      // not a valid move
+      if (!foundMove) {
+        // check if clicked on new piece
+        const hasMoveOptions = getMoveOptions(square)
+        // if new piece, setMoveFrom, otherwise clear moveFrom
+        setMoveFrom(hasMoveOptions ? square : null)
+        return
+      }
+
+      // valid move
+      setMoveTo(square)
+
+      // if promotion move
+      if (
+        (foundMove.color === 'w' && foundMove.piece === 'p' && square[1] === '8') ||
+        (foundMove.color === 'b' && foundMove.piece === 'p' && square[1] === '1')
+      ) {
+        setPendingMove([moveFrom, square])
+        setPromoting(true)
+        return
+      }
+
+      // // is normal move
+      const coreCopy: Chess = new Chess(core.fen())
+      const move = coreCopy.move({
+        from: moveFrom,
+        to: square
+      })
+
+      // if invalid, setMoveFrom and getMoveOptions
+      if (move === null) {
+        const hasMoveOptions = getMoveOptions(square)
+        if (hasMoveOptions) setMoveFrom(square)
+        return
+      }
+      setLastMove([moveFrom, square])
+      const message = {
+        message: 'Move',
+        data: {
+          from: moveFrom,
+          to: square
+        }
+      }
+      sendMessage(JSON.stringify(message))
+      setFen(core.fen())
+
+      setMoveFrom(null)
+      setMoveTo(null)
+      setOptionSquares({})
+      return
+    }
+  }
+
   return (
     <GameV2Context.Provider
       value={{
@@ -301,7 +434,11 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         result,
         opponent,
         resign,
-        onEnd
+        onEnd,
+        onSquareClick,
+        rightClickedSquares,
+        optionSquares,
+        moveSquares,
       }}
     >
       {children}

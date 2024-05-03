@@ -1,13 +1,9 @@
-/* eslint-disable jsx-a11y/aria-role */
-import Chessground from '@react-chess/chessground'
+import { Chessboard } from 'react-chessboard'
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { GameResult, GameType, useGameV2 } from 'src/contexts/gamev2.context'
 import { v4 as uuidv4 } from 'uuid'
 
-import 'src/pages/gamev2/css/chessground.base.css'
-import 'src/pages/gamev2/css/chessground.brown.css'
-import 'src/pages/gamev2/css/chessground.cburnett.css'
 import classNames from 'classnames'
 import { path } from 'src/constants/path'
 import ChatBox from '../chat/components/ChatBox'
@@ -75,6 +71,7 @@ export default function BaseGame(props: BaseGameProps) {
     }
   }, [game.result])
 
+
   if (!game.core) return <>Loading...</>
 
   const calcChessGroundSize = () => Math.min(window.innerHeight * 0.67, window.innerHeight * 0.67)
@@ -92,25 +89,21 @@ export default function BaseGame(props: BaseGameProps) {
               <p className='text-lg m-2'>10:00</p>
             </div>
           </div>
-          <Chessground
-            width={calcChessGroundSize()}
-            height={calcChessGroundSize()}
-            config={{
-              turnColor: game.turn,
-              fen: game.fen,
-              orientation: game.side,
-              draggable: {
-                enabled: false
-              },
-              movable: {
-                free: false,
-                dests: game.getMoveableDests(),
-                color: game.side
-              },
-              events: {
-                move: game.move
-              },
-              lastMove: game.lastMove
+          <Chessboard
+            boardWidth={calcChessGroundSize()}
+            position={game.fen}
+            boardOrientation={game.side}
+            animationDuration={200}
+            arePiecesDraggable={false}
+            onSquareClick={game.onSquareClick}
+            customBoardStyle={{
+              borderRadius: '4px',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)'
+            }}
+            customSquareStyles={{
+              ...game.moveSquares,
+              ...game.optionSquares,
+              ...game.rightClickedSquares
             }}
           />
           <div className='w-full flex items-center justify-between'>
