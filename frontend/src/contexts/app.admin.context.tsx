@@ -3,12 +3,12 @@ import { ReactWithChild } from "src/interface/app"
 
 export interface AdminAppContextType {
     showSidebar: boolean,
-    theme: 'dracula' | 'cmyk'
+    theme: 'forest' | 'pastel'
     setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>
 }
 const initContext: AdminAppContextType = {
     showSidebar: true,
-    theme: 'dracula',
+    theme: 'forest',
     setShowSidebar: () => null
 }
 
@@ -18,7 +18,7 @@ export default AdminAppContext
 
 export const AdminAppContextProvider = ({ children }: ReactWithChild) => {
     const [showSidebar, setShowSidebar] = useState<boolean>(initContext.showSidebar)
-    const [theme, setTheme] = useState<'dracula' | 'cmyk'>(initContext.theme)
+    const [theme, setTheme] = useState<'forest' | 'pastel'>(initContext.theme)
 
     return (
         <AdminAppContext.Provider value={{ showSidebar, theme, setShowSidebar }}>

@@ -53,21 +53,11 @@ export default function QuickMatch() {
   if (state == State.FINDING) {
     return (
       <div className='flex flex-col items-center justify-center relative'>
-        <div>
-          <img className='brightness-50 shadow-2xl' src={board} alt='Chess Board' />
-
-          <div
-            className='text-3xl text-base-content whitespace-nowrap'
-            style={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              zIndex: '3'
-            }}
-          >
-            Finding opponent...
-          </div>
+        <span className='loading loading-spinner'></span>
+        <div
+          className='text-3xl text-base-content whitespace-nowrap'
+        >
+          Finding opponent...
         </div>
       </div>
     )

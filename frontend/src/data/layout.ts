@@ -4,9 +4,9 @@ import { FaComments, FaHome, FaUserFriends } from 'react-icons/fa';
 
 import { IconType } from 'react-icons'
 
-interface QuickOptionNavbar extends PoliciesOption {
+export interface QuickOptionNavbar extends PoliciesOption {
 }
-interface SidebarOption extends QuickOptionNavbar {
+export interface SidebarOption extends QuickOptionNavbar {
   icon: IconType
 }
 
