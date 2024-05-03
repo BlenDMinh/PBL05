@@ -102,7 +102,7 @@ export default function AdminSidebar(props: AdminSidebarProps) {
       id: 0,
       title: 'Ruleset',
       icon: FaList,
-      to: ''
+      to: path.adminRuleset
     },
     {
       id: 1,

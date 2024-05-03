@@ -27,7 +27,7 @@ export default function AdminDefaultLayout({ children }: ReactWithChild) {
       > */}
         <div
           className={classNames('flex min-h-screen h-screen w-full flex-col items-center pt-28', {
-            'pointer-events-none lg:pl-96': showSidebar,
+            'lg:pl-96': showSidebar,
             'lg:pl-[88px]': !showSidebar
           })}
         >

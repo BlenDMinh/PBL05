@@ -21,3 +21,12 @@ export type GameResult = {
 export interface GameHistoryResponse extends PaginitionResponse {
     games: GameResult[]
 }
+
+export type GameRuleset = {
+    id: number,
+    name: string,
+    minutePerTurn: number | null,
+    totalMinutePerPlayer: number,
+    extraTimeSteps: number | null,
+    extraTime: number | null
+}

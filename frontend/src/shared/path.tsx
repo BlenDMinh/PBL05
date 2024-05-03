@@ -13,6 +13,7 @@ import Friend from 'src/pages/friend/Friend'
 import Profile from 'src/pages/profile/Profile'
 import Verify from 'src/pages/verify/Verify'
 import AdminDashboard from 'src/pages/admin/dashboard/AdminDashboard'
+import AdminRuleset from 'src/pages/admin/ruleset/AdminRuleset'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -35,6 +36,10 @@ export const ADMIN_ROUTER: RouteObject[] = [
     path: path.admin,
     element: <AdminDashboard />
   },
+  {
+    path: path.adminRuleset,
+    element: <AdminRuleset />
+  }
 ]
 
 export const PRIVATE_ROUTER: RouteObject[] = [
