@@ -28,7 +28,7 @@ export default function ResultModal(props: ResultModalPropss) {
             ? 'DRAW'
             : 'IDK'}
         </p>
-        <form method='dialog'>
+        <form method='dialog' className='modal-backdrop'>
           <div className='w-full flex justify-evenly gap-5'>
             <button className='btn btn-primary flex-1 text-lg' onClick={props.onReplay}>
               Play again
@@ -37,6 +37,7 @@ export default function ResultModal(props: ResultModalPropss) {
               Exit
             </button>
           </div>
+          <button className="btn btn-sm btn-circle text-white btn-ghost absolute right-2 top-2">✕</button>
         </form>
       </div>
     </dialog>

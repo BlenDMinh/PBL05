@@ -3,6 +3,7 @@ package modules.game_chesslib.algo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -18,6 +19,203 @@ import com.github.bhlangonijr.chesslib.Square;
 import com.github.bhlangonijr.chesslib.move.Move;
 
 public class Minimax {
+    public Move getBestMoveAlphaBeta(Board board, int depth, Side side) {
+        return getBestMoveAlphaBeta(board, depth, side, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, true)
+                .getBestMove();
+    }
+
+    PairMoveValue getBestMoveAlphaBeta(Board board, int depth, Side side, double alpha, double beta,
+            boolean isMaximizingPlayer) {
+        List<Move> newGameMoves = board.legalMoves();
+        Collections.shuffle(newGameMoves);
+        if (depth == 0 || newGameMoves.size() == 0) {
+            return new PairMoveValue(null, evaluateBoard(board, side));
+        }
+        Move bestMove = null, currMove;
+
+        if (isMaximizingPlayer) {
+            double bestEval = Double.NEGATIVE_INFINITY;
+            for (int i = 0; i < newGameMoves.size(); i++) {
+                currMove = newGameMoves.get(i);
+                board.doMove(currMove);
+                double eval = getBestMoveAlphaBeta(board, depth - 1, side, alpha, beta, !isMaximizingPlayer).getValue();
+                board.undoMove();
+                if (bestEval < eval) {
+                    bestEval = eval;
+                    bestMove = currMove;
+                }
+                if (alpha < bestEval) {
+                    alpha = bestEval;
+                }
+                if (alpha >= beta) {
+                    break;
+                }
+            }
+            return new PairMoveValue(bestMove, bestEval);
+        } else {
+            double bestEval = Double.POSITIVE_INFINITY;
+            for (int i = 0; i < newGameMoves.size(); i++) {
+                currMove = newGameMoves.get(i);
+                board.doMove(currMove);
+                double eval = getBestMoveAlphaBeta(board, depth - 1, side, alpha, beta, !isMaximizingPlayer).getValue();
+                board.undoMove();
+                if (bestEval > eval) {
+                    bestEval = eval;
+                    bestMove = currMove;
+                }
+                if (beta > bestEval) {
+                    beta = bestEval;
+                }
+                if (alpha >= beta) {
+                    break;
+                }
+            }
+            return new PairMoveValue(bestMove, bestEval);
+        }
+    }
+
+    public PairMoveValue getBestMoveAlphaBeta(Board board, int depth, double sum, Side side) {
+        return getBestMoveAlphaBeta(board, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
+                true, sum, side);
+    }
+
+    PairMoveValue getBestMoveAlphaBeta(Board board, int depth, double alpha, double beta,
+            boolean isMaximizingPlayer, double sum, Side side) {
+        List<Move> newGameMoves = board.legalMoves();
+        Collections.shuffle(newGameMoves);
+        if (depth == 0 || newGameMoves.size() == 0) {
+            return new PairMoveValue(null, sum);
+        }
+
+        double maxValue = Double.NEGATIVE_INFINITY;
+        double minValue = Double.POSITIVE_INFINITY;
+        Move bestMove = null, currMove;
+        for (int i = 0; i < newGameMoves.size(); i++) {
+            currMove = newGameMoves.get(i);
+            LastMoveInfo lastMoveInfo = new LastMoveInfo();
+            lastMoveInfo.setMove(currMove);
+            lastMoveInfo.setPieceMove(mapPieceTypeToString.get(board.getPiece(currMove.getFrom()).getPieceType()));
+            Piece captured = board.getPiece(currMove.getTo());
+            if (captured != null && !captured.getFanSymbol().equals("NONE")) {
+                lastMoveInfo.setPieceCapture(mapPieceTypeToString.get(board.getPiece(currMove.getTo()).getPieceType()));
+            }
+            lastMoveInfo.setPromotion(mapPieceTypeToString.get(currMove.getPromotion().getPieceType()));
+            lastMoveInfo.setSide(board.getSideToMove());
+
+            board.doMove(currMove);
+            double newSum = evaluateBoard(board, lastMoveInfo, sum, side);
+            PairMoveValue pairMoveValue = getBestMoveAlphaBeta(
+                    board,
+                    depth - 1,
+                    alpha,
+                    beta,
+                    !isMaximizingPlayer,
+                    newSum,
+                    side);
+            board.undoMove();
+
+            if (isMaximizingPlayer) {
+                if (pairMoveValue.getValue() > maxValue) {
+                    maxValue = pairMoveValue.getValue();
+                    bestMove = currMove;
+                }
+                if (pairMoveValue.getValue() > alpha) {
+                    alpha = pairMoveValue.getValue();
+                }
+            } else {
+                if (pairMoveValue.getValue() < minValue) {
+                    minValue = pairMoveValue.getValue();
+                    bestMove = currMove;
+                }
+                if (pairMoveValue.getValue() < beta) {
+                    beta = pairMoveValue.getValue();
+                }
+            }
+            // Alpha-beta pruning
+            if (alpha >= beta) {
+                break; // cut off
+            }
+        }
+        if (isMaximizingPlayer) {
+            return new PairMoveValue(bestMove, maxValue);
+        } else {
+            return new PairMoveValue(bestMove, minValue);
+        }
+    }
+
+    double evaluateBoard(Board chess, LastMoveInfo lastMoveInfo, double prevSum, Side side) {
+        if (chess.isMated()) {
+            // Opponent is in checkmate (good for player side)
+            if (lastMoveInfo.getSide().equals(side)) {
+                return Math.pow(10, 10);
+            }
+            // Player side’s king is in checkmate (bad for player side)
+            else {
+                return -Math.pow(10, 10);
+            }
+        }
+        if (chess.isDraw()) {
+            return 0;
+        }
+        if (chess.isKingAttacked()) {
+            if (lastMoveInfo.getSide().equals(side)) {
+                prevSum += 50;
+            }
+            // Player side’s king is in check
+            else {
+                prevSum -= 50;
+            }
+        }
+        if (prevSum < -1500) {
+            if (lastMoveInfo.getPieceMove().equals("k")) {
+                lastMoveInfo.setPieceMove("k_e");
+            }
+        }
+        int rowTo = mapSquareToPosition(lastMoveInfo.getMove().getTo()).row;
+        int colTo = mapSquareToPosition(lastMoveInfo.getMove().getTo()).col;
+        int rowFrom = mapSquareToPosition(lastMoveInfo.getMove().getFrom()).row;
+        int colFrom = mapSquareToPosition(lastMoveInfo.getMove().getFrom()).col;
+
+        if (lastMoveInfo.getPieceCapture() != null && lastMoveInfo.getPromotion() != null) {
+
+            if (lastMoveInfo.getPieceCapture() != null) {
+                if (lastMoveInfo.getSide().equals(side)) {
+                    prevSum += weights.get(lastMoveInfo.getPieceCapture()) +
+                            pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPieceCapture())[rowTo][colTo];
+                }
+                // player[color]’s piece was captured (bad for player[color])
+                else {
+                    prevSum -= weights.get(lastMoveInfo.getPieceCapture()) +
+                            pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPieceCapture())[rowTo][colTo];
+                }
+            }
+
+            if (lastMoveInfo.getPromotion() != null) {
+                lastMoveInfo.setPromotion("q");
+                if (lastMoveInfo.getSide().equals(side)) {
+                    prevSum -= weights.get(lastMoveInfo.getPieceMove()) +
+                            pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPieceMove())[rowFrom][colFrom];
+                    prevSum += weights.get(lastMoveInfo.getPromotion()) +
+                            pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPromotion())[rowTo][colTo];
+                } else {
+                    prevSum += weights.get(lastMoveInfo.getPieceMove()) +
+                            pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPieceMove())[rowFrom][colFrom];
+                    prevSum -= weights.get(lastMoveInfo.getPromotion()) +
+                            pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPromotion())[rowTo][colTo];
+                }
+
+            }
+        } else {
+            if (!lastMoveInfo.getSide().equals(side)) {
+                prevSum += pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPieceMove())[rowFrom][colFrom];
+                prevSum -= pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPieceMove())[rowTo][colTo];
+            } else {
+                prevSum -= pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPieceMove())[rowFrom][colFrom];
+                prevSum += pst.get(lastMoveInfo.getSide()).get(lastMoveInfo.getPieceMove())[rowTo][colTo];
+            }
+        }
+        return prevSum;
+    }
 
     public Move getBestMove(int depth, Board board) throws InterruptedException {
         List<Move> newGameMoves = board.legalMoves();
@@ -151,7 +349,7 @@ public class Minimax {
         return isMaximisingPlayer ? bestMove : worstMove;
     }
 
-    public static double evaluateBoard(Board board) {
+    double evaluateBoard(Board board) {
         double totalEvaluation = 0;
         Piece[] pieces = board.boardToArray();
         for (Piece piece : pieces) {
@@ -166,17 +364,65 @@ public class Minimax {
         return totalEvaluation;
     }
 
+    double evaluateBoard(Board board, Side side) {
+        if (board.isMated()) {
+            if (board.getSideToMove().equals(side)) {
+                return -Math.pow(10, 10);
+            } else {
+                return Math.pow(10, 10);
+            }
+        }
+        double totalEvaluation = 0;
+        int remainWhite = 0, remainBlack = 0;
+        Piece[] remainPieces = board.boardToArray();
+        for (Piece piece : remainPieces) {
+            if (!piece.getFanSymbol().equals("NONE")) {
+                if (piece.getPieceSide().equals(Side.WHITE)) {
+                    ++remainWhite;
+                } else {
+                    ++remainBlack;
+                }
+            }
+        }
+
+        boolean end = remainWhite <= 5 || remainBlack <= 5;
+        if (board.isKingAttacked()) {
+            if (board.getSideToMove().equals(side)) {
+                totalEvaluation = -50;
+                if (end) {
+                    totalEvaluation = -200;
+                }
+            } else {
+                totalEvaluation = 50;
+                if (end) {
+                    totalEvaluation = 200;
+                }
+            }
+        }
+        for (Square square : Square.values()) {
+            Piece piece = board.getPiece(square);
+            if (piece != null && !piece.getFanSymbol().equals("NONE")) {
+                if (piece.getPieceSide().equals(side))
+                    totalEvaluation += getPieceValue(piece, square, end);
+                else
+                    totalEvaluation -= getPieceValue(piece, square, end);
+            }
+        }
+
+        return totalEvaluation;
+    }
+
     static int getPieceWeight(PieceType pieceType, boolean end) {
         if (pieceType.equals(PieceType.PAWN))
             return 100;
         if (pieceType.equals(PieceType.KNIGHT))
-            return 300;
+            return 280;
         if (pieceType.equals(PieceType.ROOK))
-            return 500;
+            return 479;
         if (pieceType.equals(PieceType.BISHOP))
-            return 300;
+            return 320;
         if (pieceType.equals(PieceType.QUEEN))
-            return 900;
+            return 929;
         if (pieceType.equals(PieceType.KING) && end)
             return 60000;
         return 60000;
@@ -186,37 +432,83 @@ public class Minimax {
         return getPieceWeight(pieceType, false);
     }
 
-    static double getPieceValue(Piece piece, Square square) {
-        double ans = 0;
-        boolean isWhite = piece.getPieceSide().equals(Side.WHITE);
-        Position pos = mapSquareToPosition(square);
-        if (piece.getPieceType().equals(PieceType.PAWN)) {
-            ans = getPieceWeight(piece.getPieceType())
-                    + (isWhite ? pawnEvalWhite[pos.getRow()][pos.getCol()] : pawnEvalBlack[pos.getRow()][pos.getCol()]);
-        } else if (piece.getPieceType().equals(PieceType.ROOK)) {
-            ans = getPieceWeight(piece.getPieceType())
-                    + (isWhite ? rookEvalWhite[pos.getRow()][pos.getCol()] : rookEvalBlack[pos.getRow()][pos.getCol()]);
-        } else if (piece.getPieceType().equals(PieceType.KNIGHT)) {
-            ans = getPieceWeight(piece.getPieceType()) + (isWhite ? knightEvalWhite[pos.getRow()][pos.getCol()]
-                    : knightEvalBlack[pos.getRow()][pos.getCol()]);
-        } else if (piece.getPieceType().equals(PieceType.BISHOP)) {
-            ans = getPieceWeight(piece.getPieceType()) + (isWhite ? bishopEvalWhite[pos.getRow()][pos.getCol()]
-                    : bishopEvalBlack[pos.getRow()][pos.getCol()]);
-        } else if (piece.getPieceType().equals(PieceType.QUEEN)) {
-            ans = getPieceWeight(piece.getPieceType()) + (isWhite ? evalQueenWhite[pos.getRow()][pos.getCol()]
-                    : evalQueenBlack[pos.getRow()][pos.getCol()]);
-        } else if (piece.getPieceType().equals(PieceType.KING)) {
-            ans = getPieceWeight(piece.getPieceType())
-                    + (isWhite ? kingEvalWhite[pos.getRow()][pos.getCol()] : kingEvalBlack[pos.getRow()][pos.getCol()]);
+    static HashMap<PieceType, String> mapPieceTypeToString = new HashMap<PieceType, String>() {
+        {
+            put(PieceType.PAWN, "p");
+            put(PieceType.KNIGHT, "n");
+            put(PieceType.ROOK, "r");
+            put(PieceType.BISHOP, "b");
+            put(PieceType.QUEEN, "q");
+            put(PieceType.KING, "k");
         }
-        return isWhite ? ans : -ans;
+    };
+
+    static double getPieceValue(Piece piece, Square square) {
+        return getPieceValue(piece, square, false);
+    }
+
+    static double getPieceValue(Piece piece, Square square, boolean end) {
+        int row = mapSquareToPosition(square).getRow();
+        int col = mapSquareToPosition(square).getCol();
+        if (end && piece.getPieceType().equals(PieceType.KING)) {
+            return weights.get("k_e") + pst.get(piece.getPieceSide()).get("k_e")[row][col];
+        }
+        return weights.get(mapPieceTypeToString.get(piece.getPieceType()))
+                + pst.get(piece.getPieceSide()).get(mapPieceTypeToString.get(piece.getPieceType()))[row][col];
+    }
+
+    static HashMap<String, double[][]> pst_w, pst_b;
+
+    static HashMap<Side, HashMap<String, double[][]>> pst;
+
+    public Minimax() {
+        pst_w = new HashMap<String, double[][]>() {
+            {
+                put("p", pawnEvalWhite);
+                put("n", knightEvalWhite);
+                put("r", rookEvalWhite);
+                put("b", bishopEvalWhite);
+                put("q", evalQueenWhite);
+                put("k", kingEvalWhite);
+                put("k_e", kingEvalWhite_End);
+            }
+        };
+        pst_b = new HashMap<String, double[][]>() {
+            {
+                put("p", pawnEvalBlack);
+                put("n", knightEvalBlack);
+                put("r", rookEvalBlack);
+                put("b", bishopEvalBlack);
+                put("q", evalQueenBlack);
+                put("k", kingEvalBlack);
+                put("k_e", kingEvalBlack_End);
+            }
+        };
+        pst = new HashMap<Side, HashMap<String, double[][]>>() {
+            {
+                put(Side.WHITE, pst_w);
+                put(Side.BLACK, pst_b);
+            }
+        };
     }
 
     static Position mapSquareToPosition(Square square) {
-        int row = square.getRank().ordinal();
+        int row = 7 - square.getRank().ordinal();
         int col = square.getFile().ordinal();
         return new Position(row, col);
     }
+
+    static HashMap<String, Double> weights = new HashMap<String, Double>() {
+        {
+            put("p", 100d);
+            put("n", 280d);
+            put("r", 479d);
+            put("b", 320d);
+            put("q", 929d);
+            put("k", 60000d);
+            put("k_e", 60000d);
+        }
+    };
 
     static double[][] reverseArray(double[][] array) {
         double[][] reversedArray = new double[array.length][];

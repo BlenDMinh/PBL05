@@ -47,6 +47,7 @@ export interface GameV2ContextInterface {
   opponent: Player | undefined
   resign: () => void
   onEnd: () => void
+  isReceiveFromServer: boolean
 }
 
 const initContext: GameV2ContextInterface = {
@@ -67,15 +68,18 @@ const initContext: GameV2ContextInterface = {
   result: GameResult.UNKNOWN,
   opponent: undefined,
   resign: () => null,
-  onEnd: () => null
+  onEnd: () => null,
+  isReceiveFromServer: false
 }
 
 export const GameV2Context = createContext<GameV2ContextInterface>(initContext)
 
+export const FEN_DEFAULT = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
+
 export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [gameType, setGameType] = useState(GameType.PVP)
   const [gameId, setGameId] = useState('')
-  const [fen, setFen] = useState('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+  const [fen, setFen] = useState(FEN_DEFAULT)
   const [core, setCore] = useState<Chess | null>(new Chess())
   const [side, setSide] = useState<'black' | 'white' | undefined>(undefined)
   const [lastMove, setLastMove] = useState<Key[]>([])
@@ -86,6 +90,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [result, setResult] = useState(initContext.result)
   const [config, setConfig] = useState(DEFAULT_CONFIG)
   const [opponent, setOpponent] = useState(initContext.opponent)
+  const [isReceiveFromServer, setIsReceiveFromServer] = useState<boolean>(false)
 
   const startGame = (gameId: string, gameType: GameType = GameType.PVP, gameConfig: GameConfig = DEFAULT_CONFIG) => {
     setGameType(gameType)
@@ -149,8 +154,8 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     if (!lastMessage) return
     const json = JSON.parse(lastMessage?.data)
     const data = json.data as GameV2SocketData
-    // console.log(data.gamePlayer.displayName + " " + getProfileFromLS().displayName)
     if (json.message === 'Player joined') {
+      setIsReceiveFromServer(true)
       if (data.gamePlayer) {
         if (data.gamePlayer.id === getProfileFromLS().id) {
           setSide(data.gamePlayer.white ? 'white' : 'black')
@@ -161,7 +166,12 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     } else if (json.message === 'Bot joined') {
       setOpponent({ difficulty: data.gamePlayer?.difficulty })
     } else if (json.message === 'Mate') {
-      //
+      const matedSide = data.white ? 'white' : 'black'
+      if (matedSide === side) {
+        setResult(GameResult.LOSE)
+      } else {
+        setResult(GameResult.WIN)
+      }
     } else if (json.message === 'Resign') {
       if (data.resignSide != undefined) {
         const resignSide = data.resignSide ? 'white' : 'black'
@@ -181,14 +191,12 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         if (data.moveHistories.length > 0) {
           const lastMove = data.moveHistories[data.moveHistories.length - 1]
           setLastMove([lastMove.from.toLowerCase() as Key, lastMove.to.toLowerCase() as Key])
+        } else {
+          setLastMove([])
         }
       }
     }
   }, [lastMessage])
-
-  useEffect(() => {
-    console.log({ opponent })
-  }, [opponent])
 
   const move = (from: Key, to: Key) => {
     if (!core) return
@@ -216,7 +224,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
             to: to
           }
         }
-        console.log('Sending', JSON.stringify(message))
         sendMessage(JSON.stringify(message))
         setFen(core.fen())
       }
@@ -301,7 +308,8 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         result,
         opponent,
         resign,
-        onEnd
+        onEnd,
+        isReceiveFromServer
       }}
     >
       {children}
