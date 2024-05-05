@@ -108,7 +108,7 @@ export default function AdminSidebar(props: AdminSidebarProps) {
       id: 1,
       title: 'Account',
       icon: FaUserCircle,
-      to: ''
+      to: path.adminAccount
     },
     {
       id: 2,

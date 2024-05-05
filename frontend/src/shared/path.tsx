@@ -14,6 +14,7 @@ import Profile from 'src/pages/profile/Profile'
 import Verify from 'src/pages/verify/Verify'
 import AdminDashboard from 'src/pages/admin/dashboard/AdminDashboard'
 import AdminRuleset from 'src/pages/admin/ruleset/AdminRuleset'
+import AdminAccount from 'src/pages/admin/account/AdminAccount'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -39,6 +40,10 @@ export const ADMIN_ROUTER: RouteObject[] = [
   {
     path: path.adminRuleset,
     element: <AdminRuleset />
+  },
+  {
+    path: path.adminAccount,
+    element: <AdminAccount />
   }
 ]
 
