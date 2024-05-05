@@ -9,18 +9,18 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
-
 import com.google.gson.Gson;
 
 import common.dto.UserPasswordDto;
 import modules.game_chesslib.custom.GameDifficulty;
+import modules.game_chesslib.custom.chessgame.ChessGame;
+import modules.game_chesslib.custom.chessgame.GameBot;
 import modules.game_chesslib.GameStore;
 import modules.game_chesslib.common.GameMessage;
 import modules.game_chesslib.common.GameMessageDto;
 import modules.game_chesslib.common.MessageDecoder;
 import modules.game_chesslib.common.MessageEncoder;
 import modules.game_chesslib.common.nested.BotConfigRequest;
-import modules.game_chesslib.custom.ChessGame;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
 
@@ -59,9 +59,9 @@ public class FindBotEndpoint {
         String gameId = UUID.randomUUID().toString();
         int humanId = (int) playerSession.getUserProperties().get("user_id");
         GameDifficulty difficulty = GameDifficulty.valueOf(botConfigRequest.getDifficulty());
-        GameStore.getInstance().addGame(new ChessGame(gameId, humanId, difficulty, side.equals("white")));
+        GameStore.getInstance().addBotHuman(new GameBot(gameId, humanId, difficulty, side.equals("white")));
         playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_CREATED, gameId));
         playerSession.close();
-        
+
     }
 }

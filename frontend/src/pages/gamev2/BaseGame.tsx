@@ -30,25 +30,8 @@ export default function BaseGame(props: BaseGameProps) {
   const { gameId } = useParams()
   const game = useGameV2()
   const navigate = useNavigate()
-  const opponentQuery = async (id: number) => {
-    const o = await profileApi.getProfile(id)
-    setOpponent(o.data)
-  }
+
   const [resign, setResign] = useState(false)
-
-  const [opponent, setOpponent] = useState<Player>()
-
-  useEffect(() => {
-    if ((game.opponent as BotPlayer)?.difficulty) {
-      setOpponent(game.opponent)
-    } else if ((game.opponent as HumanPlayer)?.id) {
-      ;(async () => {
-        await opponentQuery((game.opponent as HumanPlayer).id)
-      })()
-    }
-  }, [game.opponent])
-
-  const player = getProfileFromLS() as HumanPlayer
 
   useEffect(() => {
     if (gameId) game.startGame(gameId, props.gameType)
@@ -100,9 +83,9 @@ export default function BaseGame(props: BaseGameProps) {
             className={classNames(`flex flex-col rounded-lg items-center justify-center`)}
           >
             <div className='w-full flex items-center justify-between'>
-              <GameProfile profile={opponent} role='Opponent' />
+              <GameProfile profile={game.opponent} role='Opponent' />
               <div className='rounded-lg border-base-300 border-2 bg-base-200'>
-                <p className='text-lg m-2'>10:00</p>
+                <p className='text-lg m-2'>{(game.opponent as HumanPlayer)?.remainMillis}</p>
               </div>
             </div>
             <Chessground
@@ -112,14 +95,14 @@ export default function BaseGame(props: BaseGameProps) {
               config={{
                 turnColor: game.turn,
                 fen: game.fen,
-                orientation: game.side === 'white' ? 'white' : 'black',
+                orientation: game.me?.side === 'white' ? 'white' : 'black',
                 draggable: {
                   enabled: true
                 },
                 movable: {
                   free: false,
                   dests: game.getMoveableDests(),
-                  color: game.side
+                  color: game.me?.side
                 },
                 events: {
                   move: game.move
@@ -128,17 +111,17 @@ export default function BaseGame(props: BaseGameProps) {
               }}
             />
             <div className='w-full flex items-center justify-between'>
-              <GameProfile profile={player} role='You' />
+              <GameProfile profile={game.me} role='You' />
               <div className='rounded-lg border-base-300 border-2 bg-base-200'>
-                <p className='text-lg m-2'>10:00</p>
+                <p className='text-lg m-2'>{game.me?.remainMillis}</p>
               </div>
             </div>
           </div>
           <div className={classNames('flex flex-col gap-5 h-full', 'w-60')}>
-            {props.gameType == GameType.PVP && (opponent as HumanPlayer)?.id && (
+            {props.gameType == GameType.PVP && (game.opponent as HumanPlayer)?.id && (
               <div className='flex justify-end'>
                 <ChatContextProvider>
-                  <ChatModal id={(opponent as HumanPlayer).id} />
+                  <ChatModal id={(game.opponent as HumanPlayer).id} />
                 </ChatContextProvider>
               </div>
             )}

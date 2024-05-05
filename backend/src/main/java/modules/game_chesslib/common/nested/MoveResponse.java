@@ -16,4 +16,12 @@ public class MoveResponse {
     String fen;
     boolean white;
     List<MoveHistory> moveHistories;
+    public MoveResponse(String fen, boolean white, List<MoveHistory> moveHistories) {
+        this.fen = fen;
+        this.white = white;
+        this.moveHistories = moveHistories;
+    }
+    Long whiteRemainMillis;
+    Long blackRemainMillis;
+    
 }

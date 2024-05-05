@@ -1,4 +1,4 @@
-package modules.game_chesslib.dto;
+package modules.game_chesslib.common.nested;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +9,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameHumanDto implements GamePlayerDto {
-    int id;
-    String displayName;
-    int elo;
-    String avatarUrl;
+public class TimeUpResponse {
+    String fen;
     boolean white;
+    Long whiteRemainMillis;
+    Long blackRemainMillis;
 }

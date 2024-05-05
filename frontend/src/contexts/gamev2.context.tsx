@@ -6,7 +6,7 @@ import { ws } from 'src/constants/ws'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 import { getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
 import { GameV2SocketData, MoveHistory } from 'src/pages/gamev2/types/game.v2.type'
-import { Player } from 'src/types/player.type'
+import { BotPlayer, HumanPlayer, Player } from 'src/types/player.type'
 
 export enum GameType {
   PVP,
@@ -33,7 +33,6 @@ export interface GameV2ContextInterface {
   startGame: (gameId: string, gameType?: GameType, gameConfig?: GameConfig) => void
   core: Chess | null
   fen: string
-  side: 'white' | 'black' | undefined
   setFen: React.Dispatch<React.SetStateAction<string>>
   lastMove: Key[]
   moveHistories: MoveHistory[]
@@ -44,6 +43,7 @@ export interface GameV2ContextInterface {
   isPromoting: boolean
   promote: (piece?: 'q' | 'r' | 'b' | 'n' | null) => void
   result: GameResult
+  me: HumanPlayer | undefined
   opponent: Player | undefined
   resign: () => void
   onEnd: () => void
@@ -53,7 +53,6 @@ export interface GameV2ContextInterface {
 const initContext: GameV2ContextInterface = {
   core: null,
   gameId: '',
-  side: undefined,
   startGame: () => null,
   fen: '',
   setFen: () => null,
@@ -66,6 +65,7 @@ const initContext: GameV2ContextInterface = {
   isPromoting: false,
   promote: () => null,
   result: GameResult.UNKNOWN,
+  me: undefined,
   opponent: undefined,
   resign: () => null,
   onEnd: () => null,
@@ -81,7 +81,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [gameId, setGameId] = useState('')
   const [fen, setFen] = useState(FEN_DEFAULT)
   const [core, setCore] = useState<Chess | null>(new Chess())
-  const [side, setSide] = useState<'black' | 'white' | undefined>(undefined)
   const [lastMove, setLastMove] = useState<Key[]>([])
   const [moveHistories, setMoveHistories] = useState<MoveHistory[]>(initContext.moveHistories)
   const [isPromoting, setPromoting] = useState(false)
@@ -89,7 +88,8 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [turn, setTurn] = useState<'white' | 'black' | undefined>(undefined)
   const [result, setResult] = useState(initContext.result)
   const [config, setConfig] = useState(DEFAULT_CONFIG)
-  const [opponent, setOpponent] = useState(initContext.opponent)
+  const [me, setMe] = useState<HumanPlayer | undefined>(initContext.me)
+  const [opponent, setOpponent] = useState<Player | undefined>(initContext.opponent)
   const [isReceiveFromServer, setIsReceiveFromServer] = useState<boolean>(false)
 
   const startGame = (gameId: string, gameType: GameType = GameType.PVP, gameConfig: GameConfig = DEFAULT_CONFIG) => {
@@ -104,10 +104,10 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
       const core = new Chess(fen)
       setCore(core)
     }
-    if (core?.isGameOver() && side) {
-      if (turn == side) {
+    if (core?.isGameOver() && me) {
+      if (turn == me.side) {
         setResult(GameResult.LOSE)
-      } else if (turn != side) {
+      } else if (turn != me.side) {
         setResult(GameResult.WIN)
       } else {
         setResult(GameResult.DRAW)
@@ -153,21 +153,43 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   useEffect(() => {
     if (!lastMessage) return
     const json = JSON.parse(lastMessage?.data)
+    console.log(json)
     const data = json.data as GameV2SocketData
     if (json.message === 'Player joined') {
       setIsReceiveFromServer(true)
       if (data.gamePlayer) {
-        if (data.gamePlayer.id === getProfileFromLS().id) {
-          setSide(data.gamePlayer.white ? 'white' : 'black')
+        const player = data.gamePlayer
+        if (player.id === getProfileFromLS().id) {
+          setMe({
+            id: player.id,
+            avatarUrl: player.avatarUrl,
+            displayName: player.displayName!,
+            elo: player.elo!,
+            side: player.white ? 'white' : 'black',
+            remainMillis: player.white ? data.whiteRemainMillis : data.blackRemainMillis
+          })
         } else {
-          setOpponent(data.gamePlayer)
+          const player = data.gamePlayer
+          const human: HumanPlayer = {
+            id: player.id!,
+            side: player.white ? 'white' : 'black',
+            displayName: player.displayName!,
+            avatarUrl: player.avatarUrl!,
+            elo: player.elo!,
+            remainMillis: player.white ? data.whiteRemainMillis : data.blackRemainMillis
+          }
+          setOpponent(human)
         }
       }
     } else if (json.message === 'Bot joined') {
-      setOpponent({ difficulty: data.gamePlayer?.difficulty })
+      const bot: BotPlayer = {
+        difficulty: data.gamePlayer?.difficulty!,
+        side: data.gamePlayer?.white ? 'white' : 'black'
+      }
+      setOpponent(bot)
     } else if (json.message === 'Mate') {
       const matedSide = data.white ? 'white' : 'black'
-      if (matedSide === side) {
+      if (matedSide === me!.side) {
         setResult(GameResult.LOSE)
       } else {
         setResult(GameResult.WIN)
@@ -175,15 +197,27 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     } else if (json.message === 'Resign') {
       if (data.resignSide != undefined) {
         const resignSide = data.resignSide ? 'white' : 'black'
-        if (resignSide === side) {
+        if (resignSide === me!.side) {
           setResult(GameResult.LOSE)
         } else {
           setResult(GameResult.WIN)
         }
       }
+    } else if (json.message === 'Time up') {
+      if (data.white === (me!.side === 'white')) {
+        setResult(GameResult.LOSE)
+      } else {
+        setResult(GameResult.WIN)
+      }
     }
-
     if (data) {
+      if (data.whiteRemainMillis && data.blackRemainMillis && me && opponent) {
+        if (me.side === 'white') setMe({ ...me, remainMillis: data.whiteRemainMillis } as HumanPlayer)
+        else setMe({ ...me, remainMillis: data.blackRemainMillis } as HumanPlayer)
+
+        if (opponent.side === 'white') setOpponent({ ...opponent, remainMillis: data.whiteRemainMillis } as HumanPlayer)
+        else setOpponent({ ...opponent, remainMillis: data.blackRemainMillis } as HumanPlayer)
+      }
       if (data.fen) setFen(data.fen)
       if (data.white != undefined) setTurn(data.white ? 'white' : 'black')
       if (data.moveHistories) {
@@ -200,7 +234,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
 
   const move = (from: Key, to: Key) => {
     if (!core) return
-    if (turn !== side) {
+    if (turn !== me!.side) {
       // setFen(core.fen())
       return
     }
@@ -261,7 +295,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     if (core.move({ from: pendeingMove[0], to: pendeingMove[1], promotion: piece })) {
       setLastMove(pendeingMove)
       const pieceStr =
-        (side == 'white' ? 'WHITE_' : 'BLACK_') +
+        (me!.side == 'white' ? 'WHITE_' : 'BLACK_') +
         (piece == 'b' ? 'BISHOP' : piece == 'n' ? 'KNIGHT' : piece == 'q' ? 'QUEEN' : 'ROOK')
       const message = {
         message: 'Promotion',
@@ -295,7 +329,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         startGame,
         core,
         fen,
-        side,
         setFen,
         lastMove,
         moveHistories,
@@ -306,6 +339,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         isPromoting,
         promote,
         result,
+        me,
         opponent,
         resign,
         onEnd,

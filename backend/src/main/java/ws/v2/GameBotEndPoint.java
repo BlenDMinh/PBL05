@@ -25,6 +25,7 @@ import common.dto.UserPasswordDto;
 import modules.game_chesslib.common.nested.MoveResponse;
 import modules.game_chesslib.common.nested.PlayerJoinedResponse;
 import modules.game_chesslib.common.nested.ResignResponse;
+import modules.game_chesslib.custom.chessgame.GameBot;
 import modules.game_chesslib.custom.player.BotPlayer;
 import modules.game_chesslib.dto.GameBotDto;
 import modules.game_chesslib.dto.GameHumanDto;
@@ -34,7 +35,6 @@ import modules.game_chesslib.common.GameMessage;
 import modules.game_chesslib.common.GameMessageDto;
 import modules.game_chesslib.common.MessageDecoder;
 import modules.game_chesslib.common.MessageEncoder;
-import modules.game_chesslib.custom.ChessGame;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
 
@@ -44,15 +44,15 @@ public class GameBotEndPoint {
     private final Gson gson = new Gson();
     private final Minimax bot = new Minimax();
     static Session humanSession;
-    private ChessGame chessGame;
+    private GameBot chessGame;
 
     @OnOpen
     public void onOpen(Session playerSession, @PathParam("id") String id) throws SQLException, Exception {
-        if (!GameStore.getInstance().isGameExist(id)) {
+        if (!GameStore.getInstance().isGameBotExist(id)) {
             playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
             return;
         }
-        chessGame = GameStore.getInstance().getGameById(id);
+        chessGame = GameStore.getInstance().getGameBotById(id);
         String queryString = playerSession.getQueryString();
         if (!queryString.startsWith("sid=")) {
             playerSession.close();
@@ -66,7 +66,7 @@ public class GameBotEndPoint {
             return;
         }
         UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
-        if (userPasswordDto.getId() != chessGame.getPlayer1().getId()) {
+        if (userPasswordDto.getId() != chessGame.getHumanPlayer().getId()) {
             playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.NOT_AUTHENTICATED));
             return;
         }
@@ -74,8 +74,8 @@ public class GameBotEndPoint {
         ModelMapper modelMapper = new ModelMapper();
         GameHumanDto gameHumanDto = modelMapper.map(userPasswordDto,
                 GameHumanDto.class);
-        gameHumanDto.setWhite(chessGame.getPlayer1().isWhite());
-        BotPlayer botPlayer = (BotPlayer) chessGame.getPlayer2();
+        gameHumanDto.setWhite(chessGame.getHumanPlayer().isWhite());
+        BotPlayer botPlayer = chessGame.getBotPlayer();
         GameBotDto gameBotDto = new GameBotDto(botPlayer.isWhite(), botPlayer.getDifficulty());
         playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.PLAYER_JOINED,
                 new PlayerJoinedResponse(chessGame.getBoard().getFen(),
@@ -181,7 +181,7 @@ public class GameBotEndPoint {
                 sendToAllPlayer(
                         new GameMessageDto(GameMessage.RESIGN, new ResignResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                chessGame.getPlayer1().isWhite(),
+                                chessGame.getHumanPlayer().isWhite(),
                                 chessGame.getMoveHistories())));
                 break;
             default:
@@ -191,7 +191,7 @@ public class GameBotEndPoint {
     }
 
     void doBot() {
-        BotPlayer botPlayer = (BotPlayer) chessGame.getPlayer2();
+        BotPlayer botPlayer = chessGame.getBotPlayer();
         Move bestMove = bot.getBestMoveAlphaBeta(chessGame.getBoard(),
                 botPlayer.getDifficulty().getValue(),
                 botPlayer.isWhite() ? Side.WHITE : Side.BLACK);
@@ -215,13 +215,10 @@ public class GameBotEndPoint {
     }
 
     boolean isRightTurn(Session playerSession) {
-        boolean white = chessGame.getPlayer1().isWhite();
+        boolean white = chessGame.getHumanPlayer().isWhite();
         Side side = chessGame.getBoard().getSideToMove();
         // check right turn
-        if (side.equals(Side.WHITE) && white) {
-            return true;
-        }
-        if (!side.equals(Side.WHITE) && !white) {
+        if (side.equals(Side.WHITE) == white) {
             return true;
         }
         playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));

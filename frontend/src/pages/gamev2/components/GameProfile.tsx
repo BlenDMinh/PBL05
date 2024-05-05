@@ -36,7 +36,12 @@ export default function GameProfile(props: GameProfileProps) {
         <span className='text-base-content font-bold text-sm'>
           {(props.profile as HumanPlayer).displayName} ({props.role})
         </span>
-        <span className='text-base-content text-sm'>{'elo: ' + (props.profile as HumanPlayer).elo}</span>
+        <div className='flex justify-between gap-5'>
+          <span className='text-base-content text-sm'>{'elo: ' + (props.profile as HumanPlayer).elo}</span>
+          <div className='border rounded-full bg-base-100 flex justify-center items-center'>
+            <p className='text-base-content text-xs px-1 py-1'>60s</p>
+          </div>
+        </div>
       </div>
     </div>
   )

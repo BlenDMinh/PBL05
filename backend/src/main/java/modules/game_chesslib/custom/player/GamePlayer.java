@@ -1,18 +1,28 @@
 package modules.game_chesslib.custom.player;
 
-import modules.game_chesslib.custom.ChessGame;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import modules.game_chesslib.custom.chessgame.ChessGame;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public abstract class GamePlayer {
-    protected int id;
     protected ChessGame game;
     protected boolean white;
+
+    public GamePlayer() {
+    }
+
+    public ChessGame getGame() {
+        return game;
+    }
+
+    public void setGame(ChessGame game) {
+        this.game = game;
+    }
+
+    public boolean isWhite() {
+        return white;
+    }
+
+    public void setWhite(boolean white) {
+        this.white = white;
+    }
 
 }

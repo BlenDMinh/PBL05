@@ -18,4 +18,12 @@ public class PlayerJoinedResponse {
     boolean white;
     GamePlayerDto gamePlayer;
     List<MoveHistory> moveHistories;
+    public PlayerJoinedResponse(String fen, boolean white, GamePlayerDto gamePlayer, List<MoveHistory> moveHistories) {
+        this.fen = fen;
+        this.white = white;
+        this.gamePlayer = gamePlayer;
+        this.moveHistories = moveHistories;
+    }
+    Long whiteRemainMillis;
+    Long blackRemainMillis;
 }

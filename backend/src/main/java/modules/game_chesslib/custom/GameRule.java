@@ -12,8 +12,8 @@ import lombok.Setter;
 public class GameRule {
     int id;
     String ruleName;
-    int minutePerTurn;
-    int totalMinutePerPlayer;
+    double minutePerTurn;
+    double totalMinutePerPlayer;
     int turnAroundStep;
-    int turnAroundPlusTime;
+    double turnAroundPlusTime;
 }

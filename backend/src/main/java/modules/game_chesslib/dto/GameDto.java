@@ -21,16 +21,16 @@ import lombok.Setter;
 public class GameDto {
     String id;
     GameStatus status;
-    int player1Id;
-    int player2Id;
+    int whiteId;
+    int blackId;
     String createdAt;
     RuleSetDto ruleSetDto;
 
     public GameDto(ResultSet rs) throws JsonMappingException, JsonProcessingException, SQLException {
         id = rs.getString("id");
         status = GameStatus.fromInt(rs.getInt("status"));
-        player1Id = rs.getInt("player1_id");
-        player2Id = rs.getInt("player2_id");
+        whiteId = rs.getInt("player1_id");
+        blackId = rs.getInt("player2_id");
         createdAt = rs.getTimestamp("created_at").toString();
         Gson gson = new Gson();
         ruleSetDto = new RuleSetDto(rs.getInt("ruleset_id"),

@@ -20,4 +20,6 @@ public final class GameMessage {
     public static final String PROMOTION = "Promotion";
     public static final String DRAW = "Draw";
     public static final String MATE = "Mate";
+
+    public static final String TIME_UP = "Time up";
 }

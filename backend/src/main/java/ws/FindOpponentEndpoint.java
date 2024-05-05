@@ -16,12 +16,19 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
+import com.google.gson.JsonObject;
+
 import common.dto.UserPasswordDto;
-import modules.game.common.GameMessage;
-import modules.game.common.GameMessageDto;
-import modules.game.common.MessageDecoder;
-import modules.game.common.MessageEncoder;
-import modules.game.service.GameService;
+import modules.game_chesslib.common.GameMessage;
+import modules.game_chesslib.common.GameMessageDto;
+import modules.game_chesslib.common.MessageDecoder;
+import modules.game_chesslib.common.MessageEncoder;
+import modules.game_chesslib.service.GameService;
+import modules.game_chesslib.GameStore;
+import modules.game_chesslib.custom.GameRule;
+import modules.game_chesslib.custom.chessgame.GameHuman;
+import modules.game_chesslib.dto.GameDto;
+import modules.game_chesslib.dto.RuleSetDto;
 import stores.session.SessionKey;
 import stores.session.SimpleSessionManager;
 
@@ -138,6 +145,17 @@ public class FindOpponentEndpoint {
                 gameId = gameService.createGame((int) player1.getUserProperties().get("player_id"),
                         (int) player2.getUserProperties().get("player_id"));
             }
+            GameDto gameDto = gameService.getById(gameId);
+            RuleSetDto ruleSetDto = gameDto.getRuleSetDto();
+            JsonObject rulesetDetail = ruleSetDto.getDetail();
+            GameRule gameRule = new GameRule(ruleSetDto.getId(), ruleSetDto.getName(),
+                    rulesetDetail.get("minute_per_turn").getAsDouble(),
+                    rulesetDetail.get("total_minute_per_player").getAsDouble(),
+                    rulesetDetail.get("turn_around_steps").getAsInt(),
+                    rulesetDetail.get("turn_around_time_plus").getAsDouble());
+            GameHuman newChessGame = new GameHuman(gameDto.getId(), gameDto.getWhiteId(),
+                    gameDto.getBlackId(), gameRule);
+            GameStore.getInstance().addGameHuman(newChessGame);
             player1.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_CREATED, gameId));
             player2.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_CREATED, gameId));
         } catch (Exception e) {

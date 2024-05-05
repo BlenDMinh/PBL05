@@ -2,8 +2,8 @@ package modules.game_chesslib.custom.player;
 
 import lombok.Getter;
 import lombok.Setter;
-import modules.game_chesslib.custom.ChessGame;
 import modules.game_chesslib.custom.GameDifficulty;
+import modules.game_chesslib.custom.chessgame.ChessGame;
 
 @Getter
 @Setter
