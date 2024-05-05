@@ -9,6 +9,7 @@ import modules.game_chesslib.custom.GameDifficulty;
 @Setter
 public class BotPlayer extends GamePlayer {
     GameDifficulty difficulty;
+    double sum = 0;
 
     public BotPlayer(ChessGame chessGame, boolean white, GameDifficulty difficulty) {
         this.difficulty = difficulty;
