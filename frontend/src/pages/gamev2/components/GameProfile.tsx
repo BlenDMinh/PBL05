@@ -3,10 +3,12 @@ import { User } from 'src/types/users.type'
 import { path } from 'src/constants/path'
 import { blankAvatar, botAvatar } from 'src/assets/images'
 import { BotPlayer, HumanPlayer, Player } from 'src/types/player.type'
+import { GameRule } from '../types/game.v2.type'
 
 export interface GameProfileProps {
   profile?: Player
   role: string
+  gameRule: GameRule | null
 }
 
 export default function GameProfile(props: GameProfileProps) {
@@ -39,7 +41,9 @@ export default function GameProfile(props: GameProfileProps) {
         <div className='flex justify-between gap-5'>
           <span className='text-base-content text-sm'>{'elo: ' + (props.profile as HumanPlayer).elo}</span>
           <div className='border rounded-full bg-base-100 flex justify-center items-center'>
-            <p className='text-base-content text-xs px-1 py-1'>60s</p>
+            <p className='text-base-content text-xs px-1 py-1'>
+              {props.gameRule?.minutePerTurn === -1 ? '' : props.gameRule?.minutePerTurn! * 60}s
+            </p>
           </div>
         </div>
       </div>

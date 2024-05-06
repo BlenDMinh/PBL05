@@ -5,7 +5,7 @@ import { Dests, Key } from 'chessground/types'
 import { ws } from 'src/constants/ws'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
 import { getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
-import { GameV2SocketData, MoveHistory } from 'src/pages/gamev2/types/game.v2.type'
+import { GameRule, GameV2SocketData, MoveHistory } from 'src/pages/gamev2/types/game.v2.type'
 import { BotPlayer, HumanPlayer, Player } from 'src/types/player.type'
 
 export enum GameType {
@@ -48,6 +48,7 @@ export interface GameV2ContextInterface {
   resign: () => void
   onEnd: () => void
   isReceiveFromServer: boolean
+  gameRule: GameRule | null
 }
 
 const initContext: GameV2ContextInterface = {
@@ -69,7 +70,8 @@ const initContext: GameV2ContextInterface = {
   opponent: undefined,
   resign: () => null,
   onEnd: () => null,
-  isReceiveFromServer: false
+  isReceiveFromServer: false,
+  gameRule: null
 }
 
 export const GameV2Context = createContext<GameV2ContextInterface>(initContext)
@@ -91,6 +93,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [me, setMe] = useState<HumanPlayer | undefined>(initContext.me)
   const [opponent, setOpponent] = useState<Player | undefined>(initContext.opponent)
   const [isReceiveFromServer, setIsReceiveFromServer] = useState<boolean>(false)
+  const [gameRule, setGameRule] = useState<GameRule | null>(null)
 
   const startGame = (gameId: string, gameType: GameType = GameType.PVP, gameConfig: GameConfig = DEFAULT_CONFIG) => {
     setGameType(gameType)
@@ -157,6 +160,9 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     const data = json.data as GameV2SocketData
     if (json.message === 'Player joined') {
       setIsReceiveFromServer(true)
+      if (data.gameRule) {
+        setGameRule(data.gameRule)
+      }
       if (data.gamePlayer) {
         const player = data.gamePlayer
         if (player.id === getProfileFromLS().id) {
@@ -343,7 +349,8 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         opponent,
         resign,
         onEnd,
-        isReceiveFromServer
+        isReceiveFromServer,
+        gameRule
       }}
     >
       {children}
