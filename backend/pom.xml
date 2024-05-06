@@ -74,12 +74,6 @@
       <artifactId>modelmapper</artifactId>
       <version>3.2.0</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.17.0</version>
-    </dependency>
     <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
     <dependency>
       <groupId>com.google.code.gson</groupId>
@@ -106,6 +100,12 @@
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-s3</artifactId>
       <version>1.12.706</version>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version>
     </dependency>
 
   </dependencies>

@@ -91,7 +91,7 @@ public class GamePlayerEndPoint {
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                 gameHumanDto, chessGame.getMoveHistories(),
                                 chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                chessGame.getHumanBlackPlayer().getRemainMillis()));
+                                chessGame.getHumanBlackPlayer().getRemainMillis(), chessGame.getGameRule()));
                 sendToAllPlayer(resp);
                 if (chessGame.getBlackSession() != null) {
                     String blackSessionId = (String) chessGame.getBlackSession().getUserProperties().get("sid");
@@ -108,7 +108,7 @@ public class GamePlayerEndPoint {
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     gameHumanDto2, chessGame.getMoveHistories(),
                                     chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                    chessGame.getHumanBlackPlayer().getRemainMillis()));
+                                    chessGame.getHumanBlackPlayer().getRemainMillis(), chessGame.getGameRule()));
                     playerSession.getBasicRemote().sendObject(resp2);
                 }
             } else if (chessGame.getHumanBlackPlayer().getId() == userId) {
@@ -122,7 +122,7 @@ public class GamePlayerEndPoint {
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                 gameHumanDto, chessGame.getMoveHistories(),
                                 chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                chessGame.getHumanBlackPlayer().getRemainMillis()));
+                                chessGame.getHumanBlackPlayer().getRemainMillis(), chessGame.getGameRule()));
                 sendToAllPlayer(resp);
                 if (chessGame.getWhiteSession() != null) {
                     String whiteSessionId = (String) chessGame.getWhiteSession().getUserProperties().get("sid");
@@ -139,7 +139,7 @@ public class GamePlayerEndPoint {
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     gameHumanDto1, chessGame.getMoveHistories(),
                                     chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                    chessGame.getHumanBlackPlayer().getRemainMillis()));
+                                    chessGame.getHumanBlackPlayer().getRemainMillis(), chessGame.getGameRule()));
                     playerSession.getBasicRemote().sendObject(resp2);
                 }
             }

@@ -13,7 +13,6 @@ import com.google.gson.Gson;
 
 import common.dto.UserPasswordDto;
 import modules.game_chesslib.custom.GameDifficulty;
-import modules.game_chesslib.custom.chessgame.ChessGame;
 import modules.game_chesslib.custom.chessgame.GameBot;
 import modules.game_chesslib.GameStore;
 import modules.game_chesslib.common.GameMessage;
