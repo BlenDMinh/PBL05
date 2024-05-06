@@ -12,6 +12,7 @@ export type GameV2SocketData = {
     difficulty?: BotDifficulty
     white: boolean
   }
+  gameRule?: GameRule
   resignSide?: boolean
   moveHistories?: MoveHistory[]
   whiteRemainMillis?: number
@@ -23,4 +24,13 @@ export type MoveHistory = {
   to: Key
   promotion: string
   piece: string
+}
+
+export type GameRule = {
+  id: number
+  ruleName: string
+  minutePerTurn: number
+  totalMinutePerPlayer: number
+  turnAroundPlusTime: number
+  turnAroundStep: number
 }
