@@ -2,7 +2,6 @@ package modules.profile.service;
 
 import modules.profile.dto.PaginationGameHistoryDto;
 import modules.profile.dto.PlayerDto;
-import common.dto.UserPasswordDto;
 import modules.profile.ProfileRepository;
 
 public class ProfileService {
