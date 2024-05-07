@@ -107,16 +107,19 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
       const core = new Chess(fen)
       setCore(core)
     }
+  }, [fen])
+
+  useEffect(() => {
     if (core?.isGameOver() && me) {
-      if (turn == me.side) {
+      if (core.isDraw()) {
+        setResult(GameResult.DRAW)
+      } else if (turn === me.side) {
         setResult(GameResult.LOSE)
       } else if (turn != me.side) {
         setResult(GameResult.WIN)
-      } else {
-        setResult(GameResult.DRAW)
       }
     }
-  }, [fen])
+  }, [core])
 
   const wsUrl = useMemo(
     () =>
@@ -193,13 +196,8 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         side: data.gamePlayer?.white ? 'white' : 'black'
       }
       setOpponent(bot)
-    } else if (json.message === 'Mate') {
-      const matedSide = data.white ? 'white' : 'black'
-      if (matedSide === me!.side) {
-        setResult(GameResult.LOSE)
-      } else {
-        setResult(GameResult.WIN)
-      }
+    } else if (json.message === 'Draw') {
+      setResult(GameResult.DRAW)
     } else if (json.message === 'Resign') {
       if (data.resignSide != undefined) {
         const resignSide = data.resignSide ? 'white' : 'black'
