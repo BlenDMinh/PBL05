@@ -6,5 +6,6 @@ export const ws = {
     game: (id: string) => id ? (wsHost + `/game-player/${id}`) : null,
     pvpgamev2: (id: string, sessionId: string) => (id && sessionId) ? (wsHost + `/v2/game-player/${id}?sid=${sessionId}`) : null,
     botgamev2: (id: string, sessionId: string) => (id && sessionId) ? (wsHost + `/v2/game-bot/${id}?sid=${sessionId}`) : null,
-    chat: (sessionId: string) => sessionId ? (wsHost + `/chat?sid=${sessionId}`) : null
+    chat: (sessionId: string) => sessionId ? (wsHost + `/chat?sid=${sessionId}`) : null,
+    general: (sessionId: string) => sessionId ? (wsHost + `/general?sid=${sessionId}`) : null,
 }

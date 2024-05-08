@@ -47,7 +47,7 @@ export default function AdminNavbar() {
 
   return (
     <div
-      className={classNames('navbar fixed z-10 h-28', {
+      className={classNames('navbar bg-base-100 fixed z-10 h-28', {
         'lg:pl-96': showSidebar,
         'lg:pl-24': !showSidebar
       })}

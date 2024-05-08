@@ -32,7 +32,8 @@ export type GameRuleset = {
         turn_around_time_plus: number
     },
     description?: {
-        title: string
+        title?: string,
+        content?: string
     },
     published: boolean,
     createdAt: string,

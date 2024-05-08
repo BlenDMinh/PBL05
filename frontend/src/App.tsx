@@ -11,15 +11,15 @@ function App() {
     const modal = document.getElementById('certModal') as HTMLDialogElement
     modal.showModal()
   }
-  // useEffect(() => {
-  //   if(app.certAuthenticated === undefined) {
-  //     return
-  //   }
-  //   if(app.certAuthenticated) {
-  //     return
-  //   }
-  //   openModal()
-  // }, [app.certAuthenticated])
+  useEffect(() => {
+    if(app.certAuthenticated === undefined) {
+      return
+    }
+    if(app.certAuthenticated) {
+      return
+    }
+    openModal()
+  }, [app.certAuthenticated])
   return (
     <>
       <dialog id="certModal" className="modal">
@@ -56,7 +56,7 @@ function App() {
         rtl={false}
         draggable
         pauseOnHover
-        theme='light'
+        theme={localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'}
       />
     </>
   )

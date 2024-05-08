@@ -1,5 +1,6 @@
 import { ReactNode, useMemo, useState } from "react"
 import { FaEllipsisVertical } from "react-icons/fa6"
+import { useQuery } from "react-query"
 import { Link } from "react-router-dom"
 import rulesetAdminApi from "src/apis/admin/ruleset.admin.api"
 import { path } from "src/constants/path"
@@ -55,7 +56,7 @@ function RulesetRow(props: RulesetRowProps) {
                         </div>
                         <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box">
                             <li><button className="btn btn-ghost" onClick={handlePublish}>Publish</button></li>
-                            <li><button className="btn btn-ghost">Edit</button></li>
+                            <li><Link to={`${path.adminRulesetEdit}?id=${ruleset.id}`} className="btn btn-ghost">Edit</Link></li>
                             <li><button className="btn btn-error" onClick={handleDelete}>Delete</button></li>
                         </ul>
                     </div>
@@ -103,7 +104,8 @@ const rulesetInit: GameRuleset[] = [
 ]
 
 export default function AdminRuleset() {
-    const rulesets = useMemo(() => rulesetInit, [])
+    const rulesets = useQuery(['rulesets'], () => rulesetAdminApi.getRulesets().then(res => res.data)).data ?? rulesetInit
+
     const publishedRulesets = useMemo(() => rulesets.filter(ruleset => ruleset.published), [rulesets])
     const unpublishedRulesets = useMemo(() => rulesets.filter(ruleset => !ruleset.published), [rulesets])
 
