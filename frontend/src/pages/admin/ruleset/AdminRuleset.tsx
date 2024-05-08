@@ -1,6 +1,8 @@
 import { ReactNode, useMemo, useState } from "react"
 import { FaEllipsisVertical } from "react-icons/fa6"
+import { Link } from "react-router-dom"
 import rulesetAdminApi from "src/apis/admin/ruleset.admin.api"
+import { path } from "src/constants/path"
 import { GameRuleset } from "src/types/game.type"
 
 interface RulesetRowProps {
@@ -109,6 +111,8 @@ export default function AdminRuleset() {
     const [onConfirm, setOnConfirm] = useState<() => void>(() => () => {})
     const [onCancel, setOnCancel] = useState<() => void>(() => () => {})
 
+    const [copyFrom, setCopyFrom] = useState<number | null>(null)
+
     const openConfirmModal = (message: ReactNode | string, onConfirm: () => void, onCancel?: () => void) => {   
         setModalMessage(message)
         setOnConfirm(onConfirm)
@@ -129,24 +133,28 @@ export default function AdminRuleset() {
                 <h3 className="font-bold text-lg">Add ruleset</h3>
                 <div className="flex w-full gap-5 h-28 justify-evenly">
                     <div className="w-1/2 flex items-center justify-center">
-                        <button className="btn btn-primary">
+                        <Link to={path.adminRulesetEdit} className="btn btn-primary">
                             Add new
-                        </button>
+                        </Link>
                     </div>
                     <div className="divider divider-horizontal">
                         OR
                     </div>
                     <div className="h-full w-1/2 flex flex-col justify-evenly">
                         <span>Copy from</span>
-                        <select className="select select-bordered">
-
+                        <select className="select select-bordered" onChange={(e) => setCopyFrom(parseInt(e.target.value))}>
+                            <option value={-1}>Select ruleset</option>
+                            {rulesets.map(ruleset => <option value={ruleset.id}>{ruleset.name}</option>)}
                         </select>
                     </div>
                 </div>
                 <div className="modal-action">
                     <form method="dialog" className="w-1/2 flex justify-evenly gap-5">
                         <button className="btn grow">Cancel</button>
-                        <button className="btn btn-success grow">Confirm</button>
+                        {   
+                            copyFrom !== null &&
+                            <Link to={`${path.adminRulesetEdit}?copy-from=${copyFrom}`} className="btn btn-success grow">Confirm</Link>
+                        }
                     </form>
                 </div>
             </div>

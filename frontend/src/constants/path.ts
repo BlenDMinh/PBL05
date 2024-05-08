@@ -15,6 +15,7 @@ export const path = {
   botv2: '/game/v2/bot/:gameId',
   quickMatch: '/game/v2/quickmatch',
   playWithBot: '/game/v2/play-with-bot',
+  room: '/game/v2/room/:id',
   chat: '/chat',
   chatbox: '/chat/:id',
   friend: '/friend',

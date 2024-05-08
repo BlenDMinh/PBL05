@@ -41,9 +41,9 @@ export default function GameProfile(props: GameProfileProps) {
         <div className='flex justify-between gap-5'>
           <span className='text-base-content text-sm'>{'elo: ' + (props.profile as HumanPlayer).elo}</span>
           <div className='border rounded-full bg-base-100 flex justify-center items-center'>
-            <p className='text-base-content text-xs px-1 py-1'>
+            {props.gameRule && <p className='text-base-content text-xs px-1 py-1'>
               {props.gameRule?.minutePerTurn === -1 ? '' : props.gameRule?.minutePerTurn! * 60}s
-            </p>
+            </p>}
           </div>
         </div>
       </div>

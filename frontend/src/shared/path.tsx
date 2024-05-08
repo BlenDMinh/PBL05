@@ -16,6 +16,7 @@ import AdminDashboard from 'src/pages/admin/dashboard/AdminDashboard'
 import AdminRuleset from 'src/pages/admin/ruleset/AdminRuleset'
 import AdminAccount from 'src/pages/admin/account/AdminAccount'
 import AdminRulesetEdit from 'src/pages/admin/ruleset/AdminRulesetEdit'
+import Room from 'src/pages/room/Room'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -87,6 +88,10 @@ export const GAME_V2_ROUTES: RouteObject[] = [
   {
     path: path.playWithBot,
     element: <PlayWithBot />
+  },
+  {
+    path: path.room,
+    element: <Room />
   },
   {
     path: path.pvpv2,

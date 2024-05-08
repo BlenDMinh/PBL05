@@ -9,8 +9,6 @@ export default function AdminRulesetEdit() {
     const id = searchParams.get('id')
     const copyFrom = searchParams.get('copy-from')
 
-    console.log(id, copyFrom)
-
     const ruleset = useMemo(async () => {
         if (id) {
             // fetch ruleset by id
@@ -38,6 +36,11 @@ export default function AdminRulesetEdit() {
 
     return <>
         <div className="w-full h-full px-16 py-10">
+            <div className="flex justify-end">
+                <button className="btn btn-primary w-24">
+                    {id ? 'Update' : 'Create'}
+                </button>
+            </div>
             {id && <span>ID: {id}</span>}
             <h3 className="text-base-content font-bold text-xl my-5">Basic</h3>
             <label className="form-control">
