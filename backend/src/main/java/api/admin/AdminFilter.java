@@ -14,8 +14,8 @@ import common.HttpStatusCode;
 import common.Role;
 import common.dto.UserPasswordDto;
 import exceptions.CustomException;
-import stores.session.Session;
-import stores.session.SessionKey;
+import shared.session.Session;
+import shared.session.SessionKey;
 import utils.RequestUtils;
 
 @WebFilter(filterName = "AdminFilter", urlPatterns = "/admin/*")

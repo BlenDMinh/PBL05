@@ -1,4 +1,4 @@
-package modules.game_chesslib.common;
+package common.socket;
 
 import javax.websocket.DecodeException;
 import javax.websocket.Decoder;
@@ -6,14 +6,14 @@ import javax.websocket.EndpointConfig;
 
 import com.google.gson.Gson;
 
-public class MessageDecoder implements Decoder.Text<GameMessageDto> {
+public class MessageDecoder implements Decoder.Text<SocketMessageDto> {
 
     private final Gson gson = new Gson();
 
     @Override
-    public GameMessageDto decode(String jsonMessage) throws DecodeException {
+    public SocketMessageDto decode(String jsonMessage) throws DecodeException {
         try {
-            return gson.fromJson(jsonMessage, GameMessageDto.class);
+            return gson.fromJson(jsonMessage, SocketMessageDto.class);
         } catch (Exception e) {
             throw new DecodeException(jsonMessage, "Error decoding JSON", e);
         }
@@ -23,7 +23,7 @@ public class MessageDecoder implements Decoder.Text<GameMessageDto> {
     public boolean willDecode(String jsonMessage) {
         // Attempt to deserialize the JSON message
         try {
-            gson.fromJson(jsonMessage, GameMessageDto.class);
+            gson.fromJson(jsonMessage, SocketMessageDto.class);
             return true; // If deserialization succeeds, return true
         } catch (Exception e) {
             return false; // If deserialization fails, return false

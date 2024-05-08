@@ -1,4 +1,4 @@
-package modules.game_chesslib.common.nested;
+package modules.game_chesslib.socket;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BotConfigRequest {
-    String side;
-    String difficulty;
+public class InviteToGameResponse {
+    String invitationId;
+    boolean accept;
 }

@@ -18,8 +18,8 @@ import com.google.gson.Gson;
 
 import common.HttpStatusCode;
 import exceptions.CustomException;
-import stores.session.Session;
-import stores.session.SimpleSessionManager;
+import shared.session.Session;
+import shared.session.SimpleSessionManager;
 
 public class RequestUtils {
     private final Gson gson;

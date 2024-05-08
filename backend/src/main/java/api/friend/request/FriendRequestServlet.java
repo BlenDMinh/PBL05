@@ -15,8 +15,8 @@ import modules.friend.dto.FriendRequestDto;
 import modules.friend.dto.PaginationFullFriendRequestDto;
 import modules.friend.dto.ResponseFriendRequestDto;
 import modules.friend.service.FriendService;
-import stores.session.Session;
-import stores.session.SessionKey;
+import shared.session.Session;
+import shared.session.SessionKey;
 import utils.RequestUtils;
 import utils.ResponseUtils;
 

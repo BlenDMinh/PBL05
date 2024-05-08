@@ -1,4 +1,4 @@
-package stores.session;
+package shared.session;
 
 public final class SessionKey {
     public static final String USER_PASSWORD_DTO = "USER_PASSWORD_DTO";

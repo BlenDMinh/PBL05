@@ -22,21 +22,21 @@ import com.github.bhlangonijr.chesslib.move.Move;
 import com.google.gson.Gson;
 
 import common.dto.UserPasswordDto;
-import modules.game_chesslib.common.nested.MoveResponse;
-import modules.game_chesslib.common.nested.PlayerJoinedResponse;
-import modules.game_chesslib.common.nested.ResignResponse;
+import common.socket.SocketMessage;
+import common.socket.SocketMessageDto;
+import common.socket.MessageDecoder;
+import common.socket.MessageEncoder;
 import modules.game_chesslib.custom.chessgame.GameBot;
 import modules.game_chesslib.custom.player.BotPlayer;
 import modules.game_chesslib.dto.GameBotDto;
 import modules.game_chesslib.dto.GameHumanDto;
+import modules.game_chesslib.socket.MoveResponse;
+import modules.game_chesslib.socket.PlayerJoinedResponse;
+import modules.game_chesslib.socket.ResignResponse;
+import shared.session.SessionKey;
+import shared.session.SimpleSessionManager;
 import modules.game_chesslib.GameStore;
 import modules.game_chesslib.algo.Minimax;
-import modules.game_chesslib.common.GameMessage;
-import modules.game_chesslib.common.GameMessageDto;
-import modules.game_chesslib.common.MessageDecoder;
-import modules.game_chesslib.common.MessageEncoder;
-import stores.session.SessionKey;
-import stores.session.SimpleSessionManager;
 
 @ServerEndpoint(value = "/v2/game-bot/{id}", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
 public class GameBotEndPoint {
@@ -49,7 +49,7 @@ public class GameBotEndPoint {
     @OnOpen
     public void onOpen(Session playerSession, @PathParam("id") String id) throws SQLException, Exception {
         if (!GameStore.getInstance().isGameBotExist(id)) {
-            playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
+            playerSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.GAME_NOT_VALID));
             return;
         }
         chessGame = GameStore.getInstance().getGameBotById(id);
@@ -58,16 +58,16 @@ public class GameBotEndPoint {
             playerSession.close();
         }
         String sessionId = queryString.substring("sid=".length());
-        stores.session.Session session = SimpleSessionManager.getInstance()
+        shared.session.Session session = SimpleSessionManager.getInstance()
                 .getSession(sessionId);
         if (session == null) {
-            playerSession.getBasicRemote().sendText(GameMessage.SESSION_NOT_VALID);
+            playerSession.getBasicRemote().sendText(SocketMessage.SESSION_NOT_VALID);
             playerSession.close();
             return;
         }
         UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
         if (userPasswordDto.getId() != chessGame.getHumanPlayer().getId()) {
-            playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.NOT_AUTHENTICATED));
+            playerSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.NOT_AUTHENTICATED));
             return;
         }
         humanSession = playerSession;
@@ -77,37 +77,37 @@ public class GameBotEndPoint {
         gameHumanDto.setWhite(chessGame.getHumanPlayer().isWhite());
         BotPlayer botPlayer = chessGame.getBotPlayer();
         GameBotDto gameBotDto = new GameBotDto(botPlayer.isWhite(), botPlayer.getDifficulty());
-        playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.PLAYER_JOINED,
+        playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.PLAYER_JOINED,
                 new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                         chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                         gameHumanDto, chessGame.getMoveHistories())));
         playerSession.getBasicRemote()
-                .sendObject(new GameMessageDto(GameMessage.BOT_JOINED,
+                .sendObject(new SocketMessageDto(SocketMessage.BOT_JOINED,
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                 gameBotDto, chessGame.getMoveHistories())));
         if (botPlayer.isWhite() && chessGame.getBoard().getSideToMove().equals(Side.WHITE)) {
             doBot();
             sendToAllPlayer(
-                    new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
+                    new SocketMessageDto(SocketMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
                             chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
         }
     }
 
     @OnMessage
-    public void onMessage(GameMessageDto gameMessageDto, Session playerSession)
+    public void onMessage(SocketMessageDto SocketMessageDto, Session playerSession)
             throws IOException, InterruptedException, EncodeException {
-        String message = gameMessageDto.getMessage();
+        String message = SocketMessageDto.getMessage();
         Square from, to;
         Move chessMove;
         boolean validMove = false;
         modules.game_chesslib.custom.Move move;
         switch (message) {
-            case GameMessage.MOVE:
+            case SocketMessage.MOVE:
                 if (!isRightTurn(playerSession)) {
                     return;
                 }
-                move = gson.fromJson(gameMessageDto.getData().toString(),
+                move = gson.fromJson(SocketMessageDto.getData().toString(),
                         modules.game_chesslib.custom.Move.class);
                 from = Square.valueOf(move.getFrom().toUpperCase());
                 to = Square.valueOf(move.getTo().toUpperCase());
@@ -124,26 +124,26 @@ public class GameBotEndPoint {
                     chessGame.addMoveHistory(chessMove);
                     chessGame.getBoard().doMove(chessMove);
                     sendToAllPlayer(
-                            new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
+                            new SocketMessageDto(SocketMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     chessGame.getMoveHistories())));
                     doBot();
                     sendToAllPlayer(
-                            new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
+                            new SocketMessageDto(SocketMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     chessGame.getMoveHistories())));
                     postCheck();
                     return;
                 } else {
-                    playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                    playerSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.INVALID_MOVE));
                 }
                 break;
 
-            case GameMessage.PROMOTION:
+            case SocketMessage.PROMOTION:
                 if (!isRightTurn(playerSession)) {
                     return;
                 }
-                move = gson.fromJson(gameMessageDto.getData().toString(),
+                move = gson.fromJson(SocketMessageDto.getData().toString(),
                         modules.game_chesslib.custom.Move.class);
                 from = Square.valueOf(move.getFrom().toUpperCase());
                 to = Square.valueOf(move.getTo().toUpperCase());
@@ -162,30 +162,30 @@ public class GameBotEndPoint {
                     chessGame.addMoveHistory(chessMove);
                     chessGame.getBoard().doMove(chessMove);
                     sendToAllPlayer(
-                            new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
+                            new SocketMessageDto(SocketMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     chessGame.getMoveHistories())));
                     doBot();
                     sendToAllPlayer(
-                            new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
+                            new SocketMessageDto(SocketMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     chessGame.getMoveHistories())));
                     postCheck();
                     return;
                 } else {
-                    playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                    playerSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.INVALID_MOVE));
                 }
                 break;
 
-            case GameMessage.RESIGN:
+            case SocketMessage.RESIGN:
                 sendToAllPlayer(
-                        new GameMessageDto(GameMessage.RESIGN, new ResignResponse(chessGame.getBoard().getFen(),
+                        new SocketMessageDto(SocketMessage.RESIGN, new ResignResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                 chessGame.getHumanPlayer().isWhite(),
                                 chessGame.getMoveHistories())));
                 break;
             default:
-                playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.UNKNOWN));
+                playerSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.UNKNOWN));
                 return;
         }
     }
@@ -199,7 +199,7 @@ public class GameBotEndPoint {
         chessGame.getBoard().doMove(bestMove);
     }
 
-    void sendToAllPlayer(GameMessageDto message) throws IOException, EncodeException {
+    void sendToAllPlayer(SocketMessageDto message) throws IOException, EncodeException {
         if (humanSession != null) {
             humanSession.getBasicRemote().sendObject(message);
         }
@@ -207,9 +207,9 @@ public class GameBotEndPoint {
 
     void postCheck() throws IOException, EncodeException {
         if (chessGame.getBoard().isDraw()) {
-            sendToAllPlayer(new GameMessageDto(GameMessage.DRAW));
+            sendToAllPlayer(new SocketMessageDto(SocketMessage.DRAW));
         } else if (chessGame.getBoard().isMated()) {
-            sendToAllPlayer(new GameMessageDto(GameMessage.MATE, new MoveResponse(chessGame.getBoard().getFen(),
+            sendToAllPlayer(new SocketMessageDto(SocketMessage.MATE, new MoveResponse(chessGame.getBoard().getFen(),
                     chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories())));
         }
     }
@@ -221,7 +221,7 @@ public class GameBotEndPoint {
         if (side.equals(Side.WHITE) == white) {
             return true;
         }
-        playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+        playerSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.INVALID_MOVE));
         return false;
     }
 

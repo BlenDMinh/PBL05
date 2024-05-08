@@ -1,4 +1,4 @@
-package modules.game_chesslib.common;
+package common.socket;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
@@ -6,10 +6,10 @@ import javax.websocket.EndpointConfig;
 
 import com.google.gson.Gson;
 
-public class MessageEncoder implements Encoder.Text<GameMessageDto> {
+public class MessageEncoder implements Encoder.Text<SocketMessageDto> {
 
     @Override
-    public String encode(GameMessageDto message) throws EncodeException {
+    public String encode(SocketMessageDto message) throws EncodeException {
         Gson gson = new Gson();
         return gson.toJson(message);
     }

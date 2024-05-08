@@ -24,20 +24,20 @@ import com.github.bhlangonijr.chesslib.move.Move;
 import com.google.gson.Gson;
 import common.GameStatus;
 import common.dto.UserPasswordDto;
-import modules.game_chesslib.common.GameMessage;
-import modules.game_chesslib.common.GameMessageDto;
-import modules.game_chesslib.common.MessageDecoder;
-import modules.game_chesslib.common.MessageEncoder;
-import modules.game_chesslib.common.nested.MoveResponse;
-import modules.game_chesslib.common.nested.PlayerJoinedResponse;
-import modules.game_chesslib.common.nested.ResignResponse;
-import modules.game_chesslib.common.nested.TimeUpResponse;
+import common.socket.SocketMessage;
+import common.socket.SocketMessageDto;
+import common.socket.MessageDecoder;
+import common.socket.MessageEncoder;
 import modules.game_chesslib.custom.chessgame.GameHuman;
 import modules.game_chesslib.custom.player.HumanPlayer;
 import modules.game_chesslib.dto.GameHumanDto;
 import modules.game_chesslib.service.GameService;
-import stores.session.SessionKey;
-import stores.session.SimpleSessionManager;
+import modules.game_chesslib.socket.MoveResponse;
+import modules.game_chesslib.socket.PlayerJoinedResponse;
+import modules.game_chesslib.socket.ResignResponse;
+import modules.game_chesslib.socket.TimeUpResponse;
+import shared.session.SessionKey;
+import shared.session.SimpleSessionManager;
 import modules.game_chesslib.GameStore;
 
 @ServerEndpoint(value = "/v2/game-player/{id}", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
@@ -57,10 +57,10 @@ public class GamePlayerEndPoint {
                 playerSession.close();
             }
             String sessionId = queryString.substring("sid=".length());
-            stores.session.Session session = SimpleSessionManager.getInstance()
+            shared.session.Session session = SimpleSessionManager.getInstance()
                     .getSession(sessionId);
             if (session == null) {
-                playerSession.getBasicRemote().sendText(GameMessage.SESSION_NOT_VALID);
+                playerSession.getBasicRemote().sendText(SocketMessage.SESSION_NOT_VALID);
                 playerSession.close();
                 return;
             }
@@ -70,12 +70,12 @@ public class GamePlayerEndPoint {
                 boolean isValidGame = chessGame.getStatus().equals(GameStatus.WAITING)
                         || chessGame.getStatus().equals(GameStatus.PLAYING);
                 if (!isValidGame || (chessGame.getWhiteSession() != null && chessGame.getBlackSession() != null)) {
-                    playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
+                    playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.GAME_NOT_VALID));
                     playerSession.close();
                     return;
                 }
             } else {
-                playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.GAME_NOT_VALID));
+                playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.GAME_NOT_VALID));
             }
 
             int userId = userPasswordDto.getId();
@@ -86,7 +86,7 @@ public class GamePlayerEndPoint {
                 GameHumanDto gameHumanDto = modelMapper.map(userPasswordDto,
                         GameHumanDto.class);
                 gameHumanDto.setWhite(true);
-                GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                SocketMessageDto resp = new SocketMessageDto(SocketMessage.PLAYER_JOINED,
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                 gameHumanDto, chessGame.getMoveHistories(),
@@ -95,7 +95,7 @@ public class GamePlayerEndPoint {
                 sendToAllPlayer(resp);
                 if (chessGame.getBlackSession() != null) {
                     String blackSessionId = (String) chessGame.getBlackSession().getUserProperties().get("sid");
-                    stores.session.Session session2 = SimpleSessionManager.getInstance()
+                    shared.session.Session session2 = SimpleSessionManager.getInstance()
                             .getSession(blackSessionId);
                     UserPasswordDto userPasswordDto2 = session2.getAttribute(
                             SessionKey.USER_PASSWORD_DTO,
@@ -103,7 +103,7 @@ public class GamePlayerEndPoint {
                     GameHumanDto gameHumanDto2 = modelMapper.map(userPasswordDto2,
                             GameHumanDto.class);
                     gameHumanDto2.setWhite(false);
-                    GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                    SocketMessageDto resp2 = new SocketMessageDto(SocketMessage.PLAYER_JOINED,
                             new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     gameHumanDto2, chessGame.getMoveHistories(),
@@ -117,7 +117,7 @@ public class GamePlayerEndPoint {
                 GameHumanDto gameHumanDto = modelMapper.map(userPasswordDto,
                         GameHumanDto.class);
                 gameHumanDto.setWhite(false);
-                GameMessageDto resp = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                SocketMessageDto resp = new SocketMessageDto(SocketMessage.PLAYER_JOINED,
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                 gameHumanDto, chessGame.getMoveHistories(),
@@ -126,7 +126,7 @@ public class GamePlayerEndPoint {
                 sendToAllPlayer(resp);
                 if (chessGame.getWhiteSession() != null) {
                     String whiteSessionId = (String) chessGame.getWhiteSession().getUserProperties().get("sid");
-                    stores.session.Session session1 = SimpleSessionManager.getInstance()
+                    shared.session.Session session1 = SimpleSessionManager.getInstance()
                             .getSession(whiteSessionId);
                     UserPasswordDto userPasswordDto1 = session1.getAttribute(
                             SessionKey.USER_PASSWORD_DTO,
@@ -134,7 +134,7 @@ public class GamePlayerEndPoint {
                     GameHumanDto gameHumanDto1 = modelMapper.map(userPasswordDto1,
                             GameHumanDto.class);
                     gameHumanDto1.setWhite(true);
-                    GameMessageDto resp2 = new GameMessageDto(GameMessage.PLAYER_JOINED,
+                    SocketMessageDto resp2 = new SocketMessageDto(SocketMessage.PLAYER_JOINED,
                             new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     gameHumanDto1, chessGame.getMoveHistories(),
@@ -149,17 +149,18 @@ public class GamePlayerEndPoint {
     }
 
     @OnMessage
-    public void onMessage(GameMessageDto gameMessageDto, Session playerSession) throws IOException, EncodeException {
+    public void onMessage(SocketMessageDto SocketMessageDto, Session playerSession)
+            throws IOException, EncodeException {
         lock.lock();
         try {
-            String message = gameMessageDto.getMessage();
+            String message = SocketMessageDto.getMessage();
             Square from, to;
             Move chessMove;
             boolean validMove = false;
             modules.game_chesslib.custom.Move move;
             switch (message) {
-                case GameMessage.MOVE:
-                    move = gson.fromJson(gameMessageDto.getData().toString(),
+                case SocketMessage.MOVE:
+                    move = gson.fromJson(SocketMessageDto.getData().toString(),
                             modules.game_chesslib.custom.Move.class);
                     if (isRightTurn(playerSession)) {
                         from = Square.valueOf(move.getFrom().toUpperCase());
@@ -183,21 +184,22 @@ public class GamePlayerEndPoint {
                             chessGame.addMoveHistory(chessMove);
                             chessGame.getBoard().doMove(chessMove);
                             sendToAllPlayer(
-                                    new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                            chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                            chessGame.getMoveHistories(),
-                                            chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                            chessGame.getHumanBlackPlayer().getRemainMillis())));
+                                    new SocketMessageDto(SocketMessage.MOVE,
+                                            new MoveResponse(chessGame.getBoard().getFen(),
+                                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                                                    chessGame.getMoveHistories(),
+                                                    chessGame.getHumanWhitePlayer().getRemainMillis(),
+                                                    chessGame.getHumanBlackPlayer().getRemainMillis())));
                             chessGame.setLastMoveTime(System.currentTimeMillis());
                             currentPlayer.increaseStepCount();
                             startTimer();
                             break;
                         }
                     }
-                    playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                    playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.INVALID_MOVE));
                     return;
-                case GameMessage.PROMOTION:
-                    move = gson.fromJson(gameMessageDto.getData().toString(),
+                case SocketMessage.PROMOTION:
+                    move = gson.fromJson(SocketMessageDto.getData().toString(),
                             modules.game_chesslib.custom.Move.class);
                     if (isRightTurn(playerSession)) {
                         from = Square.valueOf(move.getFrom().toUpperCase());
@@ -222,23 +224,24 @@ public class GamePlayerEndPoint {
                             chessGame.addMoveHistory(chessMove);
                             chessGame.getBoard().doMove(chessMove);
                             sendToAllPlayer(
-                                    new GameMessageDto(GameMessage.MOVE, new MoveResponse(chessGame.getBoard().getFen(),
-                                            chessGame.getBoard().getSideToMove().equals(Side.WHITE),
-                                            chessGame.getMoveHistories(),
-                                            chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                            chessGame.getHumanBlackPlayer().getRemainMillis())));
+                                    new SocketMessageDto(SocketMessage.MOVE,
+                                            new MoveResponse(chessGame.getBoard().getFen(),
+                                                    chessGame.getBoard().getSideToMove().equals(Side.WHITE),
+                                                    chessGame.getMoveHistories(),
+                                                    chessGame.getHumanWhitePlayer().getRemainMillis(),
+                                                    chessGame.getHumanBlackPlayer().getRemainMillis())));
                             chessGame.setLastMoveTime(System.currentTimeMillis());
                             currentPlayer.increaseStepCount();
                             startTimer();
                             break;
                         }
                     }
-                    playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                    playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.INVALID_MOVE));
                     return;
 
-                case GameMessage.RESIGN:
+                case SocketMessage.RESIGN:
                     String sessionId = (String) playerSession.getUserProperties().get("sid");
-                    stores.session.Session session = SimpleSessionManager.getInstance()
+                    shared.session.Session session = SimpleSessionManager.getInstance()
                             .getSession(sessionId);
                     UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO,
                             UserPasswordDto.class);
@@ -247,14 +250,14 @@ public class GamePlayerEndPoint {
                             : chessGame.getHumanBlackPlayer();
                     boolean resignSide = gamePlayer.isWhite();
                     sendToAllPlayer(
-                            new GameMessageDto(GameMessage.RESIGN, new ResignResponse(chessGame.getBoard().getFen(),
+                            new SocketMessageDto(SocketMessage.RESIGN, new ResignResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE), resignSide,
                                     chessGame.getMoveHistories(), chessGame.getHumanWhitePlayer().getRemainMillis(),
                                     chessGame.getHumanBlackPlayer().getRemainMillis())));
                     break;
 
                 default:
-                    playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.UNKNOWN));
+                    playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.UNKNOWN));
                     return;
             }
             postCheck();
@@ -290,9 +293,9 @@ public class GamePlayerEndPoint {
 
     void postCheck() throws IOException, EncodeException {
         if (chessGame.getBoard().isDraw()) {
-            sendToAllPlayer(new GameMessageDto(GameMessage.DRAW));
+            sendToAllPlayer(new SocketMessageDto(SocketMessage.DRAW));
         } else if (chessGame.getBoard().isMated()) {
-            sendToAllPlayer(new GameMessageDto(GameMessage.MATE, new MoveResponse(chessGame.getBoard().getFen(),
+            sendToAllPlayer(new SocketMessageDto(SocketMessage.MATE, new MoveResponse(chessGame.getBoard().getFen(),
                     chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories(),
                     chessGame.getHumanWhitePlayer().getRemainMillis(),
                     chessGame.getHumanBlackPlayer().getRemainMillis())));
@@ -301,26 +304,26 @@ public class GamePlayerEndPoint {
 
     boolean isRightTurn(Session playerSession) throws IOException, EncodeException {
         String sessionId = (String) playerSession.getUserProperties().get("sid");
-        stores.session.Session session = SimpleSessionManager.getInstance()
+        shared.session.Session session = SimpleSessionManager.getInstance()
                 .getSession(sessionId);
         UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
         Side side = chessGame.getBoard().getSideToMove();
         // check right turn
         if (side.equals(Side.WHITE)) {
             if (userPasswordDto.getId() != chessGame.getHumanWhitePlayer().getId()) {
-                playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.INVALID_MOVE));
                 return false;
             }
         } else {
             if (userPasswordDto.getId() != chessGame.getHumanBlackPlayer().getId()) {
-                playerSession.getBasicRemote().sendObject(new GameMessageDto(GameMessage.INVALID_MOVE));
+                playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.INVALID_MOVE));
                 return false;
             }
         }
         return true;
     }
 
-    void sendToAllPlayer(GameMessageDto message) throws IOException, EncodeException {
+    void sendToAllPlayer(SocketMessageDto message) throws IOException, EncodeException {
         if (chessGame.getWhiteSession() != null) {
             chessGame.getWhiteSession().getBasicRemote().sendObject(message);
         }
@@ -340,7 +343,7 @@ public class GamePlayerEndPoint {
                     chessGame.getHumanBlackPlayer().setRemainMillis(remainMillisWhenEnd);
                 }
                 try {
-                    sendToAllPlayer(new GameMessageDto(GameMessage.TIME_UP, new TimeUpResponse(fen, isWhite,
+                    sendToAllPlayer(new SocketMessageDto(SocketMessage.TIME_UP, new TimeUpResponse(fen, isWhite,
                             chessGame.getHumanWhitePlayer().getRemainMillis(),
                             chessGame.getHumanBlackPlayer().getRemainMillis())));
                 } catch (IOException | EncodeException e) {

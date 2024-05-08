@@ -1,6 +1,6 @@
-package modules.game_chesslib.common;
+package common.socket;
 
-public final class GameMessage {
+public final class SocketMessage {
     public static final String WAITING = "Waiting for opponent";
     public static final String SESSION_NOT_VALID = "Session not valid";
     public static final String GAME_NOT_VALID = "Game not valid";
@@ -16,10 +16,14 @@ public final class GameMessage {
     public static final String INVALID_MOVE = "Invalid move";
     public static final String HUMAN_JOIN = "Human join";
     public static final String RESIGN = "Resign";
-    
+
     public static final String PROMOTION = "Promotion";
     public static final String DRAW = "Draw";
     public static final String MATE = "Mate";
 
     public static final String TIME_UP = "Time up";
+
+    public static final String INVITE_TO_GAME_REQUEST = "Invite to game request";
+    public static final String INVITE_TO_GAME_RESPONSE = "Invite to game response";
+    public static final String INVITATION_REJECTED = "Invitation rejected";
 }

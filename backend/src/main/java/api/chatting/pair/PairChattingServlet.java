@@ -10,8 +10,8 @@ import javax.servlet.http.HttpServletResponse;
 import common.dto.UserPasswordDto;
 import modules.chat.dto.PaginationMessageResponseDto;
 import modules.chat.service.ChatService;
-import stores.session.Session;
-import stores.session.SessionKey;
+import shared.session.Session;
+import shared.session.SessionKey;
 import utils.RequestUtils;
 import utils.ResponseUtils;
 

@@ -8,8 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import stores.session.Session;
-import stores.session.SimpleSessionManager;
+import shared.session.Session;
+import shared.session.SimpleSessionManager;
 import utils.RequestUtils;
 import utils.ResponseUtils;
 

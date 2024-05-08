@@ -19,18 +19,18 @@ import javax.websocket.server.ServerEndpoint;
 import com.google.gson.JsonObject;
 
 import common.dto.UserPasswordDto;
-import modules.game_chesslib.common.GameMessage;
-import modules.game_chesslib.common.GameMessageDto;
-import modules.game_chesslib.common.MessageDecoder;
-import modules.game_chesslib.common.MessageEncoder;
+import common.socket.SocketMessage;
+import common.socket.SocketMessageDto;
+import common.socket.MessageDecoder;
+import common.socket.MessageEncoder;
 import modules.game_chesslib.service.GameService;
 import modules.game_chesslib.GameStore;
 import modules.game_chesslib.custom.GameRule;
 import modules.game_chesslib.custom.chessgame.GameHuman;
 import modules.game_chesslib.dto.GameDto;
 import modules.game_chesslib.dto.RuleSetDto;
-import stores.session.SessionKey;
-import stores.session.SimpleSessionManager;
+import shared.session.SessionKey;
+import shared.session.SimpleSessionManager;
 
 @ServerEndpoint(value = "/find-opponent", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
 public class FindOpponentEndpoint {
@@ -55,10 +55,10 @@ public class FindOpponentEndpoint {
                 userSession.close();
             }
             String sessionId = queryString.substring("sid=".length());
-            stores.session.Session session = SimpleSessionManager.getInstance()
+            shared.session.Session session = SimpleSessionManager.getInstance()
                     .getSession(sessionId);
             if (session == null) {
-                userSession.getBasicRemote().sendText(GameMessage.SESSION_NOT_VALID);
+                userSession.getBasicRemote().sendText(SocketMessage.SESSION_NOT_VALID);
                 userSession.close();
                 return;
             }
@@ -69,12 +69,12 @@ public class FindOpponentEndpoint {
             userSession.getUserProperties().put("rank", rank);
             Set<Session> set = group.get(rank.getValue());
             if (set.contains(userSession)) {
-                userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
+                userSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.FINDING));
                 return;
             }
             if (set.isEmpty()) {
                 set.add(userSession);
-                userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
+                userSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.FINDING));
             } else {
                 Iterator<Session> iterator = set.iterator();
                 Session opponentSession = null;
@@ -83,7 +83,7 @@ public class FindOpponentEndpoint {
                         opponentSession = iterator.next();
                     } while ((int) opponentSession.getUserProperties().get("player_id") == userPasswordDto.getId());
                 } catch (NoSuchElementException ex) {
-                    userSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.FINDING));
+                    userSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.FINDING));
                     return;
                 }
                 set.remove(opponentSession);
@@ -156,11 +156,11 @@ public class FindOpponentEndpoint {
             GameHuman newChessGame = new GameHuman(gameDto.getId(), gameDto.getWhiteId(),
                     gameDto.getBlackId(), gameRule);
             GameStore.getInstance().addGameHuman(newChessGame);
-            player1.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_CREATED, gameId));
-            player2.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_CREATED, gameId));
+            player1.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.GAME_CREATED, gameId));
+            player2.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.GAME_CREATED, gameId));
         } catch (Exception e) {
-            player1.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.ERROR));
-            player2.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.ERROR));
+            player1.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.ERROR));
+            player2.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.ERROR));
         }
         player1.close();
         player2.close();

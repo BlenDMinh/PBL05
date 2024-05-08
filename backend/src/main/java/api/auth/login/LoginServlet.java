@@ -19,9 +19,9 @@ import modules.auth.dto.LoginDto;
 import modules.auth.dto.LoginResponseDto;
 import modules.auth.dto.PlayerDto;
 import modules.auth.service.AuthService;
-import stores.session.Session;
-import stores.session.SessionKey;
-import stores.session.SimpleSessionManager;
+import shared.session.Session;
+import shared.session.SessionKey;
+import shared.session.SimpleSessionManager;
 import utils.RequestUtils;
 import utils.ResponseUtils;
 

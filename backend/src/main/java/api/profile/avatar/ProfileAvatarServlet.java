@@ -17,8 +17,8 @@ import exceptions.ServerException;
 import modules.auth.AuthRepository;
 import modules.profile.dto.UrlDto;
 import modules.profile.service.ProfileService;
-import stores.session.Session;
-import stores.session.SessionKey;
+import shared.session.Session;
+import shared.session.SessionKey;
 import utils.RequestUtils;
 import utils.ResponseUtils;
 

@@ -19,8 +19,8 @@ import modules.chat.ServerMessage;
 import modules.chat.dto.MessageRequestDto;
 import modules.chat.dto.MessageResponseDto;
 import modules.chat.service.ChatService;
-import stores.session.SessionKey;
-import stores.session.SimpleSessionManager;
+import shared.session.SessionKey;
+import shared.session.SimpleSessionManager;
 
 @ServerEndpoint(value = "/chat", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
 public class ChatEndpoint {
@@ -35,7 +35,7 @@ public class ChatEndpoint {
             userSession.close();
         }
         String sessionId = queryString.substring("sid=".length());
-        stores.session.Session session = SimpleSessionManager.getInstance()
+        shared.session.Session session = SimpleSessionManager.getInstance()
                 .getSession(sessionId);
         if (session == null) {
             userSession.getBasicRemote().sendText(ServerMessage.SESSION_NOT_VALID);

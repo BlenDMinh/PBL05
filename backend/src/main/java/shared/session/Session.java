@@ -1,4 +1,4 @@
-package stores.session;
+package shared.session;
 
 import java.util.HashMap;
 import java.util.Map;

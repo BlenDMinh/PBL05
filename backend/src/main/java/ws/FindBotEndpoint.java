@@ -12,16 +12,16 @@ import javax.websocket.server.ServerEndpoint;
 import com.google.gson.Gson;
 
 import common.dto.UserPasswordDto;
+import common.socket.SocketMessage;
+import common.socket.SocketMessageDto;
+import common.socket.MessageDecoder;
+import common.socket.MessageEncoder;
 import modules.game_chesslib.custom.GameDifficulty;
 import modules.game_chesslib.custom.chessgame.GameBot;
+import modules.game_chesslib.socket.BotConfigRequest;
+import shared.session.SessionKey;
+import shared.session.SimpleSessionManager;
 import modules.game_chesslib.GameStore;
-import modules.game_chesslib.common.GameMessage;
-import modules.game_chesslib.common.GameMessageDto;
-import modules.game_chesslib.common.MessageDecoder;
-import modules.game_chesslib.common.MessageEncoder;
-import modules.game_chesslib.common.nested.BotConfigRequest;
-import stores.session.SessionKey;
-import stores.session.SimpleSessionManager;
 
 @ServerEndpoint(value = "/find-bot", encoders = MessageEncoder.class, decoders = MessageDecoder.class)
 public class FindBotEndpoint {
@@ -34,10 +34,10 @@ public class FindBotEndpoint {
             userSession.close();
         }
         String sessionId = queryString.substring("sid=".length());
-        stores.session.Session session = SimpleSessionManager.getInstance()
+        shared.session.Session session = SimpleSessionManager.getInstance()
                 .getSession(sessionId);
         if (session == null) {
-            userSession.getAsyncRemote().sendText(GameMessage.SESSION_NOT_VALID);
+            userSession.getAsyncRemote().sendText(SocketMessage.SESSION_NOT_VALID);
             userSession.close();
             return;
         }
@@ -46,8 +46,9 @@ public class FindBotEndpoint {
     }
 
     @OnMessage
-    public void onMessage(GameMessageDto gameMessageDto, Session playerSession) throws IOException {
-        BotConfigRequest botConfigRequest = gson.fromJson(gameMessageDto.getData().toString(), BotConfigRequest.class);
+    public void onMessage(SocketMessageDto SocketMessageDto, Session playerSession) throws IOException {
+        BotConfigRequest botConfigRequest = gson.fromJson(SocketMessageDto.getData().toString(),
+                BotConfigRequest.class);
         String side = botConfigRequest.getSide();
         if (side.equals("random")) {
             String[] sides = { "white", "black" };
@@ -59,7 +60,7 @@ public class FindBotEndpoint {
         int humanId = (int) playerSession.getUserProperties().get("user_id");
         GameDifficulty difficulty = GameDifficulty.valueOf(botConfigRequest.getDifficulty());
         GameStore.getInstance().addBotHuman(new GameBot(gameId, humanId, difficulty, side.equals("white")));
-        playerSession.getAsyncRemote().sendObject(new GameMessageDto(GameMessage.GAME_CREATED, gameId));
+        playerSession.getAsyncRemote().sendObject(new SocketMessageDto(SocketMessage.GAME_CREATED, gameId));
         playerSession.close();
 
     }

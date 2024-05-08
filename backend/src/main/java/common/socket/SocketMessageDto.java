@@ -1,4 +1,4 @@
-package modules.game_chesslib.common;
+package common.socket;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,11 +9,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GameMessageDto {
+public class SocketMessageDto {
     String message;
     Object data;
 
-    public GameMessageDto(String message) {
+    public SocketMessageDto(String message) {
         this.message = message;
     }
 }

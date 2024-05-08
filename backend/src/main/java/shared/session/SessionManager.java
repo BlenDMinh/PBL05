@@ -1,4 +1,4 @@
-package stores.session;
+package shared.session;
 
 public interface SessionManager {
     Session createSession();

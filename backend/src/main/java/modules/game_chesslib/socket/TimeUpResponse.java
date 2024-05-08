@@ -1,4 +1,4 @@
-package modules.game_chesslib.common.nested;
+package modules.game_chesslib.socket;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
