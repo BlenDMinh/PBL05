@@ -16,14 +16,21 @@ export enum AuthenticateState {
   AUTHENTICATED
 }
 export interface AppContextType {
-  isAuthenticated: AuthenticateState,
+  isAuthenticated: AuthenticateState
   certAuthenticated: boolean | undefined
   setIsAuthenticated: React.Dispatch<React.SetStateAction<AuthenticateState>>
   showSidebar: boolean
   setShowSidebar: React.Dispatch<React.SetStateAction<boolean>>
   user: User | null
-  setUser: React.Dispatch<React.SetStateAction<User | null>>,
-  inviteOpponent: (opponentId: string, gamerule: GameRuleset, side: 'white' | 'black' | 'random', rated: boolean) => void
+  setUser: React.Dispatch<React.SetStateAction<User | null>>
+  inviteOpponent: (
+    opponentId: string,
+    gamerule: GameRuleset,
+    side: 'white' | 'black' | 'random',
+    rated: boolean
+  ) => void
+  openConfirmToast: boolean
+  setOpenConfirmToast: (value: boolean) => void
 }
 
 const initAppContext: AppContextType = {
@@ -34,7 +41,9 @@ const initAppContext: AppContextType = {
   setShowSidebar: () => null,
   user: getProfileFromLS(),
   setUser: () => null,
-  inviteOpponent: () => null
+  inviteOpponent: () => null,
+  openConfirmToast: false,
+  setOpenConfirmToast: () => null
 }
 
 export const AppContext = createContext<AppContextType>(initAppContext)
@@ -44,37 +53,49 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
   const [isAuthenticated, setIsAuthenticated] = useState<AuthenticateState>(initAppContext.isAuthenticated)
   const [showSidebar, setShowSidebar] = useState<boolean>(initAppContext.showSidebar)
   const [user, setUser] = useState<User | null>(initAppContext.user)
+  const [openConfirmToast, setOpenConfirmToast] = useState<boolean>(initAppContext.openConfirmToast)
 
   useEffect(() => {
-    authApi.loginFromSessionId().then((res) => {
-      if (res.status != HttpStatusCode.Ok) {
+    authApi
+      .loginFromSessionId()
+      .then((res) => {
+        if (res.status != HttpStatusCode.Ok) {
+          setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
+          setUser(null)
+          clearLS()
+        } else {
+          setIsAuthenticated(AuthenticateState.AUTHENTICATED)
+        }
+      })
+      .catch((e) => {
         setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
         setUser(null)
         clearLS()
-      } else {
-        setIsAuthenticated(AuthenticateState.AUTHENTICATED)
-      }
-    }).catch(e => {
-      setIsAuthenticated(AuthenticateState.NOT_AUTHENTICATED)
-      setUser(null)
-      clearLS()
-    })
+      })
 
-    http.get('/').then((res) => {
-      if (res.status === HttpStatusCode.Ok) {
-        setCertAuthenticated(true)
-      } else {
+    http
+      .get('/')
+      .then((res) => {
+        if (res.status === HttpStatusCode.Ok) {
+          setCertAuthenticated(true)
+        } else {
+          setCertAuthenticated(false)
+        }
+      })
+      .catch((e) => {
         setCertAuthenticated(false)
-      }
-    }).catch((e) => {
-      setCertAuthenticated(false)
-    })
+      })
   }, [])
 
   const wsUrl = useMemo(() => ws.general(getSessionIdFromLS()), [isAuthenticated])
   const socket = useWebSocket(wsUrl)
 
-  const inviteOpponent = (opponentId: string, gamerule: GameRuleset, side: 'white' | 'black' | 'random', rated: boolean) => {
+  const inviteOpponent = (
+    opponentId: string,
+    gamerule: GameRuleset,
+    side: 'white' | 'black' | 'random',
+    rated: boolean
+  ) => {
     const message = {
       message: 'Invite to game request',
       data: {
@@ -85,7 +106,7 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
           minutePerTurn: gamerule.detail.minute_per_turn,
           totalMinutePerPlayer: gamerule.detail.total_minute_per_player,
           turnAroundStep: gamerule.detail.turn_around_steps,
-          turnAroundPlusTime: gamerule.detail.turn_around_time_plus,
+          turnAroundPlusTime: gamerule.detail.turn_around_time_plus
         },
         meSide: side,
         rated: rated
@@ -93,16 +114,29 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
     }
     socket.sendJsonMessage(message)
   }
-  
+
   useEffect(() => {
     if (socket.lastJsonMessage) {
       const data = socket.lastJsonMessage
-      toast(data.message, { type: 'info' , onClick: () => console.log('Accept')})
+      setOpenConfirmToast(true)
     }
   }, [socket.lastJsonMessage])
 
   return (
-    <AppContext.Provider value={{ isAuthenticated, certAuthenticated, setIsAuthenticated, showSidebar, setShowSidebar, user, setUser, inviteOpponent }}>
+    <AppContext.Provider
+      value={{
+        isAuthenticated,
+        certAuthenticated,
+        setIsAuthenticated,
+        showSidebar,
+        setShowSidebar,
+        user,
+        setUser,
+        inviteOpponent,
+        openConfirmToast,
+        setOpenConfirmToast
+      }}
+    >
       {children}
     </AppContext.Provider>
   )
