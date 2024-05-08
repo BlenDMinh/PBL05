@@ -21,5 +21,6 @@ export const path = {
   profile: '/profile/:id',
   admin: '/admin',
   adminRuleset: '/admin/ruleset',
+  adminRulesetEdit: '/admin/ruleset/edit',
   adminAccount: '/admin/account',
 } as const

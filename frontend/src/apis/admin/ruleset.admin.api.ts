@@ -17,7 +17,7 @@ const rulesetAdminApi = {
     updateRuleset(id: number, ruleset: GameRuleset) {
         return http.put(`${URL_ADMIN_RULESETS}/${id}`, ruleset)
     },
-    delateRuleset(id: number) {
+    deleteRuleset(id: number) {
         return http.delete(`${URL_ADMIN_RULESETS}/${id}`)
     }
 }

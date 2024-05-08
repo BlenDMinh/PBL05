@@ -9,13 +9,13 @@ export default function GameV2Routes() {
     const { isAuthenticated } = useContext<AppContextType>(AppContext)
     const navigate = useNavigate()
   
-    useEffect(() => {
-      if(isAuthenticated == AuthenticateState.UNKNOWN)
-        return
-      if (isAuthenticated != AuthenticateState.AUTHENTICATED) {
-        navigate(path.login)
-      }
-    }, [isAuthenticated])
+    // useEffect(() => {
+    //   if(isAuthenticated == AuthenticateState.UNKNOWN)
+    //     return
+    //   if (isAuthenticated != AuthenticateState.AUTHENTICATED) {
+    //     navigate(path.login)
+    //   }
+    // }, [isAuthenticated])
     return <GameLayout>
             <GameV2ContextProvider>
              <Outlet />
