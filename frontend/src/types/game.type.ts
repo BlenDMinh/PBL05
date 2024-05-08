@@ -25,8 +25,15 @@ export interface GameHistoryResponse extends PaginitionResponse {
 export type GameRuleset = {
     id: number,
     name: string,
-    minutePerTurn: number | null,
-    totalMinutePerPlayer: number,
-    extraTimeSteps: number | null,
-    extraTime: number | null
+    detail: {
+        minute_per_turn: number,
+        total_minute_per_player: number,
+        turn_around_steps: number,
+        turn_around_time_plus: number
+    },
+    description: {
+        title: string
+    } | null,
+    published: boolean,
+    createdAt: string,
 }
