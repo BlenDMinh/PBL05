@@ -20,7 +20,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
 import common.dto.UserPasswordDto;
@@ -35,7 +34,6 @@ import modules.game_chesslib.custom.GameSide;
 import modules.game_chesslib.custom.Invitation;
 import modules.game_chesslib.custom.chessgame.GameHuman;
 import modules.game_chesslib.dto.GameDto;
-import modules.game_chesslib.dto.RuleSetDto;
 import modules.game_chesslib.service.GameService;
 import modules.game_chesslib.socket.InviteToGameRequest;
 import modules.game_chesslib.socket.InviteToGameResponse;
@@ -129,21 +127,16 @@ public class GeneralEndpoint {
                     try {
                         String gameId;
                         Session player1 = invitation.getFrom(), player2 = userSession;
+                        int rulesetId = invitation.getGameRule().getId();
                         if (!isFromWhite) {
                             gameId = gameService.createGame((int) player2.getUserProperties().get("user_id"),
-                                    (int) player1.getUserProperties().get("user_id"));
+                                    (int) player1.getUserProperties().get("user_id"), rulesetId);
                         } else {
                             gameId = gameService.createGame((int) player1.getUserProperties().get("user_id"),
-                                    (int) player2.getUserProperties().get("user_id"));
+                                    (int) player2.getUserProperties().get("user_id"), rulesetId);
                         }
                         GameDto gameDto = gameService.getById(gameId);
-                        RuleSetDto ruleSetDto = gameDto.getRuleSetDto();
-                        JsonObject rulesetDetail = ruleSetDto.getDetail();
-                        GameRule gameRule = new GameRule(ruleSetDto.getId(), ruleSetDto.getName(),
-                                rulesetDetail.get("minute_per_turn").getAsDouble(),
-                                rulesetDetail.get("total_minute_per_player").getAsDouble(),
-                                rulesetDetail.get("turn_around_steps").getAsInt(),
-                                rulesetDetail.get("turn_around_time_plus").getAsDouble());
+                        GameRule gameRule = invitation.getGameRule();
                         GameHuman newChessGame = new GameHuman(gameDto.getId(), gameDto.getWhiteId(),
                                 gameDto.getBlackId(), gameRule);
                         GameStore.getInstance().addGameHuman(newChessGame);

@@ -37,7 +37,7 @@ public class FindOpponentEndpoint {
     static ArrayList<Set<Session>> group = new ArrayList<>();
 
     static {
-        for (Rank _ : Rank.values()) {
+        for (Rank rank : Rank.values()) {
             group.add(ConcurrentHashMap.newKeySet());
         }
     }
