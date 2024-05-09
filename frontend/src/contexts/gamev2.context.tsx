@@ -282,7 +282,6 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
           ms.map((m) => m.to)
         )
     })
-    // console.log(dests)
     return dests
   }
 

@@ -4,6 +4,8 @@ import { path } from 'src/constants/path'
 import { blankAvatar, botAvatar } from 'src/assets/images'
 import { BotPlayer, HumanPlayer, Player } from 'src/types/player.type'
 import { GameRule } from '../types/game.v2.type'
+import { useGameV2 } from 'src/contexts/gamev2.context'
+import { useEffect, useRef, useState } from 'react'
 
 export interface GameProfileProps {
   profile?: Player
@@ -12,6 +14,26 @@ export interface GameProfileProps {
 }
 
 export default function GameProfile(props: GameProfileProps) {
+
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const [time, setTime] = useState<number>(props.gameRule ? props.gameRule.minutePerTurn * 60 : 0)
+  const game = useGameV2()
+
+  useEffect(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current)
+    if (!props.gameRule || props.gameRule?.minutePerTurn === -1) return
+    setTime(props.gameRule ? props.gameRule.minutePerTurn * 60 : 0)
+    if(!game.turn) return
+    if(game.turn !== props.profile?.side) return
+    const id = setInterval(() => {
+      setTime(time => time - 1)
+    }, 1000)
+    intervalRef.current = id
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current)
+    }
+  }, [game.turn])
+
   if (!props.profile) return <></>
 
   if ((props.profile as BotPlayer).difficulty) {
@@ -27,6 +49,7 @@ export default function GameProfile(props: GameProfileProps) {
       </div>
     )
   }
+
   return (
     <div className='flex gap-3 items-center h-fit py-2 px-2'>
       <Link to={path.profile.replace(':id', (props.profile as HumanPlayer).id + '')} target='_blank'>
@@ -40,11 +63,14 @@ export default function GameProfile(props: GameProfileProps) {
         </span>
         <div className='flex justify-between gap-5'>
           <span className='text-base-content text-sm'>{'elo: ' + (props.profile as HumanPlayer).elo}</span>
-          <div className='border rounded-full bg-base-100 flex justify-center items-center'>
-            {props.gameRule && <p className='text-base-content text-xs px-1 py-1'>
-              {props.gameRule?.minutePerTurn === -1 ? '' : props.gameRule?.minutePerTurn! * 60}s
-            </p>}
-          </div>
+          {
+            props.gameRule?.minutePerTurn !== -1 &&
+            <div className='border w-20 rounded-full bg-base-100 flex justify-center items-center'>
+              {props.gameRule && <p className='text-base-content text-xs px-1 py-1'>
+                {time}s
+              </p>}
+            </div>
+          }
         </div>
       </div>
     </div>

@@ -65,6 +65,8 @@ export default function BaseGame(props: BaseGameProps) {
     }
   }, [game.result])
 
+  console.log(game.me, game.opponent)
+
   if (!game.core)
     return (
       <div className='bg-base h-full w-full flex items-center justify-center'>
@@ -85,7 +87,9 @@ export default function BaseGame(props: BaseGameProps) {
             <div className='w-full flex items-center justify-between'>
               <GameProfile profile={game.opponent} role='Opponent' gameRule={game.gameRule} />
               <div className='rounded-lg border-base-300 border-2 bg-base-200'>
-                <p className='text-lg m-2'>{(game.opponent as HumanPlayer)?.remainMillis}</p>
+                <span className='font-mono text-2xl'>
+                  <span>{Math.floor(((game.opponent as HumanPlayer)?.remainMillis ?? 0) / 1000)}</span>s
+                </span>
               </div>
             </div>
             <Chessground
@@ -113,7 +117,9 @@ export default function BaseGame(props: BaseGameProps) {
             <div className='w-full flex items-center justify-between'>
               <GameProfile profile={game.me} gameRule={game.gameRule} role='You' />
               <div className='rounded-lg border-base-300 border-2 bg-base-200'>
-                <p className='text-lg m-2'>{game.me?.remainMillis}</p>
+                <span className='font-mono text-2xl'>
+                  <span>{Math.floor(((game.me as HumanPlayer)?.remainMillis ?? 0) / 1000)}</span>s
+                </span>
               </div>
             </div>
           </div>
