@@ -20,30 +20,15 @@ export default function FriendList(props: FriendListProps) {
     <div className='flex flex-col'>
       {friends?.map((friend) => (
         <div key={friend.id} className='flex items-center justify-between p-2 border-b border-base-300'>
-          {friend.displayName}
-          <button
-            className='btn btn-primary'
-            onClick={() =>
-                props.selectCallback?.(friend.id.toString())
-            //   app.inviteOpponent(
-            //     friend.id.toString(),
-            //     {
-            //       id: 0,
-            //       name: 'Chơi 10 phút',
-            //       detail: {
-            //         minute_per_turn: -1,
-            //         total_minute_per_player: 10,
-            //         turn_around_steps: -1,
-            //         turn_around_time_plus: -1
-            //       },
-            //       published: true,
-            //       createdAt: new Date().toISOString()
-            //     } as GameRuleset,
-            //     'white',
-            //     false
-            //   )
-            }
-          >
+          <div className='flex gap-5 items-center'>
+            <div className='avatar'>
+              <div className='rounded-full w-8 h-8'>
+                <img src={friend.avatarUrl} alt='' />
+              </div>
+            </div>
+            <span className='font-bold'>{friend.displayName}</span>
+          </div>
+          <button className='btn btn-primary' onClick={() => props.selectCallback?.(friend.id.toString())}>
             Invite
           </button>
         </div>

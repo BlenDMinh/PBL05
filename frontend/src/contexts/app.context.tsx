@@ -108,7 +108,7 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
       message: 'Invite to game request',
       data: {
         opponentId: opponentId,
-        gamerule: {
+        gameRule: {
           id: gamerule.id,
           ruleName: gamerule.name,
           minutePerTurn: gamerule.detail.minute_per_turn,
@@ -120,6 +120,7 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
         rated: rated
       }
     }
+    console.log(message)
     socket.sendJsonMessage(message)
   }
 
