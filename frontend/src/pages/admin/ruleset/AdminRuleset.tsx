@@ -145,7 +145,7 @@ export default function AdminRuleset() {
       () =>
         onCancel ??
         (() => {
-          console.log('Cancel')
+          // console.log('Cancel')
         })
     )
 

@@ -29,11 +29,13 @@ export interface AppContextType {
     gamerule: GameRuleset,
     side: 'white' | 'black' | 'random',
     rated: boolean
-  ) => void,
-  invitationMessage: GameInvitationRequestMessage | null,
-  invitationResponse: (response: 'accept' | 'reject', invitationId?: string) => void,
+  ) => void
+  invitationMessage: GameInvitationRequestMessage | null
+  invitationResponse: (response: 'accept' | 'reject', invitationId?: string) => void
   openConfirmToast: boolean
   setOpenConfirmToast: (value: boolean) => void
+  inviting: boolean
+  setInviting: (value: boolean) => void
 }
 
 const initAppContext: AppContextType = {
@@ -48,7 +50,9 @@ const initAppContext: AppContextType = {
   invitationMessage: null,
   invitationResponse: () => null,
   openConfirmToast: false,
-  setOpenConfirmToast: () => null
+  setOpenConfirmToast: () => null,
+  inviting: false,
+  setInviting: () => null
 }
 
 export const AppContext = createContext<AppContextType>(initAppContext)
@@ -59,8 +63,10 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
   const [showSidebar, setShowSidebar] = useState<boolean>(initAppContext.showSidebar)
   const [user, setUser] = useState<User | null>(initAppContext.user)
   const [openConfirmToast, setOpenConfirmToast] = useState<boolean>(initAppContext.openConfirmToast)
-  const [invitationMessage, setInvitationMessage] = useState<GameInvitationRequestMessage | null>(initAppContext.invitationMessage)
-
+  const [invitationMessage, setInvitationMessage] = useState<GameInvitationRequestMessage | null>(
+    initAppContext.invitationMessage
+  )
+  const [inviting, setInviting] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -120,7 +126,6 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
         rated: rated
       }
     }
-    console.log(message)
     socket.sendJsonMessage(message)
   }
 
@@ -138,18 +143,17 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
   }
 
   useEffect(() => {
-    console.log(socket.lastJsonMessage)
     if (socket.lastJsonMessage) {
       const data = socket.lastJsonMessage as GameSocketMessage
-      if(data.message === 'Invite to game request') {
+      if (data.message === 'Invite to game request') {
         setInvitationMessage(data as GameInvitationRequestMessage)
         setOpenConfirmToast(true)
-      } else if(data.message === "Game created") {
+      } else if (data.message === 'Game created') {
         const gameId = data.data
         navigate(`/game/v2/${gameId}`)
-      } else if(data.message === "Invitation rejected") {
+      } else if (data.message === 'Invitation rejected') {
         toast.error('Opponent rejected your invitation')
-        navigate('/game/v2/room')
+        setInviting(false)
       }
     }
   }, [socket.lastJsonMessage])
@@ -168,7 +172,9 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
         invitationMessage,
         invitationResponse,
         openConfirmToast,
-        setOpenConfirmToast
+        setOpenConfirmToast,
+        inviting,
+        setInviting
       }}
     >
       {children}

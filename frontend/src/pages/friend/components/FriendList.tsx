@@ -8,18 +8,18 @@ import friendApi from 'src/apis/friend.api'
 import YourFriend from './YourFriend'
 
 export default function FriendList() {
-  const { id } = useParams()
+  const id = getProfileFromLS().id
   const [page, setPage] = useState(1)
-  const [friendList, setFriendList] = useState<FriendType[] | null>(null)
+  const [friendList, setFriendList] = useState<FriendType[]>([])
   const [maxPage, setMaxPage] = useState(1)
   const [keyword, setKeyword] = useState('')
 
   useEffect(() => {
-    setFriendList(null)
-    friendApi.getFriendList(id!.toString(), page, 16, keyword).then((res) => {
-      setFriendList(res.data.friends)
-      setMaxPage(res.data.totalPages)
-    })
+    if (id)
+      friendApi.getFriendList(id.toString(), page, 16, keyword).then((res) => {
+        setFriendList(res.data.friends)
+        setMaxPage(res.data.totalPages)
+      })
   }, [page, keyword, id])
 
   return (
@@ -42,7 +42,7 @@ export default function FriendList() {
         ) : (
           <>
             {friendList.map((friend) => (
-              <YourFriend friend={friend} />
+              <YourFriend key={friend.id} friend={friend} />
             ))}
           </>
         )}

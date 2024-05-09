@@ -221,7 +221,7 @@ export default function AdminRulesetEdit() {
             data={ruleset.description?.content ?? ''}
             editor={ClassicEditor}
             onChange={(event, editor) => {
-              console.log(editor.getData())
+              // console.log(editor.getData())
             }}
             onReady={(editor) => {
               editor.editing.view.change((writer) => {

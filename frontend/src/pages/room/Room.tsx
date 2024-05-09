@@ -60,7 +60,7 @@ export default function Room() {
 
   const [rated, setRated] = useState(false)
 
-  const [inviting, setInviting] = useState(false)
+  
 
   const calcChessGroundSize = () => Math.min(window.innerHeight * 0.67, window.innerHeight * 0.67)
 
@@ -193,10 +193,10 @@ export default function Room() {
                     side,
                     rated
                   )
-                  setInviting(true)
+                  app.setInviting(true)
                 }}
               >
-                {inviting ? <span className='loading loading-spinner' /> : 'Play'}
+                {app.inviting ? <span className='loading loading-spinner' /> : 'Play'}
               </button>
             </>
           )}

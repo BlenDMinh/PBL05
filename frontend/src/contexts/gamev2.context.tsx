@@ -169,7 +169,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   useEffect(() => {
     if (!lastMessage) return
     const json = JSON.parse(lastMessage?.data)
-    console.log(json)
+    // console.log(json)
     const data = json.data as GameV2SocketData
     if (json.message === 'Player joined') {
       setIsReceiveFromServer(true)
