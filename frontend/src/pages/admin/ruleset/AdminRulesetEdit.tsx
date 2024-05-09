@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
-import { useParams, useSearchParams } from "react-router-dom"
+import { useNavigate, useParams, useSearchParams } from "react-router-dom"
 import rulesetAdminApi from "src/apis/admin/ruleset.admin.api"
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { GameRuleset } from "src/types/game.type";
+import { path } from "src/constants/path";
+import { toast } from "react-toastify";
 
 export default function AdminRulesetEdit() {
     const [searchParams, setSearchParams] = useSearchParams()
@@ -11,8 +13,9 @@ export default function AdminRulesetEdit() {
     const copyFrom = searchParams.get('copy-from')
 
     const [ruleset, setRuleset] = useState<GameRuleset>()
+    const [isDoing, setIsDoing] = useState(false)
 
-    console.log(ruleset)
+    const navigate = useNavigate()
 
     useEffect(() => {
         if (id) {
@@ -46,34 +49,58 @@ export default function AdminRulesetEdit() {
     return <>
         <div className="w-full h-full px-16 py-10">
             <div className="flex justify-end">
-                <button className="btn btn-primary w-24">
-                    {id ? 'Update' : 'Create'}
+                <button className="btn btn-primary w-24" onClick={() => {
+                    setIsDoing(true)
+                    if(id) {
+                        rulesetAdminApi.updateRuleset(parseInt(id), ruleset).then((res) => {
+                            toast(res.data.message)
+                            navigate(path.adminRuleset)
+                        })
+                    } else {
+                        rulesetAdminApi.addRuleset(ruleset).then((res) => {
+                            toast(res.data.message)
+                            navigate(path.adminRuleset)
+                        })
+                    }
+                }}>
+
+                    {isDoing ? <span className="loading" /> : id ? 'Update' : 'Create'}
                 </button>
             </div>
             {id && <span>ID: {id}</span>}
             <h3 className="text-base-content font-bold text-xl my-5">Basic</h3>
             <label className="form-control">
                 <span className="label label-text">Name</span>
-                <input className="input input-bordered" type="text" value={ruleset.name} />
+                <input className="input input-bordered" type="text" value={ruleset.name} onChange={(e) => {
+                    setRuleset({...ruleset, name: e.target.value})
+                }} />
             </label>
             <div className="flex w-full justify-evenly gap-10">
                 <label className="form-control w-1/2">
                     <span className="label label-text">Minute per turn</span>
-                    <input className="input input-bordered" type="number" value={ruleset.detail.minute_per_turn} />
+                    <input className="input input-bordered" type="number" value={ruleset.detail.minute_per_turn} onChange={(e) => {
+                        setRuleset({...ruleset, detail: {...ruleset.detail, minute_per_turn: parseInt(e.target.value)}})
+                    }} />
                 </label>
                 <label className="form-control w-1/2">
                     <span className="label label-text">Total Minute per Player</span>
-                    <input className="input input-bordered" type="number" value={ruleset.detail.total_minute_per_player} />
+                    <input className="input input-bordered" type="number" value={ruleset.detail.total_minute_per_player} onChange={(e) => {
+                        setRuleset({...ruleset, detail: {...ruleset.detail, total_minute_per_player: parseInt(e.target.value)}})
+                    }} />
                 </label>
             </div>
             <div className="flex w-full justify-evenly gap-10">
                 <label className="form-control w-1/2">
                     <span className="label label-text">Turn around time steps</span>
-                    <input className="input input-bordered" type="number" value={ruleset.detail.turn_around_steps} />
+                    <input className="input input-bordered" type="number" value={ruleset.detail.turn_around_steps} onChange={(e) => {
+                        setRuleset({...ruleset, detail: {...ruleset.detail, turn_around_steps: parseInt(e.target.value)}})
+                    }} />
                 </label>
                 <label className="form-control w-1/2">
                     <span className="label label-text">Time plus</span>
-                    <input className="input input-bordered" type="number" value={ruleset.detail.turn_around_time_plus}/>
+                    <input className="input input-bordered" type="number" value={ruleset.detail.turn_around_time_plus} onChange={(e) => {
+                        setRuleset({...ruleset, detail: {...ruleset.detail, turn_around_time_plus: parseInt(e.target.value)}})
+                    }}/>
                 </label>
             </div>
             <h3 className="text-base-content font-bold text-xl my-5">Description</h3>

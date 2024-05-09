@@ -1,6 +1,6 @@
-import { ReactNode, useMemo, useState } from "react"
+import { ReactNode, useEffect, useMemo, useState } from "react"
 import { FaEllipsisVertical } from "react-icons/fa6"
-import { useQuery } from "react-query"
+import { useMutation, useQuery } from "react-query"
 import { Link } from "react-router-dom"
 import rulesetAdminApi from "src/apis/admin/ruleset.admin.api"
 import { path } from "src/constants/path"
@@ -19,24 +19,30 @@ function RulesetRow(props: RulesetRowProps) {
 
     const handlePublish = () => {
         props.openConfirmModal?.('Are you sure you want to publish this ruleset?', () => {
+            console.log('Confirm')
             const newRuleset = { ...ruleset, published: true }
-            rulesetAdminApi.updateRuleset(ruleset.id, newRuleset)
-            props.onChange?.(newRuleset)
+            rulesetAdminApi.updateRuleset(ruleset.id, newRuleset).then(() => {
+                props.onChange?.(newRuleset)
+            })
         })
     }
 
     const handleUnpublish = () => {
         props.openConfirmModal?.('Are you sure you want to unpublish this ruleset?', () => {
+            console.log('Confirm')
             const newRuleset = { ...ruleset, published: false }
-            rulesetAdminApi.updateRuleset(ruleset.id, newRuleset)
-            props.onChange?.(newRuleset)
+            rulesetAdminApi.updateRuleset(ruleset.id, newRuleset).then(() => {
+                props.onChange?.(newRuleset)
+            })
         })
     }
 
     const handleDelete = () => {
         props.openConfirmModal?.(<>Are you sure you want to delete this ruleset <b>forever</b>?</>, () => {
-            rulesetAdminApi.deleteRuleset(ruleset.id)
-            props.onChange?.(ruleset)
+            console.log('Confirm')
+            rulesetAdminApi.deleteRuleset(ruleset.id).then(() => {
+                props.onChange?.(ruleset)
+            })
         })
     }
 
@@ -76,38 +82,15 @@ function RulesetRow(props: RulesetRowProps) {
     </>
 }
 
-const rulesetInit: GameRuleset[] = [
-    {
-        id: 0,
-        name: 'Chơi 10 phút',
-        detail: {
-            minute_per_turn: -1,
-            total_minute_per_player: 10,
-            turn_around_steps: -1,
-            turn_around_time_plus: -1
-        },
-        published: true,
-        createdAt: new Date().toISOString(),
-    },
-    {
-        id: 0,
-        name: 'Chơi 10 phút',
-        detail: {
-            minute_per_turn: -1,
-            total_minute_per_player: 10,
-            turn_around_steps: -1,
-            turn_around_time_plus: -1
-        },
-        published: false,
-        createdAt: new Date().toISOString(),
-    }
-]
-
 export default function AdminRuleset() {
-    const rulesets = useQuery(['rulesets'], () => rulesetAdminApi.getRulesets().then(res => res.data)).data ?? rulesetInit
+    const rulesetsMutation = useMutation({
+        mutationFn: () => rulesetAdminApi.getRulesets().then(res => res.data),
+    })
 
-    const publishedRulesets = useMemo(() => rulesets.filter(ruleset => ruleset.published), [rulesets])
-    const unpublishedRulesets = useMemo(() => rulesets.filter(ruleset => !ruleset.published), [rulesets])
+    const rulesets = rulesetsMutation.data
+
+    const publishedRulesets = useMemo(() => rulesets?.filter(ruleset => ruleset.published), [rulesets])
+    const unpublishedRulesets = useMemo(() => rulesets?.filter(ruleset => !ruleset.published), [rulesets])
 
     const [modalMessage, setModalMessage] = useState<ReactNode | string>('')
     const [onConfirm, setOnConfirm] = useState<() => void>(() => () => {})
@@ -117,8 +100,10 @@ export default function AdminRuleset() {
 
     const openConfirmModal = (message: ReactNode | string, onConfirm: () => void, onCancel?: () => void) => {   
         setModalMessage(message)
-        setOnConfirm(onConfirm)
-        setOnCancel(onCancel ?? (() => {}))
+        setOnConfirm(() => onConfirm)
+        setOnCancel(() => onCancel ?? (() => {
+            console.log('Cancel')
+        }))
 
         const modal = document.getElementById('confirm-modal') as HTMLDialogElement
         modal.showModal()
@@ -128,6 +113,13 @@ export default function AdminRuleset() {
         const modal = document.getElementById('add-modal') as HTMLDialogElement
         modal.showModal()
     }
+
+    useEffect(() => {
+        rulesetsMutation.mutate()
+    }, [])
+
+    if(!rulesets)
+        return <div className="loading loading-lg"></div>
 
     return <>
         <dialog id="add-modal" className="modal">
@@ -146,7 +138,7 @@ export default function AdminRuleset() {
                         <span>Copy from</span>
                         <select className="select select-bordered" onChange={(e) => setCopyFrom(parseInt(e.target.value))}>
                             <option value={-1}>Select ruleset</option>
-                            {rulesets.map(ruleset => <option value={ruleset.id}>{ruleset.name}</option>)}
+                            {rulesets.map(ruleset => <option key={ruleset.id} value={ruleset.id}>{ruleset.name}</option>)}
                         </select>
                     </div>
                 </div>
@@ -189,7 +181,8 @@ export default function AdminRuleset() {
                             </tr>
                         </thead>
                         <tbody>
-                            {publishedRulesets.map(ruleset => <RulesetRow ruleset={ruleset} isPublished openConfirmModal={openConfirmModal} />)}
+                            {publishedRulesets ? publishedRulesets.map(ruleset => <RulesetRow
+                            key={ruleset.id} ruleset={ruleset} isPublished openConfirmModal={openConfirmModal} onChange={() => rulesetsMutation.mutate()} />) : <span className="loading loading-lg" />}
                         </tbody>
                     </table>
                 </div>
@@ -212,7 +205,7 @@ export default function AdminRuleset() {
                             </tr>
                         </thead>
                         <tbody>
-                            {unpublishedRulesets.map(ruleset => <RulesetRow ruleset={ruleset} openConfirmModal={openConfirmModal}  />)}
+                            {unpublishedRulesets ? unpublishedRulesets.map(ruleset => <RulesetRow key={ruleset.id} ruleset={ruleset} openConfirmModal={openConfirmModal} onChange={() => rulesetsMutation.mutate()} />) : <span className="loading loading-lg" />}
                         </tbody>
                     </table>
                 </div>
