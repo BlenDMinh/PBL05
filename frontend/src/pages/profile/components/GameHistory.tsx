@@ -49,7 +49,7 @@ export default function GameHistory(props: GameHistoryProps) {
   }
 
   return (
-    <>
+    <div className='h-full'>
       <div className='join flex w-full justify-center mb-3'>
         <button className='join-item btn' onClick={() => setPage(Math.max(1, page - 1))}>
           «
@@ -95,6 +95,6 @@ export default function GameHistory(props: GameHistoryProps) {
           ))}
         </thead>
       </table>
-    </>
+    </div>
   )
 }

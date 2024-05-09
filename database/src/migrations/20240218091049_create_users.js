@@ -31,6 +31,7 @@ exports.up = async (knex) => {
     table.string("avatar_url");
     table.integer("elo").defaultTo(1000);
     table.integer("role").unsigned().defaultTo(USER_ROLE.PLAYER);
+    table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 };
 /**

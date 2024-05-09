@@ -23,6 +23,7 @@ exports.seed = async function (knex) {
     status: USER_STATUS.ACTIVE,
     role: USER_ROLE.USER_ROLE,
     elo: Math.floor(Math.random() * 1000) + 1000,
+    created_at: fakerVI.date.past(),
   }));
   await knex(tableName).insert(users);
   await knex(tableName).insert([
@@ -32,12 +33,14 @@ exports.seed = async function (knex) {
       role: USER_ROLE.ADMIN,
       status: USER_STATUS.ACTIVE,
       avatar_url: "https://avatars.githubusercontent.com/u/56352885",
+      created_at: fakerVI.date.past(),
     },
     {
       display_name: "player1",
       email: "player1@gmail.com",
       role: USER_ROLE.PLAYER,
       status: USER_STATUS.ACTIVE,
+      created_at: fakerVI.date.past(),
       avatar_url:
         "https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/472.jpg",
     },
@@ -46,6 +49,7 @@ exports.seed = async function (knex) {
       email: "player2@gmail.com",
       role: USER_ROLE.PLAYER,
       status: USER_STATUS.ACTIVE,
+      created_at: fakerVI.date.past(),
       avatar_url:
         "https://cloudflare-ipfs.com/ipfs/Qmd3W5DuhgHirLHGVixi6V76LhCkZUz6pnFt5AJBiyvHye/avatar/205.jpg",
     },

@@ -1,11 +1,21 @@
-import * as React from 'react'
 import IconFriend from '../../assets/svgs/friends.svg'
-import { FaCamera, FaChess, FaGamepad, FaMinusSquare, FaPencilAlt, FaPencilRuler, FaSquare, FaUsers, FaWaveSquare, FaWifi } from 'react-icons/fa'
+import {
+  FaCamera,
+  FaChess,
+  FaGamepad,
+  FaMinusSquare,
+  FaPencilAlt,
+  FaPencilRuler,
+  FaSquare,
+  FaUsers,
+  FaWaveSquare,
+  FaWifi
+} from 'react-icons/fa'
 import { BiMessage } from 'react-icons/bi'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery } from 'react-query'
 import profileApi from 'src/apis/profile.api'
-import { useMemo } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { User } from 'src/types/users.type'
 import GameHistory from './components/GameHistory'
 import { blankAvatar } from 'src/assets/images'
@@ -13,19 +23,32 @@ import { AppContext } from 'src/contexts/app.context'
 import AvatarModal from './components/AvatarModal'
 import FriendList from '../friend/components/FriendList'
 import { FaPencil } from 'react-icons/fa6'
+import friendApi from 'src/apis/friend.api'
+import { getProfileFromLS } from 'src/utils/auth'
 interface ProfileProps {}
 
 const Profile: React.FC<ProfileProps> = () => {
   const { id } = useParams()
   const profileQuery = useQuery(['profile', id], () => profileApi.getProfile(id))
-  const profile = useMemo(() => profileQuery.data ? profileQuery.data.data : null, [profileQuery.isFetched])
-  
-  const { user } = React.useContext(AppContext)
+  const profile = profileQuery.data ? profileQuery.data.data : null
+  const [totalFriend, setTotalFriend] = useState(0)
+  const { user } = useContext(AppContext)
+  const getCreatedAt = (timestamp: string) => {
+    const createdAtDate = new Date(timestamp)
+    const year = createdAtDate.getFullYear()
+    const month = String(createdAtDate.getMonth() + 1).padStart(2, '0') // Months are zero-indexed
+    const day = String(createdAtDate.getDate()).padStart(2, '0')
+    return `${year}/${month}/${day}`
+  }
 
-  if(!profile) {
-    return (
-      <div></div>
-    )
+  useEffect(() => {
+    if (id)
+      friendApi.getFriendList(id.toString(), 1, 1, '').then((res) => {
+        setTotalFriend(res.data.totalElements)
+      })
+  }, [id])
+  if (!profile) {
+    return <div></div>
   }
 
   return (
@@ -34,12 +57,18 @@ const Profile: React.FC<ProfileProps> = () => {
         <div className='w-full h-full flex justify-between'>
           <div className='w-full h-full flex items-center gap-5'>
             <div className=''>
-              <img src={profile.avatarUrl ?? blankAvatar} alt='Avatar' className='avatar w-48 h-48 rounded-full object-cover' />
-              {profile.id === user?.id && <>
-              <div className='h-12 w-12 z-10 relative -top-10'>
-                <AvatarModal />
-              </div>
-              </>}
+              <img
+                src={profile.avatarUrl ?? blankAvatar}
+                alt='Avatar'
+                className='avatar w-48 h-48 rounded-full object-cover'
+              />
+              {profile.id === user?.id && (
+                <>
+                  <div className='h-12 w-12 z-10 relative -top-10'>
+                    <AvatarModal />
+                  </div>
+                </>
+              )}
             </div>
             <div className='flex flex-col h-full'>
               <h1 className='text-2xl font-bold'>{profile.displayName}</h1>
@@ -51,20 +80,22 @@ const Profile: React.FC<ProfileProps> = () => {
                 </div>
                 <div className='flex flex-col text-secondary text-4xl items-center'>
                   <FaChess />
-                  <span className='text-base-content text-xl'>102</span>
+                  <span className='text-base-content text-xl'>{getCreatedAt(profile.createdAt!)}</span>
                 </div>
                 <div className='flex flex-col text-accent text-4xl items-center'>
                   <FaUsers />
-                  <span className='text-base-content text-xl'>203 </span>
+                  <span className='text-base-content text-xl'>{totalFriend} </span>
                 </div>
               </div>
             </div>
           </div>
-          <div>
-            <button className='btn btn-ghost text-2xl w-16 h-16'>
-              <FaPencil />
-            </button>
-          </div>
+          {id && parseInt(id) === getProfileFromLS().id && (
+            <div>
+              <button className='btn btn-ghost text-2xl w-16 h-16'>
+                <FaPencil />
+              </button>
+            </div>
+          )}
         </div>
       </div>
       <div className='w-full h-full flex flex-col'>

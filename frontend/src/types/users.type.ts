@@ -1,14 +1,15 @@
-import { PaginitionResponse } from "./utils.type"
+import { PaginitionResponse } from './utils.type'
 
 export interface User {
   id: number
   displayName: string
   email: string
   status: string
-  online: boolean,
+  online: boolean
   elo: number
-  role: string,
+  role: string
   avatarUrl: string
+  createdAt?: string
 }
 
 export interface Friend extends User {
@@ -19,10 +20,9 @@ export interface FriendListResponse extends PaginitionResponse {
   friends: Friend[]
 }
 
-
 export type FriendRequest = {
-  senderId: number,
-  receiverId: number,
+  senderId: number
+  receiverId: number
   createdAt: string
 }
 export interface FriendRequestResponse extends PaginitionResponse {

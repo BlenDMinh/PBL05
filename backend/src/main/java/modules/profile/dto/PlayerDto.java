@@ -19,6 +19,7 @@ public class PlayerDto {
     private boolean online;
     private String avatarUrl;
     private int elo;
+    private String createdAt;
 
     public PlayerDto(ResultSet rs) throws SQLException {
         id = rs.getInt("id");
@@ -27,5 +28,6 @@ public class PlayerDto {
         online = rs.getBoolean("online");
         avatarUrl = rs.getString("avatar_url");
         elo = rs.getInt("elo");
+        createdAt = rs.getTimestamp("created_at").toString();
     }
 }
