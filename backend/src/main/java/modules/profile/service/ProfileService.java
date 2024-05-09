@@ -2,6 +2,9 @@ package modules.profile.service;
 
 import modules.profile.dto.PaginationGameHistoryDto;
 import modules.profile.dto.PlayerDto;
+
+import java.util.List;
+
 import modules.profile.ProfileRepository;
 
 public class ProfileService {
@@ -19,4 +22,7 @@ public class ProfileService {
         return profileRepository.updateAvartarUrl(userId, url);
     }
 
+    public List<PlayerDto> getTopNPlayerByDisplaynameOrEmail(int n, String keyword) {
+        return profileRepository.getTopNPlayerByDisplaynameOrEmail(n, keyword);
+    }
 }

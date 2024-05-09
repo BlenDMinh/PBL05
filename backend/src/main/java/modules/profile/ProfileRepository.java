@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import common.Role;
 import modules.profile.dto.GameHistoryDto;
 import modules.profile.dto.PaginationGameHistoryDto;
 import modules.profile.dto.PlayerDto;
@@ -143,5 +144,35 @@ public class ProfileRepository {
             }
         }
         return result;
+    }
+
+    public List<PlayerDto> getTopNPlayerByDisplaynameOrEmail(int n, String keyword) {
+        List<PlayerDto> playerDtos = new ArrayList<>();
+        String query = "select * from users"
+                + " where (email ilike ?"
+                + " or display_name ilike ?)"
+                + " and role = ?"
+                + " offset 0 limit ?";
+        Connection conn = null;
+        try {
+            conn = ConnectionPool.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(query);
+            stmt.setString(1, "%" + keyword + "%");
+            stmt.setString(2, "%" + keyword + "%");
+            stmt.setInt(3, Role.PLAYER.getValue());
+            stmt.setInt(4, n);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                playerDtos.add(new PlayerDto(rs));
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        } finally {
+            // Release resources in a finally block
+            if (conn != null) {
+                ConnectionPool.releaseConnection(conn);
+            }
+        }
+        return playerDtos;
     }
 }
