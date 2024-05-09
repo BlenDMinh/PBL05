@@ -47,7 +47,6 @@ export default function AvatarModal(props: AvatarModalProps) {
                 <img className="avatar rounded-lg h-96 w-96 object-cover" src={image} alt="" />
                 <input className="file-input file-input-bordered w-full" type="file" name="image" accept="image/*" onChange={(event) => {
                     if (event.target.files) {
-                        console.log(event.target.files[0]);
                         setImage(URL.createObjectURL(event.target.files[0]));
                         setImageData(event.target.files[0]);
                     }

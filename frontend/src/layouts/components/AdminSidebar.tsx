@@ -214,7 +214,7 @@ export default function AdminSidebar(props: AdminSidebarProps) {
                         <img src={blankAvatar} alt="" className='object-cover' />
                       </div>
                     </div>
-                    <span className='text-base-content text-lg'>Name</span>
+                    <span className='text-base-content text-lg'>admin1</span>
                   </div>
                   <div className='flex gap-3 text-base-content'>
                     <button className='btn btn-ghost w-12 h-12 text-xl'>

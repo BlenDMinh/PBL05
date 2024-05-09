@@ -65,11 +65,13 @@ public class GamePlayerEndPoint {
                 return;
             }
             UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
+            boolean isValidGame = false;
             if (GameStore.getInstance().isGameHumanExist(id)) {
                 chessGame = GameStore.getInstance().getGameHumanById(id);
-                boolean isValidGame = chessGame.getStatus().equals(GameStatus.WAITING)
+                isValidGame = chessGame.getStatus().equals(GameStatus.WAITING)
                         || chessGame.getStatus().equals(GameStatus.PLAYING);
-                if (!isValidGame || (chessGame.getWhiteSession() != null && chessGame.getBlackSession() != null)) {
+                if (/* !isValidGame || */ (chessGame.getWhiteSession() != null
+                        && chessGame.getBlackSession() != null)) {
                     playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.GAME_NOT_VALID));
                     playerSession.close();
                     return;
@@ -80,6 +82,39 @@ public class GamePlayerEndPoint {
 
             int userId = userPasswordDto.getId();
             ModelMapper modelMapper = new ModelMapper();
+            Long whiteRemainMillisInTurn = null, blackRemainMillisInTurn = null, whiteRemainMillis = null,
+                    blackRemainMillis = null;
+            long waitedMillis = 0;
+            if (chessGame.getLastMoveTime() != 0) {
+                waitedMillis = System.currentTimeMillis() - chessGame.getLastMoveTime();
+            }
+            if ((int) (chessGame.getGameRule().getMinutePerTurn()) != -1) {
+                whiteRemainMillisInTurn = blackRemainMillisInTurn = Math
+                        .round(chessGame.getGameRule().getMinutePerTurn() * 60 * 1000);
+                if (isValidGame) {
+                    if (chessGame.getBoard().getSideToMove().equals(Side.WHITE)) {
+                        whiteRemainMillisInTurn = Math.max(0,
+                                Long.valueOf(Math.round(chessGame.getGameRule().getMinutePerTurn() * 60 * 1000))
+                                        - waitedMillis);
+                    } else {
+                        blackRemainMillisInTurn = Math.max(0,
+                                Long.valueOf(Math.round(chessGame.getGameRule().getMinutePerTurn() * 60 * 1000))
+                                        - waitedMillis);
+                    }
+                }
+            }
+
+            if ((int) chessGame.getGameRule().getTotalMinutePerPlayer() != -1) {
+                whiteRemainMillis = chessGame.getHumanWhitePlayer().getRemainMillis();
+                blackRemainMillis = chessGame.getHumanBlackPlayer().getRemainMillis();
+                if (isValidGame) {
+                    if (chessGame.getBoard().getSideToMove().equals(Side.WHITE)) {
+                        whiteRemainMillis = whiteRemainMillis - waitedMillis;
+                    } else {
+                        blackRemainMillis = blackRemainMillis - waitedMillis;
+                    }
+                }
+            }
             if (chessGame.getHumanWhitePlayer().getId() == userId) {
                 playerSession.getUserProperties().put("sid", sessionId);
                 chessGame.setWhiteSession(playerSession);
@@ -90,8 +125,9 @@ public class GamePlayerEndPoint {
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                 gameHumanDto, chessGame.getMoveHistories(),
-                                chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                chessGame.getHumanBlackPlayer().getRemainMillis(), chessGame.getGameRule()));
+                                whiteRemainMillis,
+                                blackRemainMillis, chessGame.getGameRule(),
+                                whiteRemainMillisInTurn, blackRemainMillisInTurn, chessGame.getStatus()));
                 sendToAllPlayer(resp);
                 if (chessGame.getBlackSession() != null) {
                     String blackSessionId = (String) chessGame.getBlackSession().getUserProperties().get("sid");
@@ -107,8 +143,9 @@ public class GamePlayerEndPoint {
                             new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     gameHumanDto2, chessGame.getMoveHistories(),
-                                    chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                    chessGame.getHumanBlackPlayer().getRemainMillis(), chessGame.getGameRule()));
+                                    whiteRemainMillis,
+                                    blackRemainMillis, chessGame.getGameRule(),
+                                    whiteRemainMillisInTurn, blackRemainMillisInTurn, chessGame.getStatus()));
                     playerSession.getBasicRemote().sendObject(resp2);
                 }
             } else if (chessGame.getHumanBlackPlayer().getId() == userId) {
@@ -121,8 +158,9 @@ public class GamePlayerEndPoint {
                         new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                 chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                 gameHumanDto, chessGame.getMoveHistories(),
-                                chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                chessGame.getHumanBlackPlayer().getRemainMillis(), chessGame.getGameRule()));
+                                whiteRemainMillis,
+                                blackRemainMillis, chessGame.getGameRule(),
+                                whiteRemainMillisInTurn, blackRemainMillisInTurn, chessGame.getStatus()));
                 sendToAllPlayer(resp);
                 if (chessGame.getWhiteSession() != null) {
                     String whiteSessionId = (String) chessGame.getWhiteSession().getUserProperties().get("sid");
@@ -138,8 +176,9 @@ public class GamePlayerEndPoint {
                             new PlayerJoinedResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE),
                                     gameHumanDto1, chessGame.getMoveHistories(),
-                                    chessGame.getHumanWhitePlayer().getRemainMillis(),
-                                    chessGame.getHumanBlackPlayer().getRemainMillis(), chessGame.getGameRule()));
+                                    whiteRemainMillis,
+                                    blackRemainMillis, chessGame.getGameRule(),
+                                    whiteRemainMillisInTurn, blackRemainMillisInTurn, chessGame.getStatus()));
                     playerSession.getBasicRemote().sendObject(resp2);
                 }
             }
@@ -249,6 +288,7 @@ public class GamePlayerEndPoint {
                             ? chessGame.getHumanWhitePlayer()
                             : chessGame.getHumanBlackPlayer();
                     boolean resignSide = gamePlayer.isWhite();
+                    chessGame.setStatus(resignSide ? GameStatus.BLACK_WIN : GameStatus.WHITE_WIN);
                     sendToAllPlayer(
                             new SocketMessageDto(SocketMessage.RESIGN, new ResignResponse(chessGame.getBoard().getFen(),
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE), resignSide,
@@ -278,7 +318,10 @@ public class GamePlayerEndPoint {
         boolean isWhite = chessGame.getBoard().getSideToMove().equals(Side.WHITE);
         Long remainMillisWhenTurnEnd = (isWhite ? chessGame.getHumanWhitePlayer() : chessGame.getHumanBlackPlayer())
                 .getRemainMillis();
-        Long remainMillisWhenTotalEnd = remainMillisWhenTurnEnd.longValue();
+        Long remainMillisWhenTotalEnd = null;
+        if (remainMillisWhenTurnEnd != null) {
+            remainMillisWhenTotalEnd = remainMillisWhenTurnEnd.longValue();
+        }
         if (remainMillisWhenTurnEnd != null) {
             remainMillisWhenTurnEnd -= Long.valueOf(Math.round(chessGame.getGameRule().getMinutePerTurn() * 60 * 1000));
             remainMillisWhenTurnEnd = Math.max(0, remainMillisWhenTurnEnd);
@@ -303,6 +346,9 @@ public class GamePlayerEndPoint {
     }
 
     boolean isRightTurn(Session playerSession) throws IOException, EncodeException {
+        if (!chessGame.getStatus().equals(GameStatus.PLAYING) && !chessGame.getStatus().equals(GameStatus.WAITING)) {
+            return false;
+        }
         String sessionId = (String) playerSession.getUserProperties().get("sid");
         shared.session.Session session = SimpleSessionManager.getInstance()
                 .getSession(sessionId);
@@ -337,8 +383,10 @@ public class GamePlayerEndPoint {
 
             @Override
             public void run() {
+                GameStatus status = GameStatus.WHITE_WIN;
                 if (isWhite) {
                     chessGame.getHumanWhitePlayer().setRemainMillis(remainMillisWhenEnd);
+                    status = GameStatus.BLACK_WIN;
                 } else {
                     chessGame.getHumanBlackPlayer().setRemainMillis(remainMillisWhenEnd);
                 }
@@ -346,6 +394,7 @@ public class GamePlayerEndPoint {
                     sendToAllPlayer(new SocketMessageDto(SocketMessage.TIME_UP, new TimeUpResponse(fen, isWhite,
                             chessGame.getHumanWhitePlayer().getRemainMillis(),
                             chessGame.getHumanBlackPlayer().getRemainMillis())));
+                    chessGame.setStatus(status);
                 } catch (IOException | EncodeException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

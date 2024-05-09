@@ -23,7 +23,7 @@ export default function ConfirmToast(props: ToastProps) {
 
   if (!opponent) {
     return (
-      <div className='toast'>
+      <div className='toast z-20'>
         <div className='w-96 h-96 bg-base-300 rounded-lg shadow-2xl flex flex-col p-8'>
           <span className='loading loading-spinner loading-lg'></span>
         </div>
@@ -32,7 +32,7 @@ export default function ConfirmToast(props: ToastProps) {
   }
 
   return (
-    <div className='toast'>
+    <div className='toast z-20'>
       <div className='w-96 h-96 bg-base-300 rounded-lg shadow-2xl flex flex-col p-8'>
         <div className='flex flex-col flex-1 gap-5'>
           <div className='flex gap-5 items-center'>

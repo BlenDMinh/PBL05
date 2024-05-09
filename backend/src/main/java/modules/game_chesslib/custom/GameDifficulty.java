@@ -1,7 +1,7 @@
 package modules.game_chesslib.custom;
 
 public enum GameDifficulty {
-    EASIEST(2), EASY(3), MEDIUM(4), HARD(5), HARDEST(6);
+    EASIEST(1), EASY(2), MEDIUM(3), HARD(4), HARDEST(5);
 
     private final int value;
 

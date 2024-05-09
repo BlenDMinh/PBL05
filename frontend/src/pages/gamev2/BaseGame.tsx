@@ -30,7 +30,7 @@ export default function BaseGame(props: BaseGameProps) {
   const { gameId } = useParams()
   const game = useGameV2()
   const navigate = useNavigate()
-
+  const [groundSize, setGroundSize] = useState<number>(0)
   const [resign, setResign] = useState(false)
 
   useEffect(() => {
@@ -64,8 +64,22 @@ export default function BaseGame(props: BaseGameProps) {
       }
     }
   }, [game.result])
+  useEffect(() => {
+    const updateSize = () => {
+      setGroundSize(Math.min(window.innerHeight * 0.67, window.innerWidth * 0.67))
+    }
 
-  console.log(game.me, game.opponent)
+    // Initial update
+    updateSize()
+
+    // Attach event listeners for window resize
+    window.addEventListener('resize', updateSize)
+
+    // Cleanup function to remove event listener
+    return () => {
+      window.removeEventListener('resize', updateSize)
+    }
+  }, [])
 
   if (!game.core)
     return (
@@ -74,34 +88,33 @@ export default function BaseGame(props: BaseGameProps) {
       </div>
     )
 
-  const calcChessGroundSize = () => Math.min(window.innerHeight * 0.67, window.innerHeight * 0.67)
-
   return (
     game.isReceiveFromServer && (
       <>
         <div className={classNames('flex h-screen items-center justify-center pt-16 gap-12 w-full')}>
           <div
-            style={{ width: `${calcChessGroundSize()}px` }}
-            className={classNames(`flex flex-col rounded-lg items-center justify-center`)}
+            style={{ width: `${groundSize}px` }}
+            className={classNames(`flex flex-col rounded-lg items-center justify-center`, {
+              'pointer-events-none': game.result !== GameResult.UNKNOWN
+            })}
           >
-            <div className='w-full flex items-center justify-between'>
-              <GameProfile profile={game.opponent} role='Opponent' gameRule={game.gameRule} />
-              <div className='rounded-lg border-base-300 border-2 bg-base-200'>
-                <span className='font-mono text-2xl'>
-                  <span>{Math.floor(((game.opponent as HumanPlayer)?.remainMillis ?? 0) / 1000)}</span>s
-                </span>
-              </div>
-            </div>
+            <GameProfile
+              profile={game.opponent}
+              role='Opponent'
+              gameSide={game.turn}
+              firstMoveDone={game.firstMoveDone}
+              gameResult={game.result}
+            />
             <Chessground
               key={gameId}
-              width={calcChessGroundSize()}
-              height={calcChessGroundSize()}
+              width={groundSize}
+              height={groundSize}
               config={{
                 turnColor: game.turn,
                 fen: game.fen,
                 orientation: game.me?.side === 'white' ? 'white' : 'black',
                 draggable: {
-                  enabled: true
+                  enabled: false
                 },
                 movable: {
                   free: false,
@@ -114,14 +127,13 @@ export default function BaseGame(props: BaseGameProps) {
                 lastMove: game.lastMove
               }}
             />
-            <div className='w-full flex items-center justify-between'>
-              <GameProfile profile={game.me} gameRule={game.gameRule} role='You' />
-              <div className='rounded-lg border-base-300 border-2 bg-base-200'>
-                <span className='font-mono text-2xl'>
-                  <span>{Math.floor(((game.me as HumanPlayer)?.remainMillis ?? 0) / 1000)}</span>s
-                </span>
-              </div>
-            </div>
+            <GameProfile
+              profile={game.me}
+              gameSide={game.turn}
+              role='You'
+              firstMoveDone={game.firstMoveDone}
+              gameResult={game.result}
+            />
           </div>
           <div className={classNames('flex flex-col gap-5 h-full', 'w-60')}>
             {props.gameType == GameType.PVP && (game.opponent as HumanPlayer)?.id && (
@@ -135,21 +147,21 @@ export default function BaseGame(props: BaseGameProps) {
               <div className='flex-1'></div>
               <div className='h-fit grid grid-cols-2 gap-3'>
                 {game.moveHistories.map((move, id) => (
-                  <div key={id} className='flex items-center justify-start gap-5 h-10 bg-base-100 rounded-lg p-2'>
+                  <div key={id} className='flex items-center justify-between h-5 bg-base-100 rounded-lg p-2'>
                     <div
-                      className={classNames('rounded-full w-8 h-8 p-1', {
+                      className={classNames('rounded-full w-[20px] h-[20px]', {
                         'bg-slate-500': move.piece.includes('WHITE'),
                         'bg-slate-200': move.piece.includes('BLACK')
                       })}
                     >
                       <img src={pieceTexture[move.piece as PieceTextureKey]} alt='' />
                     </div>
-                    <span className='font-bold'>{move.to}</span>
+                    <span className='font-semibold text-sm flex-1 pl-2'>{move.to}</span>
                     {move.promotion !== 'NONE' ? (
                       <>
                         <FaArrowRight />
                         <div
-                          className={classNames('rounded-full w-8 h-8 p-1', {
+                          className={classNames('rounded-full w-[20px] h-[20px]', {
                             'bg-slate-500': move.piece.includes('WHITE'),
                             'bg-slate-200': move.piece.includes('BLACK')
                           })}
@@ -164,31 +176,33 @@ export default function BaseGame(props: BaseGameProps) {
                 ))}
               </div>
             </div>
-            <div className='flex w-full justify-around'>
-              {resign ? (
-                <div className='flex w-1/2 gap-2 justify-evenly'>
-                  <button className='btn btn-error w-1/2' onClick={() => game.resign()}>
-                    Yes
+            {game.result === GameResult.UNKNOWN && (
+              <div className='flex w-full justify-around'>
+                {resign ? (
+                  <div className='flex w-1/2 gap-2 justify-evenly'>
+                    <button className='btn btn-error w-1/2' onClick={() => game.resign()}>
+                      Yes
+                    </button>
+                    <button className='btn btn-primary w-1/2' onClick={() => setResign(false)}>
+                      No
+                    </button>
+                  </div>
+                ) : (
+                  <button className='btn btn-error' onClick={() => setResign(true)}>
+                    <FaFlag />
+                    Resign
                   </button>
-                  <button className='btn btn-primary w-1/2' onClick={() => setResign(false)}>
-                    No
-                  </button>
-                </div>
-              ) : (
-                <button className='btn btn-error' onClick={() => setResign(true)}>
-                  <FaFlag />
-                  Resign
-                </button>
-              )}
-              {props.gameType === GameType.PVP && (
-                <div className='tooltip' data-tip='Not working yet'>
-                  <button className='btn btn-info btn-disabled' onClick={() => game.resign()}>
-                    <FaHandshake />
-                    Draw
-                  </button>
-                </div>
-              )}
-            </div>
+                )}
+                {props.gameType === GameType.PVP && (
+                  <div className='tooltip' data-tip='Not working yet'>
+                    <button className='btn btn-info btn-disabled' onClick={() => game.resign()}>
+                      <FaHandshake />
+                      Draw
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <PromotionModal />

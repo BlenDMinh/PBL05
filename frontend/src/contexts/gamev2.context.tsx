@@ -49,6 +49,7 @@ export interface GameV2ContextInterface {
   onEnd: () => void
   isReceiveFromServer: boolean
   gameRule: GameRule | null
+  firstMoveDone: () => boolean
 }
 
 const initContext: GameV2ContextInterface = {
@@ -71,7 +72,8 @@ const initContext: GameV2ContextInterface = {
   resign: () => null,
   onEnd: () => null,
   isReceiveFromServer: false,
-  gameRule: null
+  gameRule: null,
+  firstMoveDone: () => false
 }
 
 export const GameV2Context = createContext<GameV2ContextInterface>(initContext)
@@ -87,19 +89,20 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   const [moveHistories, setMoveHistories] = useState<MoveHistory[]>(initContext.moveHistories)
   const [isPromoting, setPromoting] = useState(false)
   const [pendeingMove, setPendingMove] = useState<Key[]>([])
-  const [turn, setTurn] = useState<'white' | 'black' | undefined>(undefined)
+  const [turn, setTurn] = useState<'white' | 'black' | undefined>(initContext.turn)
   const [result, setResult] = useState(initContext.result)
   const [config, setConfig] = useState(DEFAULT_CONFIG)
   const [me, setMe] = useState<HumanPlayer | undefined>(initContext.me)
   const [opponent, setOpponent] = useState<Player | undefined>(initContext.opponent)
-  const [isReceiveFromServer, setIsReceiveFromServer] = useState<boolean>(false)
-  const [gameRule, setGameRule] = useState<GameRule | null>(null)
+  const [isReceiveFromServer, setIsReceiveFromServer] = useState<boolean>(initContext.isReceiveFromServer)
+  const [gameRule, setGameRule] = useState<GameRule | null>(initContext.gameRule)
+
+  const firstMoveDone = () => moveHistories.length > 0
 
   const startGame = (gameId: string, gameType: GameType = GameType.PVP, gameConfig: GameConfig = DEFAULT_CONFIG) => {
     setGameType(gameType)
     setConfig(config)
     setGameId(gameId)
-    setResult(GameResult.UNKNOWN)
   }
 
   useEffect(() => {
@@ -156,6 +159,13 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     }
   }, [readyState])
 
+  const getGameRuleMillisPerTurn = () => {
+    if (gameRule && gameRule.minutePerTurn && gameRule.minutePerTurn != -1) {
+      return gameRule.minutePerTurn * 60 * 1000
+    }
+    return null
+  }
+
   useEffect(() => {
     if (!lastMessage) return
     const json = JSON.parse(lastMessage?.data)
@@ -175,7 +185,8 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
             displayName: player.displayName!,
             elo: player.elo!,
             side: player.white ? 'white' : 'black',
-            remainMillis: player.white ? data.whiteRemainMillis : data.blackRemainMillis
+            remainMillis: player.white ? data.whiteRemainMillis : data.blackRemainMillis,
+            remainMillisInTurn: player.white ? data.whiteRemainMillisInTurn : data.blackRemainMillisInTurn
           })
         } else {
           const player = data.gamePlayer
@@ -185,10 +196,24 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
             displayName: player.displayName!,
             avatarUrl: player.avatarUrl!,
             elo: player.elo!,
-            remainMillis: player.white ? data.whiteRemainMillis : data.blackRemainMillis
+            remainMillis: player.white ? data.whiteRemainMillis : data.blackRemainMillis,
+            remainMillisInTurn: player.white ? data.whiteRemainMillisInTurn : data.blackRemainMillisInTurn
           }
           setOpponent(human)
         }
+      }
+      switch (data.gameStatus) {
+        case 'WHITE_WIN':
+          if (me?.side === 'white') setResult(GameResult.WIN)
+          else if (me?.side === 'black') setResult(GameResult.LOSE)
+          break
+        case 'BLACK_WIN':
+          if (me?.side === 'black') setResult(GameResult.WIN)
+          else if (me?.side === 'white') setResult(GameResult.LOSE)
+          break
+
+        default:
+          break
       }
     } else if (json.message === 'Bot joined') {
       const bot: BotPlayer = {
@@ -216,11 +241,31 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
     }
     if (data) {
       if (data.whiteRemainMillis && data.blackRemainMillis && me && opponent) {
-        if (me.side === 'white') setMe({ ...me, remainMillis: data.whiteRemainMillis } as HumanPlayer)
-        else setMe({ ...me, remainMillis: data.blackRemainMillis } as HumanPlayer)
+        if (me.side === 'white')
+          setMe({
+            ...me,
+            remainMillis: data.whiteRemainMillis,
+            remainMillisInTurn: data.whiteRemainMillisInTurn ?? getGameRuleMillisPerTurn()
+          } as HumanPlayer)
+        else
+          setMe({
+            ...me,
+            remainMillis: data.blackRemainMillis,
+            remainMillisInTurn: data.blackRemainMillisInTurn ?? getGameRuleMillisPerTurn()
+          } as HumanPlayer)
 
-        if (opponent.side === 'white') setOpponent({ ...opponent, remainMillis: data.whiteRemainMillis } as HumanPlayer)
-        else setOpponent({ ...opponent, remainMillis: data.blackRemainMillis } as HumanPlayer)
+        if (opponent.side === 'white')
+          setOpponent({
+            ...opponent,
+            remainMillis: data.whiteRemainMillis,
+            remainMillisInTurn: data.whiteRemainMillisInTurn ?? getGameRuleMillisPerTurn()
+          } as HumanPlayer)
+        else
+          setOpponent({
+            ...opponent,
+            remainMillis: data.blackRemainMillis,
+            remainMillisInTurn: data.blackRemainMillisInTurn ?? getGameRuleMillisPerTurn()
+          } as HumanPlayer)
       }
       if (data.fen) setFen(data.fen)
       if (data.white != undefined) setTurn(data.white ? 'white' : 'black')
@@ -347,7 +392,8 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         resign,
         onEnd,
         isReceiveFromServer,
-        gameRule
+        gameRule,
+        firstMoveDone
       }}
     >
       {children}

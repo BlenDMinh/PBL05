@@ -3,7 +3,7 @@ import GameProfile from '../gamev2/components/GameProfile'
 import Chessground from '@react-chess/chessground'
 import classNames from 'classnames'
 import { getProfileFromLS } from 'src/utils/auth'
-import { useContext, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { FaLink } from 'react-icons/fa'
 import InvatationModal from './components/InvatationModal'
 import FriendList from './components/FriendList'
@@ -39,7 +39,21 @@ export default function Room() {
   }, [opponent])
 
   const gamerules = useQuery('gamerules', () => rulesetApi.getRulesets()).data?.data
+  if (gamerules) {
+    gamerules.sort((a, b) => {
+      if (a.id < b.id) {
+        return -1
+      }
+      if (a.id > b.id) {
+        return 1
+      }
+      return 0
+    })
+  }
 
+  useEffect(() => {
+    if (gamerules) setGameRuleId(gamerules[0].id + '')
+  }, [gamerules])
   const app = useContext(AppContext)
 
   const [gameRuleId, setGameRuleId] = useState<string>('')
@@ -59,7 +73,7 @@ export default function Room() {
         >
           {opponent && (
             <div className='w-full flex items-center justify-between'>
-              <GameProfile profile={opponentPlayer} role='Opponent' gameRule={null} />
+              <GameProfile profile={opponentPlayer} role='Opponent' />
               <div className='rounded-lg border-base-300 border-2 bg-base-200'>
                 <p className='text-lg m-2'>10:00</p>
               </div>
@@ -84,7 +98,7 @@ export default function Room() {
             />
           </div>
           <div className='w-full flex items-center justify-between'>
-            <GameProfile profile={userPlayer} gameRule={null} role='You' />
+            <GameProfile profile={userPlayer} role='You' />
             <div className='rounded-lg border-base-300 border-2 bg-base-200'>
               <p className='text-lg m-2'>10:00</p>
             </div>
@@ -154,9 +168,8 @@ export default function Room() {
                   <span className='text-base-content font-bold text-lg'>Gamerule</span>
                   <div>
                     <select className='select select-bordered' onChange={(e) => setGameRuleId(e.target.value)}>
-                      <option value={''}>Select gamerule</option>
                       {gamerules?.map((rule) => (
-                        <option key={rule.id} value={rule.id}>
+                        <option key={rule.id} value={rule.id} selected={rule.id === gamerules[0].id}>
                           {rule.name}
                         </option>
                       ))}

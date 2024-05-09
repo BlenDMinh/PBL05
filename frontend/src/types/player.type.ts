@@ -12,6 +12,7 @@ export interface HumanPlayer extends Player {
   avatarUrl?: string
   elo: number,
   remainMillis?: number
+  remainMillisInTurn?: number
 }
 
 export enum BotDifficulty {

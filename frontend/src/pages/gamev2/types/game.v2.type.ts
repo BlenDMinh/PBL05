@@ -12,11 +12,14 @@ export type GameV2SocketData = {
     difficulty?: BotDifficulty
     white: boolean
   }
+  gameStatus: 'WAITING' | 'PLAYING' | 'WHITE_WIN' | 'BLACK_WIN' | 'DRAW'
   gameRule?: GameRule
   resignSide?: boolean
   moveHistories?: MoveHistory[]
   whiteRemainMillis?: number
   blackRemainMillis?: number
+  whiteRemainMillisInTurn?: number
+  blackRemainMillisInTurn?: number
 }
 
 export type MoveHistory = {

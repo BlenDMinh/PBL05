@@ -3,8 +3,8 @@ package common;
 public enum GameStatus {
     WAITING(0),
     PLAYING(1),
-    PLAYER1_WIN(2),
-    PLAYER2_WIN(3),
+    WHITE_WIN(2),
+    BLACK_WIN(3),
     DRAW(4);
 
     private final int value;

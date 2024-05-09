@@ -46,12 +46,13 @@ public class HumanPlayer extends GamePlayer {
         this.white = white;
     }
 
-    public long getRemainMillis() {
+    public Long getRemainMillis() {
         return remainMillis;
     }
 
     public void decreaseRemainMillisBy(long millis) {
-        this.remainMillis -= millis;
+        if (this.remainMillis != null)
+            this.remainMillis -= millis;
     }
 
     public void setRemainMillis(long remainMillis) {
