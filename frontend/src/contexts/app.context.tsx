@@ -1,11 +1,12 @@
 import { createContext, useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import useWebSocket from 'react-use-websocket'
 import authApi from 'src/apis/auth.api'
 import HttpStatusCode from 'src/constants/httpStatusCode.enum'
 import { ws } from 'src/constants/ws'
 import { ReactWithChild } from 'src/interface/app'
-import { GameRuleset } from 'src/types/game.type'
+import { GameInvitationRequestMessage, GameRuleset, GameSocketMessage } from 'src/types/game.type'
 import { User } from 'src/types/users.type'
 import { clearLS, getAccessTokenFromLS, getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
 import http from 'src/utils/http'
@@ -28,7 +29,9 @@ export interface AppContextType {
     gamerule: GameRuleset,
     side: 'white' | 'black' | 'random',
     rated: boolean
-  ) => void
+  ) => void,
+  invitationMessage: GameInvitationRequestMessage | null,
+  invitationResponse: (response: 'accept' | 'reject', invitationId?: string) => void,
   openConfirmToast: boolean
   setOpenConfirmToast: (value: boolean) => void
 }
@@ -42,6 +45,8 @@ const initAppContext: AppContextType = {
   user: getProfileFromLS(),
   setUser: () => null,
   inviteOpponent: () => null,
+  invitationMessage: null,
+  invitationResponse: () => null,
   openConfirmToast: false,
   setOpenConfirmToast: () => null
 }
@@ -54,6 +59,9 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
   const [showSidebar, setShowSidebar] = useState<boolean>(initAppContext.showSidebar)
   const [user, setUser] = useState<User | null>(initAppContext.user)
   const [openConfirmToast, setOpenConfirmToast] = useState<boolean>(initAppContext.openConfirmToast)
+  const [invitationMessage, setInvitationMessage] = useState<GameInvitationRequestMessage | null>(initAppContext.invitationMessage)
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     authApi
@@ -115,10 +123,33 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
     socket.sendJsonMessage(message)
   }
 
+  const invitationResponse = (response: 'accept' | 'reject', invitationId?: string) => {
+    const message = {
+      message: 'Invite to game response',
+      data: {
+        accept: response === 'accept',
+        invitationId: invitationId ?? invitationMessage?.data.invitationId
+      }
+    }
+    setInvitationMessage(null)
+    setOpenConfirmToast(false)
+    socket.sendJsonMessage(message)
+  }
+
   useEffect(() => {
+    console.log(socket.lastJsonMessage)
     if (socket.lastJsonMessage) {
-      const data = socket.lastJsonMessage
-      setOpenConfirmToast(true)
+      const data = socket.lastJsonMessage as GameSocketMessage
+      if(data.message === 'Invite to game request') {
+        setInvitationMessage(data as GameInvitationRequestMessage)
+        setOpenConfirmToast(true)
+      } else if(data.message === "Game created") {
+        const gameId = data.data
+        navigate(`/game/v2/${gameId}`)
+      } else if(data.message === "Invitation rejected") {
+        toast.error('Opponent rejected your invitation')
+        navigate('/game/v2/room')
+      }
     }
   }, [socket.lastJsonMessage])
 
@@ -133,6 +164,8 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
         user,
         setUser,
         inviteOpponent,
+        invitationMessage,
+        invitationResponse,
         openConfirmToast,
         setOpenConfirmToast
       }}

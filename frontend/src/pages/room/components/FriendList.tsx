@@ -24,23 +24,24 @@ export default function FriendList(props: FriendListProps) {
           <button
             className='btn btn-primary'
             onClick={() =>
-              app.inviteOpponent(
-                friend.id.toString(),
-                {
-                  id: 0,
-                  name: 'Chơi 10 phút',
-                  detail: {
-                    minute_per_turn: -1,
-                    total_minute_per_player: 10,
-                    turn_around_steps: -1,
-                    turn_around_time_plus: -1
-                  },
-                  published: true,
-                  createdAt: new Date().toISOString()
-                } as GameRuleset,
-                'white',
-                false
-              )
+                props.selectCallback?.(friend.id.toString())
+            //   app.inviteOpponent(
+            //     friend.id.toString(),
+            //     {
+            //       id: 0,
+            //       name: 'Chơi 10 phút',
+            //       detail: {
+            //         minute_per_turn: -1,
+            //         total_minute_per_player: 10,
+            //         turn_around_steps: -1,
+            //         turn_around_time_plus: -1
+            //       },
+            //       published: true,
+            //       createdAt: new Date().toISOString()
+            //     } as GameRuleset,
+            //     'white',
+            //     false
+            //   )
             }
           >
             Invite

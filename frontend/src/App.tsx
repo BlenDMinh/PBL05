@@ -70,7 +70,7 @@ function App() {
         pauseOnHover
         theme={localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'}
       />
-      {app.openConfirmToast && <ConfirmToast></ConfirmToast>}
+      {app.openConfirmToast && <ConfirmToast onConfirm={() => app.invitationResponse('accept')} onCancel={() => app.invitationResponse('reject')}></ConfirmToast>}
     </>
   )
 }

@@ -40,14 +40,12 @@ export default function Home() {
               Play with bot
             </span>
           </Link>
-          <div className='tooltip h-1/4' data-tip='Currently not available'>
-            <div className='btn bg-base-200 w-full h-full border-b-8 border-base-300'>
-              <span className='text-base-content font-bold text-xl flex gap-2 items-center'>
-                <FaUser />
-                Play with friends
-              </span>
-            </div>
-          </div>
+          <Link to={path.room} className='btn bg-base-200 w-full h-1/4 border-b-8 border-base-300'>
+            <span className='text-base-content font-bold text-xl flex gap-2 items-center'>
+              <FaUser />
+              Play with friends
+            </span>
+          </Link>
         </div>
         <div className='card bg-base-200 h-full w-1/3 border-b-8 border-base-300'>
           <figure>

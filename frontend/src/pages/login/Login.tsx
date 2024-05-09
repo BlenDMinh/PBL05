@@ -41,7 +41,11 @@ export default function Login(props: LoginProps) {
       })
       setIsAuthenticated(AuthenticateState.AUTHENTICATED)
       setUser(data.data.user)
-      navigate(path.home)
+      if(data.data.user.role.toLocaleLowerCase() === 'admin') {
+        navigate(path.admin)
+      } else {
+        navigate(path.home)
+      }
     },
     onError: (error) => {
       if (isAxiosError<AuthErrorResponse>(error)) {
