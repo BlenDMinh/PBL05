@@ -58,14 +58,14 @@ function GameProfile(props: GameProfileProps) {
           </span>
           <div className='flex justify-between gap-5'>
             <span className='text-base-content text-sm'>{'elo: ' + (props.profile as HumanPlayer).elo}</span>
-            {(props.profile as HumanPlayer)?.remainMillisInTurn &&
-              props.profile.side === props.gameSide &&
-              props.gameResult === GameResult.UNKNOWN &&
-              props.firstMoveDone() === true && (
-                <TimeLeftTurn milliseconds={(props.profile as HumanPlayer).remainMillisInTurn!} />
-              )}
           </div>
         </div>
+        {(props.profile as HumanPlayer)?.remainMillisInTurn &&
+          props.profile.side === props.gameSide &&
+          props.gameResult === GameResult.UNKNOWN &&
+          props.firstMoveDone() === true && (
+            <TimeLeftTurn milliseconds={(props.profile as HumanPlayer).remainMillisInTurn!} />
+          )}
       </div>
       {(props.profile as HumanPlayer)?.remainMillis && (
         <TimeLeftTotal

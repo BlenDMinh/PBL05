@@ -35,7 +35,7 @@ function TimeLeftTotal(props: TimeLeftTotalProps) {
     .padStart(2, '0')
 
   return (
-    <div className='rounded-lg border-base-300 border-2 bg-base-200'>
+    <div className='border-base-300 border-2 bg-base-200'>
       <span className='font-mono text-2xl p-2'>
         {minutes}:{seconds}
       </span>
