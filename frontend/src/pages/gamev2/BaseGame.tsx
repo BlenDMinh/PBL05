@@ -94,7 +94,7 @@ export default function BaseGame(props: BaseGameProps) {
         <div className={classNames('flex h-screen items-center justify-center pt-16 gap-12 w-full')}>
           <div
             style={{ width: `${groundSize}px` }}
-            className={classNames(`flex flex-col rounded-lg items-center justify-center`, {
+            className={classNames(`flex flex-col rounded-lg items-center justify-between`, {
               'pointer-events-none': game.result !== GameResult.UNKNOWN
             })}
           >
@@ -114,7 +114,7 @@ export default function BaseGame(props: BaseGameProps) {
                 fen: game.fen,
                 orientation: game.me?.side === 'white' ? 'white' : 'black',
                 draggable: {
-                  enabled: false
+                  enabled: true
                 },
                 movable: {
                   free: false,

@@ -27,7 +27,7 @@ function TimeLeftTurn(props: TimeLeftTurnProps) {
 
   return (
     <div className='border rounded-full bg-base-100 flex justify-center items-center'>
-      <p className='text-base-content text-xs p-1'>
+      <p className='text-base-content text-xs px-1'>
         {minutes}:{seconds}
       </p>
     </div>
