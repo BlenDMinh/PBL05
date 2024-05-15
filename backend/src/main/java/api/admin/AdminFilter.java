@@ -30,6 +30,7 @@ public class AdminFilter implements Filter {
         if (!userPasswordDto.getRole().equals(Role.ADMIN)) {
             throw new CustomException(HttpStatusCode.NOT_ACCEPTABLE, "You do not have permission");
         }
+
         chain.doFilter(request, response);
     }
 }
