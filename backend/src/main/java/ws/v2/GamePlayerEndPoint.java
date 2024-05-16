@@ -197,11 +197,16 @@ public class GamePlayerEndPoint {
             Move chessMove;
             boolean validMove = false;
             modules.game_chesslib.custom.Move move;
+            String sessionId = (String) playerSession.getUserProperties().get("sid");
+            shared.session.Session session = SimpleSessionManager.getInstance()
+                    .getSession(sessionId);
+            UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
+            String oldFen = chessGame.getBoard().getFen();
             switch (message) {
                 case SocketMessage.MOVE:
                     move = gson.fromJson(SocketMessageDto.getData().toString(),
                             modules.game_chesslib.custom.Move.class);
-                    if (isRightTurn(playerSession)) {
+                    if (isRightTurn(playerSession, userPasswordDto.getId())) {
                         from = Square.valueOf(move.getFrom().toUpperCase());
                         to = Square.valueOf(move.getTo().toUpperCase());
                         chessMove = new Move(from, to);
@@ -240,7 +245,7 @@ public class GamePlayerEndPoint {
                 case SocketMessage.PROMOTION:
                     move = gson.fromJson(SocketMessageDto.getData().toString(),
                             modules.game_chesslib.custom.Move.class);
-                    if (isRightTurn(playerSession)) {
+                    if (isRightTurn(playerSession, userPasswordDto.getId())) {
                         from = Square.valueOf(move.getFrom().toUpperCase());
                         to = Square.valueOf(move.getTo().toUpperCase());
                         Piece promotion = Piece.fromValue(move.getPromotion());
@@ -279,11 +284,6 @@ public class GamePlayerEndPoint {
                     return;
 
                 case SocketMessage.RESIGN:
-                    String sessionId = (String) playerSession.getUserProperties().get("sid");
-                    shared.session.Session session = SimpleSessionManager.getInstance()
-                            .getSession(sessionId);
-                    UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO,
-                            UserPasswordDto.class);
                     HumanPlayer gamePlayer = userPasswordDto.getId() == chessGame.getHumanWhitePlayer().getId()
                             ? chessGame.getHumanWhitePlayer()
                             : chessGame.getHumanBlackPlayer();
@@ -300,6 +300,7 @@ public class GamePlayerEndPoint {
                     playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.UNKNOWN));
                     return;
             }
+            gameService.insertGameLog(SocketMessageDto, chessGame.getId(), userPasswordDto.getId(), oldFen);
             postCheck();
         } finally {
             lock.unlock();
@@ -345,23 +346,19 @@ public class GamePlayerEndPoint {
         }
     }
 
-    boolean isRightTurn(Session playerSession) throws IOException, EncodeException {
+    boolean isRightTurn(Session playerSession, int playerId) throws IOException, EncodeException {
         if (!chessGame.getStatus().equals(GameStatus.PLAYING) && !chessGame.getStatus().equals(GameStatus.WAITING)) {
             return false;
         }
-        String sessionId = (String) playerSession.getUserProperties().get("sid");
-        shared.session.Session session = SimpleSessionManager.getInstance()
-                .getSession(sessionId);
-        UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
         Side side = chessGame.getBoard().getSideToMove();
         // check right turn
         if (side.equals(Side.WHITE)) {
-            if (userPasswordDto.getId() != chessGame.getHumanWhitePlayer().getId()) {
+            if (playerId != chessGame.getHumanWhitePlayer().getId()) {
                 playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.INVALID_MOVE));
                 return false;
             }
         } else {
-            if (userPasswordDto.getId() != chessGame.getHumanBlackPlayer().getId()) {
+            if (playerId != chessGame.getHumanBlackPlayer().getId()) {
                 playerSession.getBasicRemote().sendObject(new SocketMessageDto(SocketMessage.INVALID_MOVE));
                 return false;
             }

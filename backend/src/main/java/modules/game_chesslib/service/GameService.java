@@ -1,8 +1,10 @@
 package modules.game_chesslib.service;
 
-import java.sql.SQLException;
+import com.google.gson.Gson;
 
+import java.sql.SQLException;
 import common.GameStatus;
+import common.socket.SocketMessageDto;
 import modules.game_chesslib.GameRepository;
 import modules.game_chesslib.dto.GameDto;
 
@@ -24,5 +26,11 @@ public class GameService {
 
     public GameDto getById(String id) throws SQLException, Exception {
         return gameRepository.getById(id);
+    }
+
+    public boolean insertGameLog(SocketMessageDto messageDtos, String gameId, int playerId, String fen) {
+        Gson gson = new Gson();
+        return gameRepository.insertGameLog(gson.toJson(messageDtos), gameId, playerId, fen,
+                new java.util.Date(System.currentTimeMillis()));
     }
 }

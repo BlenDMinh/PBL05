@@ -1,10 +1,12 @@
 package modules.game_chesslib;
 
 import java.sql.Connection;
+import java.util.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 
 import org.apache.log4j.Logger;
 
@@ -77,5 +79,35 @@ public class GameRepository {
             }
         }
         return gameDto;
+    }
+
+    public boolean insertGameLog(String messageDtos, String gameId, int playerId, String fen,
+            Date createdAt) {
+        boolean result = false;
+        Connection conn = null;
+        String sql = "insert into game_logs (fen, message, player_id, game_id, created_at) VALUES (?, to_json(?::json), ?, ?, ?)";
+        try {
+            conn = ConnectionPool.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql);
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, fen);
+            stmt.setString(2, messageDtos);
+            stmt.setInt(3, playerId);
+            stmt.setString(4, gameId);
+            stmt.setTimestamp(5, new Timestamp(createdAt.getTime()));
+            int count = stmt.executeUpdate();
+            if (count > 0) {
+                result = true;
+            }
+        } catch (SQLException e) {
+            logger.error("SQLException occurred: " + e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Exception occurred: " + e.getMessage(), e);
+        } finally {
+            if (conn != null) {
+                ConnectionPool.releaseConnection(conn);
+            }
+        }
+        return result;
     }
 }
