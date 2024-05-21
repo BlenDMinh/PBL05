@@ -64,11 +64,13 @@ public class LoginServlet extends HttpServlet {
     Session session = requestUtils.getSession(req);
 
     UserPasswordDto userPasswordDto = session.getAttribute(SessionKey.USER_PASSWORD_DTO, UserPasswordDto.class);
+    UserPasswordDto nUserPasswordDto = authService.getUser(userPasswordDto.getEmail());
+    session.setAttribute(SessionKey.USER_PASSWORD_DTO, nUserPasswordDto);
     if (userPasswordDto.getRole() == Role.ADMIN) {
-      AdminDto adminDto = modelMapper.map(userPasswordDto, AdminDto.class);
+      AdminDto adminDto = modelMapper.map(nUserPasswordDto, AdminDto.class);
       responseUtils.responseJson(resp, new LoginResponseDto<AdminDto>(adminDto, session.getSessionId()));
     } else {
-      PlayerDto playerDto = modelMapper.map(userPasswordDto, PlayerDto.class);
+      PlayerDto playerDto = modelMapper.map(nUserPasswordDto, PlayerDto.class);
       responseUtils.responseJson(resp, new LoginResponseDto<PlayerDto>(playerDto, session.getSessionId()));
     }
   }

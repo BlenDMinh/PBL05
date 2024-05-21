@@ -24,7 +24,6 @@ import AvatarModal from './components/AvatarModal'
 import FriendList from '../friend/components/FriendList'
 import { FaPencil } from 'react-icons/fa6'
 import friendApi from 'src/apis/friend.api'
-import { getProfileFromLS } from 'src/utils/auth'
 interface ProfileProps {}
 
 const Profile: React.FC<ProfileProps> = () => {
@@ -89,7 +88,7 @@ const Profile: React.FC<ProfileProps> = () => {
               </div>
             </div>
           </div>
-          {id && parseInt(id) === getProfileFromLS().id && (
+          {id && parseInt(id) === user?.id && (
             <div>
               <button className='btn btn-ghost text-2xl w-16 h-16'>
                 <FaPencil />

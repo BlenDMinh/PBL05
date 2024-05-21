@@ -8,7 +8,7 @@ import { ws } from 'src/constants/ws'
 import { ReactWithChild } from 'src/interface/app'
 import { GameInvitationRequestMessage, GameRuleset, GameSocketMessage } from 'src/types/game.type'
 import { User } from 'src/types/users.type'
-import { clearLS, getAccessTokenFromLS, getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
+import { clearLS, getAccessTokenFromLS, getSessionIdFromLS } from 'src/utils/auth'
 import http from 'src/utils/http'
 
 export enum AuthenticateState {
@@ -44,7 +44,7 @@ const initAppContext: AppContextType = {
   setIsAuthenticated: () => null,
   showSidebar: false,
   setShowSidebar: () => null,
-  user: getProfileFromLS(),
+  user: null,
   setUser: () => null,
   inviteOpponent: () => null,
   invitationMessage: null,
@@ -79,6 +79,7 @@ const AppContextProvider = ({ children }: ReactWithChild) => {
           clearLS()
         } else {
           setIsAuthenticated(AuthenticateState.AUTHENTICATED)
+          setUser(res.data.user)
         }
       })
       .catch((e) => {

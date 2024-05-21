@@ -14,7 +14,6 @@ import javax.servlet.http.Part;
 import common.dto.UserPasswordDto;
 import common.service.UploadService;
 import exceptions.ServerException;
-import modules.auth.AuthRepository;
 import modules.profile.dto.UrlDto;
 import modules.profile.service.ProfileService;
 import shared.session.Session;
@@ -32,7 +31,6 @@ public class ProfileAvatarServlet extends HttpServlet {
     final ResponseUtils responseUtils = new ResponseUtils();
     final UploadService uploadService = new UploadService();
     final ProfileService profileService = new ProfileService();
-    final AuthRepository authRepository = new AuthRepository();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -47,8 +45,6 @@ public class ProfileAvatarServlet extends HttpServlet {
             if (!result) {
                 throw new Exception();
             }
-            UserPasswordDto newUserPasswordDto = authRepository.getUserByEmail(userPasswordDto.getEmail());
-            session.setAttribute(SessionKey.USER_PASSWORD_DTO, newUserPasswordDto);
             responseUtils.responseJson(resp, new UrlDto(url));
         } catch (Throwable throwable) {
             throw new ServerException();

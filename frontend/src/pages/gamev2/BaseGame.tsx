@@ -13,7 +13,6 @@ import ChatBox from '../chat/components/ChatBox'
 import { ChatContextProvider } from 'src/contexts/chat.context'
 import profileApi from 'src/apis/profile.api'
 import { useQuery } from 'react-query'
-import { getProfileFromLS } from 'src/utils/auth'
 import GameProfile from './components/GameProfile'
 import PromotionModal from './components/PromotionModal'
 import ResultModal from './components/ResultModal'
@@ -214,6 +213,7 @@ export default function BaseGame(props: BaseGameProps) {
           onExit={() => {
             game.onEnd()
             navigate(path.home)
+            window.location.reload()
           }}
         />
       </>

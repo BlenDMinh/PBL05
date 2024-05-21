@@ -294,6 +294,7 @@ public class GamePlayerEndPoint {
                                     chessGame.getBoard().getSideToMove().equals(Side.WHITE), resignSide,
                                     chessGame.getMoveHistories(), chessGame.getHumanWhitePlayer().getRemainMillis(),
                                     chessGame.getHumanBlackPlayer().getRemainMillis())));
+                    gameService.endGame(chessGame.getId(), chessGame.getStatus());
                     break;
 
                 default:
@@ -312,6 +313,9 @@ public class GamePlayerEndPoint {
         if (chessGame.getLastMoveTime() != 0) {
             long moveWaitedTime = System.currentTimeMillis() - chessGame.getLastMoveTime();
             currentPlayer.decreaseRemainMillisBy(moveWaitedTime);
+        } else {
+            // First move happened
+            chessGame.setStatus(GameStatus.PLAYING);
         }
     }
 
@@ -337,12 +341,18 @@ public class GamePlayerEndPoint {
 
     void postCheck() throws IOException, EncodeException {
         if (chessGame.getBoard().isDraw()) {
+            chessGame.cancelTimer();
             sendToAllPlayer(new SocketMessageDto(SocketMessage.DRAW));
+            gameService.endGame(chessGame.getId(), GameStatus.DRAW);
         } else if (chessGame.getBoard().isMated()) {
+            chessGame.cancelTimer();
             sendToAllPlayer(new SocketMessageDto(SocketMessage.MATE, new MoveResponse(chessGame.getBoard().getFen(),
                     chessGame.getBoard().getSideToMove().equals(Side.WHITE), chessGame.getMoveHistories(),
                     chessGame.getHumanWhitePlayer().getRemainMillis(),
                     chessGame.getHumanBlackPlayer().getRemainMillis())));
+            gameService.endGame(chessGame.getId(),
+                    chessGame.getBoard().getSideToMove().equals(Side.WHITE) ? GameStatus.BLACK_WIN
+                            : GameStatus.WHITE_WIN);
         }
     }
 
@@ -392,6 +402,7 @@ public class GamePlayerEndPoint {
                             chessGame.getHumanWhitePlayer().getRemainMillis(),
                             chessGame.getHumanBlackPlayer().getRemainMillis())));
                     chessGame.setStatus(status);
+                    gameService.endGame(chessGame.getId(), status);
                 } catch (IOException | EncodeException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();

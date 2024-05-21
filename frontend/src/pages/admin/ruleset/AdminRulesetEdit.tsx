@@ -7,12 +7,29 @@ import { GameRuleset } from 'src/types/game.type'
 import { path } from 'src/constants/path'
 import { toast } from 'react-toastify'
 
+export interface GameRulesetInput {
+  id: number
+  name: string
+  detail: {
+    minute_per_turn: string
+    total_minute_per_player: string
+    turn_around_steps: string
+    turn_around_time_plus: string
+  }
+  description?: {
+    title?: string
+    content?: string
+  }
+  published: boolean
+  createdAt: string
+}
+
 export default function AdminRulesetEdit() {
   const [searchParams, setSearchParams] = useSearchParams()
   const id = searchParams.get('id')
   const copyFrom = searchParams.get('copy-from')
 
-  const [ruleset, setRuleset] = useState<GameRuleset>()
+  const [ruleset, setRuleset] = useState<GameRulesetInput>()
   const [isDoing, setIsDoing] = useState(false)
   const [isMinutePerTurnCheck, setIsMinutePerTurnCheck] = useState(true)
   const [isTotalMinutePerPlayerCheck, setIsTotalMinutePerPlayerCheck] = useState(true)
@@ -22,16 +39,17 @@ export default function AdminRulesetEdit() {
   useEffect(() => {
     setRuleset((ruleset) => {
       if (ruleset && ruleset.detail) {
-        const minute_per_turn = isMinutePerTurnCheck ? Math.max(0, ruleset.detail.minute_per_turn) : -1
-        const total_minute_per_player = isTotalMinutePerPlayerCheck
-          ? Math.max(0, ruleset.detail.total_minute_per_player)
-          : -1
-        const turn_around_steps = isExtraStepCheck ? Math.max(0, ruleset.detail.turn_around_steps) : -1
-        const turn_around_time_plus = isExtraTimeCheck ? Math.max(0, ruleset.detail.turn_around_time_plus) : -1
+        const minute_per_turn =
+          (isMinutePerTurnCheck ? Math.max(0, parseFloat(ruleset.detail.minute_per_turn)) : -1) + ''
+        const total_minute_per_player =
+          (isTotalMinutePerPlayerCheck ? Math.max(0, parseFloat(ruleset.detail.total_minute_per_player)) : -1) + ''
+        const turn_around_steps = (isExtraStepCheck ? Math.max(0, parseInt(ruleset.detail.turn_around_steps)) : -1) + ''
+        const turn_around_time_plus =
+          (isExtraTimeCheck ? Math.max(0, parseFloat(ruleset.detail.turn_around_time_plus)) : -1) + ''
         return {
           ...ruleset,
           detail: { minute_per_turn, total_minute_per_player, turn_around_steps, turn_around_time_plus }
-        } as GameRuleset
+        } as GameRulesetInput
       }
     })
   }, [isMinutePerTurnCheck, isTotalMinutePerPlayerCheck, isExtraStepCheck, isExtraTimeCheck])
@@ -40,39 +58,47 @@ export default function AdminRulesetEdit() {
 
   useEffect(() => {
     if (ruleset && ruleset.detail) {
-      setIsMinutePerTurnCheck(ruleset.detail.minute_per_turn != -1)
-      setIsTotalMinutePerPlayerCheck(ruleset.detail.total_minute_per_player != -1)
-      setIsExtraStepCheck(ruleset.detail.turn_around_steps != -1)
-      setIsExtraTimeCheck(ruleset.detail.turn_around_time_plus != -1)
+      setIsMinutePerTurnCheck(ruleset.detail.minute_per_turn != '-1')
+      setIsTotalMinutePerPlayerCheck(ruleset.detail.total_minute_per_player != '-1')
+      setIsExtraStepCheck(ruleset.detail.turn_around_steps != '-1')
+      setIsExtraTimeCheck(ruleset.detail.turn_around_time_plus != '-1')
     }
   }, [ruleset])
 
   useEffect(() => {
     if (id) {
       // fetch ruleset by id
-      rulesetAdminApi.getRuleset(parseInt(id)).then((ruleset) => setRuleset(ruleset.data))
+      rulesetAdminApi
+        .getRuleset(parseInt(id))
+        .then((ruleset) => setRuleset(ruleset.data as unknown as GameRulesetInput))
       return
     }
     if (copyFrom) {
       // fetch ruleset by id
       rulesetAdminApi
         .getRuleset(parseInt(copyFrom))
-        .then((ruleset) => setRuleset({ ...ruleset.data, id: -1, name: '' }))
+        .then((ruleset) => setRuleset({ ...(ruleset.data as unknown as GameRulesetInput), id: -1, name: '' }))
       return
     }
     setRuleset({
       id: 0,
       name: '',
       detail: {
-        minute_per_turn: -1,
-        total_minute_per_player: -1,
-        turn_around_steps: -1,
-        turn_around_time_plus: -1
+        minute_per_turn: '-1',
+        total_minute_per_player: '-1',
+        turn_around_steps: '-1',
+        turn_around_time_plus: '-1'
       },
       published: false,
       createdAt: ''
     })
   }, [id, copyFrom])
+  const checkValidNumber = (e: any): boolean => {
+    let input = e.target.value
+
+    if (input.match(/^([0-9]{1,})?(\.)?([0-9]{1,})?$/)) return true
+    return false
+  }
 
   if (!ruleset) {
     return <div>Loading...</div>
@@ -87,12 +113,12 @@ export default function AdminRulesetEdit() {
             onClick={() => {
               setIsDoing(true)
               if (id) {
-                rulesetAdminApi.updateRuleset(parseInt(id), ruleset).then((res) => {
+                rulesetAdminApi.updateRuleset(parseInt(id), ruleset as unknown as GameRuleset).then((res) => {
                   toast(res.data.message)
                   navigate(path.adminRuleset)
                 })
               } else {
-                rulesetAdminApi.addRuleset(ruleset).then((res) => {
+                rulesetAdminApi.addRuleset(ruleset as unknown as GameRuleset).then((res) => {
                   toast(res.data.message)
                   navigate(path.adminRuleset)
                 })
@@ -125,11 +151,20 @@ export default function AdminRulesetEdit() {
                 type='number'
                 value={isMinutePerTurnCheck ? ruleset.detail.minute_per_turn : ''}
                 onChange={(e) => {
-                  if (isMinutePerTurnCheck)
+                  if (isMinutePerTurnCheck && checkValidNumber(e))
                     setRuleset({
                       ...ruleset,
-                      detail: { ...ruleset.detail, minute_per_turn: Math.max(parseFloat(e.target.value), 0) }
+                      detail: { ...ruleset.detail, minute_per_turn: e.target.value }
                     })
+                }}
+                onBlur={(e) => {
+                  setRuleset({
+                    ...ruleset,
+                    detail: {
+                      ...ruleset.detail,
+                      minute_per_turn: parseFloat(ruleset.detail.minute_per_turn) + '' || '-1'
+                    }
+                  })
                 }}
               />
               <input
@@ -149,11 +184,20 @@ export default function AdminRulesetEdit() {
                 type='number'
                 value={isTotalMinutePerPlayerCheck ? ruleset.detail.total_minute_per_player : ''}
                 onChange={(e) => {
-                  if (isTotalMinutePerPlayerCheck)
+                  if (isTotalMinutePerPlayerCheck && checkValidNumber(e))
                     setRuleset({
                       ...ruleset,
-                      detail: { ...ruleset.detail, total_minute_per_player: Math.max(parseFloat(e.target.value), 0) }
+                      detail: { ...ruleset.detail, total_minute_per_player: e.target.value }
                     })
+                }}
+                onBlur={(e) => {
+                  setRuleset({
+                    ...ruleset,
+                    detail: {
+                      ...ruleset.detail,
+                      total_minute_per_player: parseFloat(ruleset.detail.total_minute_per_player) + '' || '-1'
+                    }
+                  })
                 }}
               />{' '}
               <input
@@ -175,11 +219,20 @@ export default function AdminRulesetEdit() {
                 readOnly={!isExtraStepCheck}
                 value={isExtraStepCheck ? ruleset.detail.turn_around_steps : ''}
                 onChange={(e) => {
-                  if (isExtraStepCheck)
+                  if (isExtraStepCheck && checkValidNumber(e))
                     setRuleset({
                       ...ruleset,
-                      detail: { ...ruleset.detail, turn_around_steps: Math.max(parseInt(e.target.value), 0) }
+                      detail: { ...ruleset.detail, turn_around_steps: e.target.value }
                     })
+                }}
+                onBlur={(e) => {
+                  setRuleset({
+                    ...ruleset,
+                    detail: {
+                      ...ruleset.detail,
+                      turn_around_steps: parseInt(ruleset.detail.turn_around_steps) + '' || '-1'
+                    }
+                  })
                 }}
               />{' '}
               <input
@@ -202,8 +255,17 @@ export default function AdminRulesetEdit() {
                   if (isExtraTimeCheck)
                     setRuleset({
                       ...ruleset,
-                      detail: { ...ruleset.detail, turn_around_time_plus: Math.max(parseFloat(e.target.value), 0) }
+                      detail: { ...ruleset.detail, turn_around_time_plus: e.target.value }
                     })
+                }}
+                onBlur={(e) => {
+                  setRuleset({
+                    ...ruleset,
+                    detail: {
+                      ...ruleset.detail,
+                      turn_around_time_plus: parseFloat(ruleset.detail.turn_around_time_plus) + '' || '-1'
+                    }
+                  })
                 }}
               />{' '}
               <input

@@ -1,14 +1,15 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useContext, useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { FaSearch } from 'react-icons/fa'
-import { getProfileFromLS } from 'src/utils/auth'
 import { useQuery } from 'react-query'
 import { Friend as FriendType } from 'src/types/users.type'
 import friendApi from 'src/apis/friend.api'
 import YourFriend from './YourFriend'
+import { AppContext } from 'src/contexts/app.context'
 
 export default function FriendList() {
-  const id = getProfileFromLS().id
+  const app = useContext(AppContext)
+  const id = app.user?.id
   const [page, setPage] = useState(1)
   const [friendList, setFriendList] = useState<FriendType[]>([])
   const [maxPage, setMaxPage] = useState(1)

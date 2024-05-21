@@ -2,7 +2,6 @@ import { useParams } from 'react-router-dom'
 import GameProfile from '../gamev2/components/GameProfile'
 import Chessground from '@react-chess/chessground'
 import classNames from 'classnames'
-import { getProfileFromLS } from 'src/utils/auth'
 import { useContext, useEffect, useMemo, useState } from 'react'
 import { FaLink } from 'react-icons/fa'
 import InvatationModal from './components/InvatationModal'
@@ -17,7 +16,7 @@ import { AppContext } from 'src/contexts/app.context'
 
 export default function Room() {
   const { id } = useParams()
-  const user = getProfileFromLS()
+  const { user } = useContext(AppContext)
   const [side, setSide] = useState<'white' | 'black' | 'random'>('white')
   const [keyword, setKeyword] = useState('')
 
@@ -59,8 +58,6 @@ export default function Room() {
   const [gameRuleId, setGameRuleId] = useState<string>('')
 
   const [rated, setRated] = useState(false)
-
-  
 
   const calcChessGroundSize = () => Math.min(window.innerHeight * 0.67, window.innerHeight * 0.67)
 
@@ -105,7 +102,7 @@ export default function Room() {
           </div>
         </div>
         <div className='rounded-lg bg-base-300 h-full w-1/2 flex flex-col p-6 gap-3'>
-          {!opponentId && (
+          {!opponentId && user && (
             <>
               <span className='text-base-content font-bold text-xl'>Find a friend</span>
               <input

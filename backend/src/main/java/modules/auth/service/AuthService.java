@@ -23,6 +23,10 @@ public class AuthService {
         return user;
     }
 
+    public UserPasswordDto getUser(String email) {
+        return authRepository.getUserByEmail(email);
+    }
+
     public RegisterIdAndVerifyCodeDto register(String displayName, String email, String password) {
         String passwordHash = bcryptService.getHash(password);
         int length = 6;

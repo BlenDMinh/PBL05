@@ -23,13 +23,13 @@ export class Http {
   // private accessToken: string
   // private refreshToken: string
   private jsessionid: string
-  private user: User
+  // private user: User
   private refreshTokenRequest: Promise<string> | null
   constructor() {
     // this.accessToken = getAccessTokenFromLS()
     // this.refreshToken = getRefreshTokenFromLS()
     this.jsessionid = getSessionIdFromLS()
-    this.user = getProfileFromLS()
+    // this.user = getProfileFromLS()
     this.refreshTokenRequest = null
     this.instance = axios.create({
       baseURL: config.baseUrl,
@@ -59,9 +59,9 @@ export class Http {
         if (url === URL_LOGIN) {
           const data = response.data as LoginResponse
           this.jsessionid = data.sessionId
-          this.user = data.user
+          // this.user = data.user
           setSessionIdToLS(data.sessionId)
-          setProfileToLS(this.user)
+          // setProfileToLS(this.user)
         } else if (url === URL_LOGOUT) {
           this.jsessionid = ''
           clearLS()

@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
+import common.GameStatus;
 import common.Role;
 import modules.profile.dto.GameHistoryDto;
 import modules.profile.dto.PaginationGameHistoryDto;
@@ -75,9 +76,11 @@ public class ProfileRepository {
 
     public PaginationGameHistoryDto getPaginationGameHistoryByPlayerId(int playerId, int page, int size) {
         List<GameHistoryDto> gameHistoryDtos = new ArrayList<>();
+        String gameStatus = GameStatus.WHITE_WIN.getValue() + "," + GameStatus.BLACK_WIN.getValue() + ","
+                + GameStatus.DRAW.getValue();
         String query = "select * from games"
                 + " where (player1_id = ? or player2_id = ?)"
-                + " and status in (2,3,4)"
+                + " and status in (" + gameStatus + ")"
                 + " order by created_at asc"
                 + " offset ? limit ?";
         int totalElements = 0, totalPages = 0;

@@ -4,9 +4,10 @@ import { Chess, SQUARES, Square } from 'chess.js'
 import { Dests, Key } from 'chessground/types'
 import { ws } from 'src/constants/ws'
 import useWebSocket, { ReadyState } from 'react-use-websocket'
-import { getProfileFromLS, getSessionIdFromLS } from 'src/utils/auth'
+import { getSessionIdFromLS } from 'src/utils/auth'
 import { GameRule, GameV2SocketData, MoveHistory } from 'src/pages/gamev2/types/game.v2.type'
 import { BotPlayer, HumanPlayer, Player } from 'src/types/player.type'
+import { AppContext } from './app.context'
 
 export enum GameType {
   PVP,
@@ -81,6 +82,7 @@ export const GameV2Context = createContext<GameV2ContextInterface>(initContext)
 export const FEN_DEFAULT = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 
 export default function GameV2ContextProvider({ children }: ReactWithChild) {
+  const app = useContext(AppContext)
   const [gameType, setGameType] = useState(GameType.PVP)
   const [gameId, setGameId] = useState('')
   const [fen, setFen] = useState(FEN_DEFAULT)
@@ -178,7 +180,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
       }
       if (data.gamePlayer) {
         const player = data.gamePlayer
-        if (player.id === getProfileFromLS().id) {
+        if (app.user && player.id === app.user.id) {
           setMe({
             id: player.id,
             avatarUrl: player.avatarUrl,
