@@ -399,6 +399,7 @@ public class Minimax {
                 }
             }
         }
+
         for (Square square : Square.values()) {
             Piece piece = board.getPiece(square);
             if (piece != null && !piece.getFanSymbol().equals("NONE")) {
@@ -408,7 +409,13 @@ public class Minimax {
                     totalEvaluation -= getPieceValue(piece, square, end);
             }
         }
-
+        if (board.isDraw()) {
+            if (totalEvaluation < 0) {
+                return 1000;
+            } else {
+                return -1000;
+            }
+        }
         return totalEvaluation;
     }
 
@@ -522,8 +529,8 @@ public class Minimax {
             { 100, 100, 100, 100, 105, 100, 100, 100 },
             { 78, 83, 86, 73, 102, 82, 85, 90 },
             { 7, 29, 21, 44, 40, 31, 44, 7 },
-            { -17, 16, -2, 15, 14, 0, 15, -13 },
-            { -26, 3, 10, 9, 6, 1, 0, -23 },
+            { -17, 16, -2, 30, 30, 0, 15, -13 },
+            { -26, 3, 10, 30, 30, 1, 0, -23 },
             { -22, 9, 5, -11, -10, -2, 3, -19 },
             { -31, 8, -7, -37, -36, -14, 3, -31 },
             { 0, 0, 0, 0, 0, 0, 0, 0 }
