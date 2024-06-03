@@ -146,7 +146,7 @@ public class FindOpponentEndpoint {
                         (int) player2.getUserProperties().get("player_id"));
             }
             GameDto gameDto = gameService.getById(gameId);
-            RuleSetDto ruleSetDto = gameDto.getRuleSetDto();
+            RuleSetDto ruleSetDto = gameDto.getRuleSet();
             JsonObject rulesetDetail = ruleSetDto.getDetail();
             GameRule gameRule = new GameRule(ruleSetDto.getId(), ruleSetDto.getName(),
                     rulesetDetail.get("minute_per_turn").getAsDouble(),

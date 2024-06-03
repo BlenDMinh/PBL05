@@ -15,6 +15,6 @@ public class RuleSetDto {
     int id;
     String name;
     JsonObject detail;
-    JsonObject description; 
-    boolean isPublished;
+    JsonObject description;
+    boolean published;
 }

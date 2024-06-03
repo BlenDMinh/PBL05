@@ -24,7 +24,7 @@ public class GameDto {
     int whiteId;
     int blackId;
     String createdAt;
-    RuleSetDto ruleSetDto;
+    RuleSetDto ruleSet;
 
     public GameDto(ResultSet rs) throws JsonMappingException, JsonProcessingException, SQLException {
         id = rs.getString("id");
@@ -33,7 +33,7 @@ public class GameDto {
         blackId = rs.getInt("player2_id");
         createdAt = rs.getTimestamp("created_at").toString();
         Gson gson = new Gson();
-        ruleSetDto = new RuleSetDto(rs.getInt("ruleset_id"),
+        ruleSet = new RuleSetDto(rs.getInt("ruleset_id"),
                 rs.getString("name"),
                 gson.fromJson(rs.getString("detail"), JsonObject.class),
                 gson.fromJson(rs.getString("description"), JsonObject.class),
