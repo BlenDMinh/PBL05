@@ -115,7 +115,7 @@ public class GameRepository {
     public List<GameLogDto> getGameLogs(String gameId) {
         Connection conn = null;
         List<GameLogDto> gameLogDtos = new ArrayList<>();
-        String sql = "select * from game_logs where game_id = ?";
+        String sql = "select * from game_logs where game_id = ? order by created_at asc";
         try {
             conn = ConnectionPool.getConnection();
             PreparedStatement stmt = conn.prepareStatement(sql);
