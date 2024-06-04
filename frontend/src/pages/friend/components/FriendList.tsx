@@ -40,6 +40,10 @@ export default function FriendList() {
           <div className='w-full h-full flex items-center justify-center'>
             <span className='loading loading-spinner loading-lg' />
           </div>
+        ) : friendList.length == 0 ? (
+          <div className='w-full h-full flex items-center justify-center'>
+            No friends
+          </div>
         ) : (
           <>
             {friendList.map((friend) => (

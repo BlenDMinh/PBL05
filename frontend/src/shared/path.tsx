@@ -17,6 +17,7 @@ import AdminRuleset from 'src/pages/admin/ruleset/AdminRuleset'
 import AdminAccount from 'src/pages/admin/account/AdminAccount'
 import AdminRulesetEdit from 'src/pages/admin/ruleset/AdminRulesetEdit'
 import Room from 'src/pages/room/Room'
+import GameLog from 'src/pages/game-log/GameLog'
 
 // private routes (path, component)
 export const AUTH_ROUTER: RouteObject[] = [
@@ -67,16 +68,16 @@ export const PRIVATE_ROUTER: RouteObject[] = [
     element: <Chat />
   },
   {
-    path: path.personals,
-    element: <Personal />
-  },
-  {
     path: path.friend,
     element: <Friend />
   },
   {
     path: path.profile,
     element: <Profile />
+  },
+  {
+    path: path.gameLog,
+    element: <GameLog />
   }
 ]
 

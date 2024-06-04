@@ -115,12 +115,13 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   }, [fen])
 
   useEffect(() => {
+    console.log(core?.isGameOver(), core?.isCheckmate(), core?.isStalemate())
     if (core?.isGameOver() && me) {
       if (core.isDraw()) {
         setResult(GameResult.DRAW)
       } else if (turn === me.side) {
         setResult(GameResult.LOSE)
-      } else if (turn != me.side) {
+      } else if (turn !== me.side) {
         setResult(GameResult.WIN)
       }
     }
@@ -171,7 +172,7 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
   useEffect(() => {
     if (!lastMessage) return
     const json = JSON.parse(lastMessage?.data)
-    // console.log(json)
+    console.log(json)
     const data = json.data as GameV2SocketData
     if (json.message === 'Player joined') {
       setIsReceiveFromServer(true)
@@ -239,6 +240,12 @@ export default function GameV2ContextProvider({ children }: ReactWithChild) {
         setResult(GameResult.LOSE)
       } else {
         setResult(GameResult.WIN)
+      }
+    } else if(json.message === 'Mate') {
+      if (data.white === (me!.side === 'black')) {
+        setResult(GameResult.WIN)
+      } else {
+        setResult(GameResult.LOSE)
       }
     }
     if (data) {

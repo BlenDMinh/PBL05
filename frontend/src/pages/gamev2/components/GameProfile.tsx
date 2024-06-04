@@ -13,14 +13,12 @@ export interface GameProfileProps {
   profile?: Player
   role: string
   gameSide?: 'black' | 'white'
-  firstMoveDone: () => boolean
-  gameResult: GameResult
+  firstMoveDone?: () => boolean
+  gameResult?: GameResult
 }
 
 const defaultProps: Partial<GameProfileProps> = {
   gameSide: 'white',
-  firstMoveDone: () => false,
-  gameResult: GameResult.UNKNOWN
 }
 
 function GameProfile(props: GameProfileProps) {
@@ -63,11 +61,11 @@ function GameProfile(props: GameProfileProps) {
         {(props.profile as HumanPlayer)?.remainMillisInTurn &&
           props.profile.side === props.gameSide &&
           props.gameResult === GameResult.UNKNOWN &&
-          props.firstMoveDone() === true && (
+          props.firstMoveDone && props.firstMoveDone() === true && (
             <TimeLeftTurn milliseconds={(props.profile as HumanPlayer).remainMillisInTurn!} />
           )}
       </div>
-      {(props.profile as HumanPlayer)?.remainMillis && (
+      {props.gameResult !== undefined && props.firstMoveDone && (props.profile as HumanPlayer)?.remainMillis && (
         <TimeLeftTotal
           milliseconds={(props.profile as HumanPlayer).remainMillis!}
           running={

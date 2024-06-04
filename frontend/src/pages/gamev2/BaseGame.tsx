@@ -51,6 +51,7 @@ export default function BaseGame(props: BaseGameProps) {
   }, [game.isPromoting])
 
   useEffect(() => {
+    console.log(game.result)
     if (game.result != GameResult.UNKNOWN) {
       const modal = document.getElementById('resultModal') as HTMLDialogElement
       if (modal) {
@@ -208,7 +209,7 @@ export default function BaseGame(props: BaseGameProps) {
         <ResultModal
           onReplay={() => {
             game.onEnd()
-            navigate(props.gameType == GameType.PVP ? path.quickMatch : path.playWithBot)
+            location.href = props.gameType == GameType.PVP ? path.quickMatch : path.playWithBot
           }}
           onExit={() => {
             game.onEnd()

@@ -1,3 +1,5 @@
+import { HumanPlayer, Player } from './player.type'
+import { User } from './users.type'
 import { PaginitionResponse } from './utils.type'
 
 export type GameSocketMessage = {
@@ -32,7 +34,7 @@ export type GameResult = {
   id: string
   player1Id: number
   player2Id: number
-  status: 'PLAYER1_WIN' | 'PLAYER2_WIN' | 'DRAW'
+  status: 'WHITE_WIN' | 'BLACK_WIN' | 'DRAW'
   createdAt: string
 }
 
@@ -55,4 +57,33 @@ export type GameRuleset = {
   }
   published: boolean
   createdAt: string
+}
+
+export type GameLog = {
+  "id": number,
+  "fen": string,
+  "message": {
+    "message": string,
+    "data": {
+      "from": string,
+      "to": string
+    }
+  },
+  "playerId": number,
+  "gameId": string,
+  "createdAt": string
+}
+
+export type GameLogResponse = {
+  game: {
+    "id": string,
+    "status": string,
+    "whiteId": number,
+    "blackId": number,
+    "createdAt": string,
+    "ruleSetDto": GameRuleset
+  },
+  whitePlayer: HumanPlayer,
+  blackPlayer: HumanPlayer,
+  gameLogs: GameLog[]
 }

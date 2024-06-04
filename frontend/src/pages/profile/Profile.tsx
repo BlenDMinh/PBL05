@@ -101,7 +101,7 @@ const Profile: React.FC<ProfileProps> = () => {
         <FriendList />
       </div>
       <div className='mt-5'>
-        <h2 className='text-lg font-bold pl-5'>Previous games</h2>
+        <h2 className='text-lg font-bold pl-5 mb-5'>Previous games</h2>
         <GameHistory />
       </div>
     </div>

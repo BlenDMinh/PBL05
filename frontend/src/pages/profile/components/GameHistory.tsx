@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import profileApi from 'src/apis/profile.api'
 import { GameResult } from 'src/types/game.type'
 import GameHistoryPlayer from './GameHistoryPlayer'
 import classNames from 'classnames'
+import { path } from 'src/constants/path'
 
 export interface GameHistoryProps {
   id?: number
@@ -66,6 +67,7 @@ export default function GameHistory(props: GameHistoryProps) {
             <th>Players</th>
             <th>Result</th>
             <th>Date</th>
+            <th>Action</th>
           </tr>
           {gameResults.map((res) => (
             <tr key={res.id} className='hover'>
@@ -77,20 +79,23 @@ export default function GameHistory(props: GameHistoryProps) {
               <td
                 className={classNames('text-lg', {
                   'text-success':
-                    (userId == res.player1Id && res.status == 'PLAYER1_WIN') ||
-                    (userId == res.player2Id && res.status == 'PLAYER2_WIN'),
+                    (userId == res.player1Id && res.status == 'WHITE_WIN') ||
+                    (userId == res.player2Id && res.status == 'BLACK_WIN'),
                   'text-error': !(
-                    (userId == res.player1Id && res.status == 'PLAYER1_WIN') ||
-                    (userId == res.player2Id && res.status == 'PLAYER2_WIN')
+                    (userId == res.player1Id && res.status == 'WHITE_WIN') ||
+                    (userId == res.player2Id && res.status == 'BLACK_WIN')
                   )
                 })}
               >
-                {(userId == res.player1Id && res.status == 'PLAYER1_WIN') ||
-                (userId == res.player2Id && res.status == 'PLAYER2_WIN')
+                {(userId == res.player1Id && res.status == 'WHITE_WIN') ||
+                (userId == res.player2Id && res.status == 'BLACK_WIN')
                   ? 'WIN'
                   : 'LOSE'}
               </td>
               <td>{new Date(res.createdAt + ' UTC').toUTCString()}</td>
+              <td className='text-primary font-bold'>
+                <Link to={path.gameLog.replace(':gameId', res.id)}>View History</Link>
+              </td>
             </tr>
           ))}
         </thead>
