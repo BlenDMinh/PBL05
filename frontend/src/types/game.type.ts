@@ -60,30 +60,30 @@ export type GameRuleset = {
 }
 
 export type GameLog = {
-  "id": number,
-  "fen": string,
-  "message": {
-    "message": string,
-    "data": {
-      "from": string,
-      "to": string
+  id: number
+  fen: string
+  message: {
+    message: string
+    data: {
+      from: string | null
+      to: string | null
     }
-  },
-  "playerId": number,
-  "gameId": string,
-  "createdAt": string
+  }
+  playerId: number
+  gameId: string
+  createdAt: string
 }
 
 export type GameLogResponse = {
   game: {
-    "id": string,
-    "status": string,
-    "whiteId": number,
-    "blackId": number,
-    "createdAt": string,
-    "ruleSetDto": GameRuleset
-  },
-  whitePlayer: HumanPlayer,
-  blackPlayer: HumanPlayer,
+    id: string
+    status: string
+    whiteId: number
+    blackId: number
+    createdAt: string
+    ruleSetDto: GameRuleset
+  }
+  whitePlayer: HumanPlayer
+  blackPlayer: HumanPlayer
   gameLogs: GameLog[]
 }

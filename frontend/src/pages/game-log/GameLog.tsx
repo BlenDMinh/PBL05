@@ -61,16 +61,13 @@ export default function GameLog() {
   const whitePlayer = gameLog?.whitePlayer
   const blackPlayer = gameLog?.blackPlayer
   const logs = gameLog?.gameLogs
-  logs.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-
-  console.log(logs)
 
   return (
     <>
-      <div className='w-full h-full flex p-16 justify-between gap-16'>
+      <div className='w-full flex p-16 justify-between gap-16'>
         <div
           style={{ width: `${groundSize}px` }}
-          className='flex flex-col rounded-lg items-center justify-between pointer-events-none'
+          className='flex flex-col rounded-lg items-center justify-center pointer-events-none'
         >
           <GameProfile profile={blackPlayer} role='Black' gameSide={'black'} />
           {logs.length > 0 ? (
@@ -105,34 +102,43 @@ export default function GameLog() {
         </div>
         <div className='w-full h-full flex flex-col items-center gap-12'>
           <div className='join flex w-full'>
-            <button className='join-item btn' onClick={() => setMove(Math.max(0, move - 1))}>«</button>
+            <button className='join-item btn' onClick={() => setMove(Math.max(0, move - 1))}>
+              «
+            </button>
             <button className='join-item btn flex-1'>Move {move + 1}</button>
-            <button className='join-item btn' onClick={() => setMove(Math.min(logs.length - 1, move + 1))}>»</button>
+            <button className='join-item btn' onClick={() => setMove(Math.min(logs.length - 1, move + 1))}>
+              »
+            </button>
           </div>
           <div className='flex flex-col overflow-y-auto flex-1 bg-base-300 w-full gap-5 p-5'>
             {logs.map((log, index) => (
-              <button key={log.id} className={classNames('btn btn-outline flex justify-between', {
-                'btn-primary': index === move
-              })} onClick={() => setMove(index)}>
+              <button
+                key={log.id}
+                className={classNames('btn btn-outline flex justify-between', {
+                  'btn-primary': index === move
+                })}
+                onClick={() => setMove(index)}
+              >
                 <div className='flex gap-4 items-center'>
-                    <div>
-                        {index + 1}
+                  <div>{index + 1}</div>
+                  <div className='avatar'>
+                    <div className='rounded-full w-8 h-8 bg-base-200'>
+                      <img
+                        src={index % 2 == 0 ? whitePlayer.avatarUrl : blackPlayer.avatarUrl ?? blankAvatar}
+                        alt='avatar'
+                      />
                     </div>
-                    <div className='avatar'>
-                      <div className='rounded-full w-8 h-8 bg-base-200'>
-                        <img src={index % 2 == 0 ? whitePlayer.avatarUrl : blackPlayer.avatarUrl ?? blankAvatar} alt='avatar' />
-                      </div>
-                    </div>
-                    <span className='w-64 text-left'>
-                      {index % 2 == 0 ? whitePlayer.displayName : blackPlayer.displayName}
-                    </span>
+                  </div>
+                  <span className='w-64 text-left'>
+                    {index % 2 == 0 ? whitePlayer.displayName : blackPlayer.displayName}
+                  </span>
+                  {log.message.data && log.message.data.from && (
                     <span className='text-accent'>
                       {log.message.data.from} → {log.message.data.to}
                     </span>
+                  )}
                 </div>
-                <span className='text-sm'>
-                    {new Date(log.createdAt).toLocaleString()}
-                </span>
+                <span className='text-sm'>{new Date(log.createdAt).toLocaleString()}</span>
               </button>
             ))}
           </div>
