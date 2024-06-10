@@ -15,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Copy .env
-        run: cp .env.example .env
+        run: cp ~/.env .env
       - name: Install dependencies
         run: cd database && npm install -g yarn && npm i
       - name: Stop server
