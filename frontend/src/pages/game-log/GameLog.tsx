@@ -3,10 +3,13 @@ import { useEffect, useState } from 'react'
 import { useQuery } from 'react-query'
 import { useParams } from 'react-router-dom'
 import gameLogApi from 'src/apis/game-log.api'
-import { GameLogResponse } from 'src/types/game.type'
 import GameProfile from '../gamev2/components/GameProfile'
 import Chessground from '@react-chess/chessground'
 import { blankAvatar } from 'src/assets/images'
+
+import 'src/pages/gamev2/css/chessground.base.css'
+import 'src/pages/gamev2/css/chessground.brown.css'
+import 'src/pages/gamev2/css/chessground.cburnett.css'
 
 export default function GameLog() {
   const { gameId } = useParams()
