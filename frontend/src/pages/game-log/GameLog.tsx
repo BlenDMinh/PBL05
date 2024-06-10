@@ -64,10 +64,10 @@ export default function GameLog() {
 
   return (
     <>
-      <div className='w-full flex p-16 justify-between gap-16'>
+      <div className='w-full h-full flex p-16 justify-between gap-16'>
         <div
           style={{ width: `${groundSize}px` }}
-          className='flex flex-col rounded-lg items-center justify-center pointer-events-none'
+          className='flex flex-col rounded-lg items-center justify-between pointer-events-none'
         >
           <GameProfile profile={blackPlayer} role='Black' gameSide={'black'} />
           {logs.length > 0 ? (
