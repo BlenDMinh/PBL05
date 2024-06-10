@@ -20,7 +20,7 @@ export default function GameLog() {
 
   useEffect(() => {
     const updateSize = () => {
-      setGroundSize(Math.min(window.innerHeight * 0.45, window.innerWidth * 0.45))
+      setGroundSize(Math.min(window.innerHeight * 0.7, window.innerWidth * 0.7))
     }
 
     // Initial update
@@ -64,11 +64,8 @@ export default function GameLog() {
 
   return (
     <>
-      <div className='w-full h-full flex p-16 justify-between gap-16'>
-        <div
-          style={{ width: `${groundSize}px` }}
-          className='flex flex-col rounded-lg items-center justify-between pointer-events-none'
-        >
+      <div className='w-full flex m-16 justify-between items-start gap-16'>
+        <div className='flex flex-col rounded-lg items-center justify-between pointer-events-none'>
           <GameProfile profile={blackPlayer} role='Black' gameSide={'black'} />
           {logs.length > 0 ? (
             <Chessground
@@ -100,7 +97,7 @@ export default function GameLog() {
           )}
           <GameProfile profile={whitePlayer} gameSide={'white'} role='White' />
         </div>
-        <div className='w-full h-full flex flex-col items-center gap-12'>
+        <div className='w-full h-screen flex flex-col items-center'>
           <div className='join flex w-full'>
             <button className='join-item btn' onClick={() => setMove(Math.max(0, move - 1))}>
               «
@@ -110,7 +107,7 @@ export default function GameLog() {
               »
             </button>
           </div>
-          <div className='flex flex-col overflow-y-auto flex-1 bg-base-300 w-full gap-5 p-5'>
+          <div className='flex flex-col flex-1 bg-base-300 w-full gap-1 p-5 overflow-auto'>
             {logs.map((log, index) => (
               <button
                 key={log.id}
@@ -119,26 +116,28 @@ export default function GameLog() {
                 })}
                 onClick={() => setMove(index)}
               >
-                <div className='flex gap-4 items-center'>
-                  <div>{index + 1}</div>
-                  <div className='avatar'>
-                    <div className='rounded-full w-8 h-8 bg-base-200'>
-                      <img
-                        src={index % 2 == 0 ? whitePlayer.avatarUrl : blackPlayer.avatarUrl ?? blankAvatar}
-                        alt='avatar'
-                      />
+                <div className='flex justify-between items-center'>
+                  <div className='flex items-center gap-4'>
+                    <div>{index + 1}</div>
+                    <div className='avatar'>
+                      <div className='rounded-full w-8 h-8 bg-base-200'>
+                        <img
+                          src={index % 2 == 0 ? whitePlayer.avatarUrl : blackPlayer.avatarUrl ?? blankAvatar}
+                          alt='avatar'
+                        />
+                      </div>
                     </div>
-                  </div>
-                  <span className='w-64 text-left'>
-                    {index % 2 == 0 ? whitePlayer.displayName : blackPlayer.displayName}
-                  </span>
-                  {log.message.data && log.message.data.from && (
-                    <span className='text-accent'>
-                      {log.message.data.from} → {log.message.data.to}
+                    <span className='w-64 text-left'>
+                      {index % 2 == 0 ? whitePlayer.displayName : blackPlayer.displayName}
                     </span>
+                  </div>
+                  {log.message.data && log.message.data.from && (
+                    <p className='text-accent whitespace-nowrap'>
+                      {log.message.data.from} → {log.message.data.to}
+                    </p>
                   )}
+                  <span className='text-sm font-mono opacity-50'>{new Date(log.createdAt).toLocaleString()}</span>
                 </div>
-                <span className='text-sm font-normal opacity-50'>{new Date(log.createdAt).toLocaleString()}</span>
               </button>
             ))}
           </div>
