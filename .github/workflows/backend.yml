@@ -15,6 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Copy .env
-        run: cp .env.example .env
+        run: cp ~/.env .env
       - name: Restart server
         run: docker compose up -d --build
