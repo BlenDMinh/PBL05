@@ -20,7 +20,7 @@ export default function GameLog() {
 
   useEffect(() => {
     const updateSize = () => {
-      setGroundSize(Math.min(window.innerHeight * 0.67, window.innerWidth * 0.67))
+      setGroundSize(Math.min(window.innerHeight * 0.45, window.innerWidth * 0.45))
     }
 
     // Initial update
@@ -138,7 +138,7 @@ export default function GameLog() {
                     </span>
                   )}
                 </div>
-                <span className='text-sm'>{new Date(log.createdAt).toLocaleString()}</span>
+                <span className='text-sm font-normal opacity-50'>{new Date(log.createdAt).toLocaleString()}</span>
               </button>
             ))}
           </div>
